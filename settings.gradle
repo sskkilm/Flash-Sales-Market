@@ -1,0 +1,4 @@
+rootProject.name = 'drop-sale-platform'
+include 'member'
+include 'product'
+include 'order'
