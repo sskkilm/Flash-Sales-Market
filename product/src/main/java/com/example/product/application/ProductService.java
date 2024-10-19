@@ -16,11 +16,14 @@ public class ProductService {
 
     public List<ProductDto> getProductList() {
         return productRepository.findAll()
-                .stream().map(ProductDto::of).toList();
+                .stream().map(ProductDto::from).toList();
     }
 
     public ProductDetails getProductDetails(Long id) {
-        Product product = productRepository.findById(id);
-        return ProductDetails.toDto(product);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "product not found -> productId: " + id)
+                );
+        return ProductDetails.from(product);
     }
 }

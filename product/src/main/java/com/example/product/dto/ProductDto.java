@@ -8,7 +8,7 @@ public record ProductDto(
         String price
 ) {
 
-    public static ProductDto of(Product product) {
+    public static ProductDto from(Product product) {
         return new ProductDto(
                 product.getId(),
                 product.getName(),

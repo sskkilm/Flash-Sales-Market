@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,15 +17,19 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> findAll() {
         return productJpaRepository.findAll()
-                .stream().map(ProductEntity::toModel).toList();
+                .stream().map(this::convertToModel).toList();
     }
 
     @Override
-    public Product findById(Long id) {
-        ProductEntity productEntity = productJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "product not found -> productId: " + id)
-                );
+    public Optional<Product> findById(Long id) {
+        return productJpaRepository.findById(id)
+                .map(this::convertToModel);
+    }
+
+    private Product convertToModel(ProductEntity productEntity) {
+        if (productEntity == null) {
+            return null;
+        }
         return productEntity.toModel();
     }
 }

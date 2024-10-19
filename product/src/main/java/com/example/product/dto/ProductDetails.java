@@ -12,7 +12,7 @@ public record ProductDetails(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static ProductDetails toDto(Product product) {
+    public static ProductDetails from(Product product) {
         return new ProductDetails(
                 product.getId(),
                 product.getName(),
