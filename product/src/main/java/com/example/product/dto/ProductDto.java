@@ -12,7 +12,7 @@ public record ProductDto(
         return new ProductDto(
                 product.getId(),
                 product.getName(),
-                product.getPrice().toString()
+                product.getPrice().amount().toString()
         );
     }
 }

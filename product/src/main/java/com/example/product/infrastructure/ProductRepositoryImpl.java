@@ -17,19 +17,13 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> findAll() {
         return productJpaRepository.findAll()
-                .stream().map(this::convertToModel).toList();
+                .stream().map(ProductEntity::toModel).toList();
     }
 
     @Override
     public Optional<Product> findById(Long id) {
         return productJpaRepository.findById(id)
-                .map(this::convertToModel);
+                .map(ProductEntity::toModel);
     }
 
-    private Product convertToModel(ProductEntity productEntity) {
-        if (productEntity == null) {
-            return null;
-        }
-        return productEntity.toModel();
-    }
 }
