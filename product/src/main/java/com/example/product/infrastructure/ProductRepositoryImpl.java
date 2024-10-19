@@ -18,4 +18,13 @@ public class ProductRepositoryImpl implements ProductRepository {
         return productJpaRepository.findAll()
                 .stream().map(ProductEntity::toModel).toList();
     }
+
+    @Override
+    public Product findById(Long id) {
+        ProductEntity productEntity = productJpaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "product not found -> productId: " + id)
+                );
+        return productEntity.toModel();
+    }
 }
