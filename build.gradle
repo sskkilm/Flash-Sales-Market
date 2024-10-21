@@ -75,5 +75,7 @@ project(':product') {
 project(':order') {
 	dependencies {
 		implementation project(':common')
+		implementation project(':member')
+		implementation project(':product')
 	}
 }
