@@ -1,6 +1,9 @@
 package com.example.product.application;
 
-import com.example.product.domain.Money;
+import com.example.common.domain.Money;
+import com.example.common.dto.ProductPurchaseRequest;
+import com.example.common.dto.ProductPurchaseResponse;
+import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.Product;
 import com.example.product.dto.ProductDetails;
 import com.example.product.dto.ProductDto;
@@ -10,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,9 @@ class ProductServiceTest {
 
     @Mock
     ProductRepository productRepository;
+
+    @Mock
+    AmountCalculator calculator;
 
     @InjectMocks
     ProductService productService;
@@ -45,7 +50,7 @@ class ProductServiceTest {
         Product product = Product.builder()
                 .id(1L)
                 .name("name")
-                .price(Money.of(new BigDecimal("10000")))
+                .price(com.example.common.domain.Money.of("10000"))
                 .stockQuantity(100)
                 .build();
         given(productRepository.findById(1L))
@@ -67,19 +72,19 @@ class ProductServiceTest {
         Product product1 = Product.builder()
                 .id(1L)
                 .name("name1")
-                .price(Money.of(new BigDecimal("10000")))
+                .price(Money.of("10000"))
                 .stockQuantity(100)
                 .build();
         Product product2 = Product.builder()
                 .id(2L)
                 .name("name2")
-                .price(Money.of(new BigDecimal("20000")))
+                .price(Money.of("20000"))
                 .stockQuantity(200)
                 .build();
         Product product3 = Product.builder()
                 .id(3L)
                 .name("name3")
-                .price(Money.of(new BigDecimal("30000")))
+                .price(Money.of("30000"))
                 .stockQuantity(300)
                 .build();
 
@@ -103,5 +108,42 @@ class ProductServiceTest {
         assertEquals(3L, productList.get(2).productId());
         assertEquals("name3", productList.get(2).name());
         assertEquals("30000", productList.get(2).price());
+    }
+
+    @Test
+    void 상품을_구매한다() {
+        //given
+        List<ProductPurchaseRequest> productPurchaseRequests = List.of(
+                new ProductPurchaseRequest(1L, 1),
+                new ProductPurchaseRequest(2L, 2)
+        );
+        Product product1 = Product.builder()
+                .id(1L)
+                .price(Money.of("10000"))
+                .stockQuantity(10)
+                .build();
+        given(productRepository.findById(1L))
+                .willReturn(Optional.of(product1));
+        Product product2 = Product.builder()
+                .id(2L)
+                .price(Money.of("20000"))
+                .stockQuantity(10)
+                .build();
+        given(productRepository.findById(2L))
+                .willReturn(Optional.of(product2));
+        given(calculator.calculateAmount(product1, 1))
+                .willReturn(Money.of("10000"));
+        given(calculator.calculateAmount(product2, 2))
+                .willReturn(Money.of("40000"));
+        //when
+        List<ProductPurchaseResponse> productPurchaseResponses = productService.purchaseProducts(productPurchaseRequests);
+        //then
+        assertEquals(2, productPurchaseResponses.size());
+        assertEquals(1L, productPurchaseResponses.get(0).productId());
+        assertEquals(1, productPurchaseResponses.get(0).quantity());
+        assertEquals(Money.of("10000"), productPurchaseResponses.get(0).purchaseAmount());
+        assertEquals(2L, productPurchaseResponses.get(1).productId());
+        assertEquals(2, productPurchaseResponses.get(1).quantity());
+        assertEquals(Money.of("40000"), productPurchaseResponses.get(1).purchaseAmount());
     }
 }
