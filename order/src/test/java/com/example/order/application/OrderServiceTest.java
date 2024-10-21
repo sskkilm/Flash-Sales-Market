@@ -90,6 +90,12 @@ class OrderServiceTest {
         assertEquals(1L, response.memberId());
         assertEquals(OrderStatus.ORDER_COMPLETED, response.status());
         assertEquals(2, response.orderProductResponses().size());
+        assertEquals(1L, response.orderProductResponses().get(0).productId());
+        assertEquals(1, response.orderProductResponses().get(0).quantity());
+        assertEquals(Money.of("20000"), response.orderProductResponses().get(0).orderAmount());
+        assertEquals(2L, response.orderProductResponses().get(1).productId());
+        assertEquals(2, response.orderProductResponses().get(1).quantity());
+        assertEquals(Money.of("60000"), response.orderProductResponses().get(1).orderAmount());
     }
 
 }

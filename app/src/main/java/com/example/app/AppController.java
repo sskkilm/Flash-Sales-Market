@@ -1,8 +1,8 @@
 package com.example.app;
 
-import com.example.member.application.MemberService;
 import com.example.order.application.OrderService;
 import com.example.order.dto.OrderCreateRequest;
+import com.example.order.dto.OrderCreateResponse;
 import com.example.product.application.ProductService;
 import com.example.product.dto.ProductDetails;
 import com.example.product.dto.ProductDto;
@@ -18,7 +18,6 @@ public class AppController {
 
     private final ProductService productService;
     private final OrderService orderService;
-    private final MemberService memberService;
 
     @GetMapping("/products")
     public List<ProductDto> getProductList() {
@@ -33,10 +32,10 @@ public class AppController {
     }
 
     @PostMapping("/orders/{memberId}")
-    public void order(
+    public OrderCreateResponse order(
             @PathVariable Long memberId,
             @RequestBody @Valid OrderCreateRequest orderCreateRequest
     ) {
-        orderService.order(memberId, orderCreateRequest);
+        return orderService.order(memberId, orderCreateRequest);
     }
 }
