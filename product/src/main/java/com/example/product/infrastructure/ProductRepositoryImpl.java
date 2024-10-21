@@ -26,4 +26,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .map(ProductEntity::toModel);
     }
 
+    @Override
+    public Product save(Product product) {
+        return productJpaRepository.save(ProductEntity.from(product)).toModel();
+    }
+
 }

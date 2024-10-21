@@ -1,13 +1,13 @@
-package com.example.order;
+package com.example.common;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "com.example")
-public class OrderApplication {
+@SpringBootApplication
+public class CommonApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(OrderApplication.class, args);
+        SpringApplication.run(CommonApplication.class, args);
     }
 
 }

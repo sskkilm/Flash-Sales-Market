@@ -1,9 +1,9 @@
 package com.example.product.infrastructure;
 
-import com.example.product.domain.Money;
+import com.example.common.domain.Money;
 import com.example.product.domain.Product;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Getter
 @Entity(name = "Product")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ProductEntity {
 
     @Id
@@ -40,10 +43,21 @@ public class ProductEntity {
         return Product.builder()
                 .id(this.id)
                 .name(this.name)
-                .price(Money.of(this.price))
+                .price(Money.of(this.price.toString()))
                 .stockQuantity(this.stockQuantity)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
+                .build();
+    }
+
+    public static ProductEntity from(Product product) {
+        return ProductEntity.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice().amount())
+                .stockQuantity(product.getStockQuantity())
+                .createdAt(product.getCreatedAt())
+                .updatedAt(product.getUpdatedAt())
                 .build();
     }
 }

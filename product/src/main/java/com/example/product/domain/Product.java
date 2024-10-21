@@ -1,5 +1,6 @@
 package com.example.product.domain;
 
+import com.example.common.domain.Money;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,4 +15,13 @@ public class Product {
     private int stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public void decreaseStock(int quantity) {
+        if (stockQuantity < quantity) {
+            throw new IllegalArgumentException("product is out of stock");
+        }
+
+        this.stockQuantity -= quantity;
+    }
+
 }

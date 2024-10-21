@@ -1,13 +1,13 @@
-package com.example.product;
+package com.example.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = "com.example")
-public class ProductApplication {
+public class AppApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProductApplication.class, args);
+        SpringApplication.run(AppApplication.class, args);
     }
 
 }
