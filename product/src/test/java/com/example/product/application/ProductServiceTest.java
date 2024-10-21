@@ -146,4 +146,18 @@ class ProductServiceTest {
         assertEquals(2, productPurchaseResponses.get(1).quantity());
         assertEquals(Money.of("40000"), productPurchaseResponses.get(1).purchaseAmount());
     }
+
+    @Test
+    void 존재하지_않는_상품을_구매하면_예외가_발생한다() {
+        //given
+        List<ProductPurchaseRequest> productPurchaseRequests = List.of(
+                new ProductPurchaseRequest(1L, 1)
+        );
+        given(productRepository.findById(1L))
+                .willReturn(Optional.empty());
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> productService.purchaseProducts(productPurchaseRequests));
+    }
 }
