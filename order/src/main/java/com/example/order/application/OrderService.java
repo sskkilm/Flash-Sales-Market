@@ -8,6 +8,8 @@ import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.dto.OrderCreateRequest;
+import com.example.order.dto.OrderCreateResponse;
+import com.example.order.dto.OrderProductResponse;
 import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public void order(Long memberId, OrderCreateRequest orderCreateRequest) {
+    public OrderCreateResponse order(Long memberId, OrderCreateRequest orderCreateRequest) {
         Long checkedMemberId = memberService.findById(memberId);
 
         Order order = orderRepository.save(Order.create(checkedMemberId));
@@ -40,6 +42,11 @@ public class OrderService {
                 .map(response -> OrderProduct.create(
                         order, response.productId(), response.quantity(), response.purchaseAmount()
                 )).toList();
-        orderProductRepository.saveAll(orderProducts);
+
+        List<OrderProductResponse> orderProductResponses = orderProductRepository.saveAll(orderProducts).stream()
+                .map(orderProduct -> new OrderProductResponse(
+                        orderProduct.getProductId(), orderProduct.getQuantity(), orderProduct.getOrderAmount()
+                )).toList();
+        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductResponses);
     }
 }

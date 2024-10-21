@@ -15,10 +15,10 @@ public class OrderProductRepositoryImpl implements OrderProductRepository {
     private final OrderProductJpaRepository orderProductJpaRepository;
 
     @Override
-    public void saveAll(List<OrderProduct> orderProducts) {
-        orderProductJpaRepository.saveAll(
+    public List<OrderProduct> saveAll(List<OrderProduct> orderProducts) {
+        return orderProductJpaRepository.saveAll(
                 orderProducts.stream().map(OrderProductEntity::from).toList()
-        );
+        ).stream().map(OrderProductEntity::toModel).toList();
     }
 
 }

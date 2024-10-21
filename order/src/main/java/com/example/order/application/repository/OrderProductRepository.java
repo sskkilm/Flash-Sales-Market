@@ -5,5 +5,5 @@ import com.example.order.domain.OrderProduct;
 import java.util.List;
 
 public interface OrderProductRepository {
-    void saveAll(List<OrderProduct> orderProducts);
+    List<OrderProduct> saveAll(List<OrderProduct> orderProducts);
 }

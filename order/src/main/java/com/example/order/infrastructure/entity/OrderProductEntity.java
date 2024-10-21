@@ -1,5 +1,6 @@
 package com.example.order.infrastructure.entity;
 
+import com.example.common.domain.Money;
 import com.example.order.domain.OrderProduct;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -48,6 +49,17 @@ public class OrderProductEntity {
                 .quantity(orderProduct.getQuantity())
                 .orderAmount(orderProduct.getOrderAmount().amount())
                 .createdAt(orderProduct.getCreatedAt())
+                .build();
+    }
+
+    public OrderProduct toModel() {
+        return OrderProduct.builder()
+                .id(this.id)
+                .order(this.order.toModel())
+                .productId(this.productId)
+                .quantity(this.quantity)
+                .orderAmount(Money.of(this.orderAmount.toString()))
+                .createdAt(this.createdAt)
                 .build();
     }
 }
