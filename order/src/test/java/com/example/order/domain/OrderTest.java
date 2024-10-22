@@ -23,30 +23,41 @@ class OrderTest {
     }
 
     @Test
-    void 회원의_주문이_맞는지_확인() {
+    void 주문_취소_시_회원_정보가_일치하지_않으면_예외가_발생한다() {
         //given
         Order order = Order.builder()
                 .memberId(1L)
                 .build();
 
-        //when
-        boolean orderNotOrderedBy = order.isNotOrderedBy(1L);
-
         //then
-        assertFalse(orderNotOrderedBy);
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> order.cancel(2L));
     }
 
     @Test
-    void 취소될_수_있는_주문인지_확인() {
+    void 주문_취소_시_배송_전이_아니면_예외가_발생한다() {
         //given
         Order order = Order.builder()
+                .memberId(1L)
+                .status(OrderStatus.DELIVERY_IN_PROGRESS)
+                .build();
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> order.cancel(1L));
+    }
+
+    @Test
+    void 주문_취소() {
+        //given
+        Order order = Order.builder()
+                .memberId(1L)
                 .status(OrderStatus.ORDER_COMPLETED)
                 .build();
 
-        //when
-        boolean canNotBeCanceled = order.canNotBeCanceled();
-
         //then
-        assertFalse(canNotBeCanceled);
+        order.cancel(1L);
     }
 }

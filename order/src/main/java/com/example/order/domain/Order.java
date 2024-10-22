@@ -22,15 +22,32 @@ public class Order {
                 .build();
     }
 
-    public boolean isNotOrderedBy(Long memberId) {
+    public void cancel(Long memberId) {
+        validateOrderBy(memberId);
+        validateBeforeDelivery();
+        this.status = OrderStatus.ORDER_CANCELED;
+    }
+
+    private void validateOrderBy(Long memberId) {
+        if (isNotOrderedBy(memberId)) {
+            throw new IllegalArgumentException(
+                    "this order is not ordered by this member -> memberId: " + memberId
+            );
+        }
+    }
+
+    private void validateBeforeDelivery() {
+        if (afterDelivery()) {
+            throw new IllegalArgumentException("order can not be canceled");
+        }
+    }
+
+    private boolean isNotOrderedBy(Long memberId) {
         return !Objects.equals(this.memberId, memberId);
     }
 
-    public boolean canNotBeCanceled() {
+    private boolean afterDelivery() {
         return this.status != OrderStatus.ORDER_COMPLETED;
     }
 
-    public void canceled() {
-        this.status = OrderStatus.CANCEL_COMPLETED;
-    }
 }

@@ -3,14 +3,14 @@ package com.example.order.dto;
 import com.example.common.domain.Money;
 import com.example.order.domain.OrderProduct;
 
-public record OrderProductResponse(
+public record OrderProductDto(
         Long productId,
         int quantity,
         String productName,
         Money orderAmount
 ) {
-    public static OrderProductResponse from(OrderProduct orderProduct) {
-        return new OrderProductResponse(
+    public static OrderProductDto from(OrderProduct orderProduct) {
+        return new OrderProductDto(
                 orderProduct.getProductId(),
                 orderProduct.getQuantity(),
                 orderProduct.getName(),

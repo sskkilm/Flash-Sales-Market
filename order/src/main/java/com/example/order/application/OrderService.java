@@ -8,9 +8,10 @@ import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
+import com.example.order.dto.OrderCancelResponse;
 import com.example.order.dto.OrderCreateRequest;
 import com.example.order.dto.OrderCreateResponse;
-import com.example.order.dto.OrderProductResponse;
+import com.example.order.dto.OrderProductDto;
 import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,50 +34,45 @@ public class OrderService {
 
         Order order = orderRepository.save(Order.create(checkedMemberId));
 
-        List<ProductPurchaseRequest> productPurchaseRequests = orderCreateRequest.orderProducts().stream()
-                .map(orderProductDto -> new ProductPurchaseRequest(
-                        orderProductDto.productId(), orderProductDto.quantity())
-                ).toList();
-        List<ProductPurchaseResponse> productPurchaseResponses = productService.purchaseProducts(productPurchaseRequests);
+        List<ProductPurchaseResponse> productPurchaseResponses = productService.purchaseProducts(
+                orderCreateRequest.orderProducts().stream()
+                        .map(request -> new ProductPurchaseRequest(
+                                request.productId(), request.quantity())
+                        ).toList()
+        );
+        List<OrderProduct> orderProducts = orderProductRepository.saveAll(
+                productPurchaseResponses.stream()
+                        .map(response -> OrderProduct.create(
+                                order, response.productId(), response.quantity(), response.name(), response.purchaseAmount()
+                        )).toList()
+        );
 
-        List<OrderProduct> orderProducts = productPurchaseResponses.stream()
-                .map(response -> OrderProduct.create(
-                        order, response.productId(), response.quantity(), response.purchaseAmount()
-                )).toList();
-
-        List<OrderProductResponse> orderProductResponses = orderProductRepository.saveAll(orderProducts).stream()
-                .map(orderProduct -> new OrderProductResponse(
-                        orderProduct.getProductId(), orderProduct.getQuantity(), orderProduct.getOrderAmount()
-                )).toList();
-        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductResponses);
+        List<OrderProductDto> orderProductDtos = orderProducts.stream()
+                .map(OrderProductDto::from).toList();
+        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductDtos);
     }
 
-    public void cancel(Long memberId, Long orderId) {
+    public OrderCancelResponse cancel(Long memberId, Long orderId) {
         Long checkedMemberId = memberService.findById(memberId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "order not found -> orderId: " + orderId
                 ));
-        if (order.isNotOrderedBy(checkedMemberId)) {
-            throw new IllegalArgumentException(
-                    "this order is not ordered by this member -> memberId: " + checkedMemberId
-            );
-        }
-
-        if (order.canNotBeCanceled()) {
-            throw new IllegalArgumentException("order can not be canceled");
-        }
+        order.cancel(checkedMemberId);
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        orderProductRepository.deleteAll(orderProducts);
-
         productService.stockRecovery(orderProducts.stream().map(
                 orderProduct -> new ProductStockRecoveryRequest(
                         orderProduct.getProductId(), orderProduct.getQuantity()
                 )
         ).toList());
+        orderProductRepository.deleteAll(orderProducts);
 
-        order.canceled();
         orderRepository.save(order);
+
+        List<OrderProductDto> orderProductDtos = orderProducts.stream()
+                .map(OrderProductDto::from).toList();
+        return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductDtos);
     }
+
 }

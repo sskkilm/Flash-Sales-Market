@@ -4,7 +4,7 @@ import com.example.order.domain.OrderStatus;
 
 import java.util.List;
 
-public record OrderCreateResponse(
+public record OrderCancelResponse(
         Long orderId,
         Long memberId,
         OrderStatus status,
