@@ -4,6 +4,7 @@ import com.example.order.application.OrderService;
 import com.example.order.dto.OrderCancelResponse;
 import com.example.order.dto.OrderCreateRequest;
 import com.example.order.dto.OrderCreateResponse;
+import com.example.order.dto.OrderHistory;
 import com.example.product.application.ProductService;
 import com.example.product.dto.ProductDetails;
 import com.example.product.dto.ProductDto;
@@ -54,5 +55,12 @@ public class AppController {
             @PathVariable Long orderId
     ) {
         orderService.returns(memberId, orderId);
+    }
+
+    @GetMapping("/orders/{memberId}")
+    public List<OrderHistory> getOrderHistory(
+            @PathVariable Long memberId
+    ) {
+        return orderService.getOrderHistory(memberId);
     }
 }

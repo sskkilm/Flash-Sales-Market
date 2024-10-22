@@ -6,6 +6,7 @@ import com.example.order.infrastructure.entity.OrderEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,5 +23,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Optional<Order> findById(Long id) {
         return orderJpaRepository.findById(id).map(OrderEntity::toModel);
+    }
+
+    @Override
+    public List<Order> findAllByMemberId(Long memberId) {
+        return orderJpaRepository.findAllByMemberId(memberId)
+                .stream().map(OrderEntity::toModel).toList();
     }
 }

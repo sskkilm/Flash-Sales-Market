@@ -38,6 +38,10 @@ public class Order {
         this.status = OrderStatus.RETURN_IN_PROGRESS;
     }
 
+    public boolean isNotOrderedBy(Long memberId) {
+        return !Objects.equals(this.memberId, memberId);
+    }
+
     private void validateOrderBy(Long memberId) {
         if (isOrderedBy(memberId)) {
             return;

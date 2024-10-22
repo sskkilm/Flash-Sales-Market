@@ -8,15 +8,13 @@ import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.dto.OrderCancelResponse;
-import com.example.order.dto.OrderCreateRequest;
-import com.example.order.dto.OrderCreateResponse;
-import com.example.order.dto.OrderProductDto;
+import com.example.order.dto.*;
 import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -28,6 +26,7 @@ public class OrderService {
     private final MemberService memberService;
     private final ProductService productService;
     private final LocalDateTimeHolder holder;
+    private final OrderProductManager manager;
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
@@ -82,5 +81,19 @@ public class OrderService {
                 ));
         order.returns(checkedMemberId, holder);
         orderRepository.save(order);
+    }
+
+    public List<OrderHistory> getOrderHistory(Long memberId) {
+        List<Order> orders = orderRepository.findAllByMemberId(memberId);
+
+        return orders.stream().map(order -> {
+            List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+
+            BigDecimal totalPrice = manager.calculateTotalPrice(orderProducts);
+
+            List<OrderProductDto> orderProductDtos = orderProducts.stream().map(OrderProductDto::from).toList();
+
+            return new OrderHistory(order.getId(), memberId, order.getStatus(), totalPrice.toString(), orderProductDtos);
+        }).toList();
     }
 }
