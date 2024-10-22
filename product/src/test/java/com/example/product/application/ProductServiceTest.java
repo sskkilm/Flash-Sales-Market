@@ -122,6 +122,7 @@ class ProductServiceTest {
                 .id(1L)
                 .price(Money.of("10000"))
                 .stockQuantity(10)
+                .name("name1")
                 .build();
         given(productRepository.findById(1L))
                 .willReturn(Optional.of(product1));
@@ -129,6 +130,7 @@ class ProductServiceTest {
                 .id(2L)
                 .price(Money.of("20000"))
                 .stockQuantity(10)
+                .name("name2")
                 .build();
         given(productRepository.findById(2L))
                 .willReturn(Optional.of(product2));
@@ -142,9 +144,11 @@ class ProductServiceTest {
         assertEquals(2, productPurchaseResponses.size());
         assertEquals(1L, productPurchaseResponses.get(0).productId());
         assertEquals(1, productPurchaseResponses.get(0).quantity());
+        assertEquals("name1", productPurchaseResponses.get(0).name());
         assertEquals(Money.of("10000"), productPurchaseResponses.get(0).purchaseAmount());
         assertEquals(2L, productPurchaseResponses.get(1).productId());
         assertEquals(2, productPurchaseResponses.get(1).quantity());
+        assertEquals("name2", productPurchaseResponses.get(1).name());
         assertEquals(Money.of("40000"), productPurchaseResponses.get(1).purchaseAmount());
     }
 

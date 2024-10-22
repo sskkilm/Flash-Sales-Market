@@ -56,34 +56,37 @@ class OrderServiceTest {
         );
         given(memberService.findById(1L))
                 .willReturn(1L);
+        Order order = Order.builder()
+                .id(1L)
+                .memberId(1L)
+                .status(OrderStatus.ORDER_COMPLETED)
+                .build();
         given(orderRepository.save(any(Order.class)))
-                .willReturn(Order.builder()
-                        .id(1L)
-                        .memberId(1L)
-                        .status(OrderStatus.ORDER_COMPLETED)
-                        .build());
+                .willReturn(order);
         given(productService.purchaseProducts(anyList()))
                 .willReturn(
                         List.of(
-                                new ProductPurchaseResponse(1L, 1, Money.of("20000")),
-                                new ProductPurchaseResponse(2L, 2, Money.of("60000"))
+                                new ProductPurchaseResponse(1L, 1, "name1", Money.of("20000")),
+                                new ProductPurchaseResponse(2L, 2, "name2", Money.of("60000"))
                         )
                 );
         given(orderProductRepository.saveAll(anyList()))
-                .willReturn(
-                        List.of(
-                                OrderProduct.builder()
-                                        .productId(1L)
-                                        .quantity(1)
-                                        .orderAmount(Money.of("20000"))
-                                        .build(),
-                                OrderProduct.builder()
-                                        .productId(2L)
-                                        .quantity(2)
-                                        .orderAmount(Money.of("60000"))
-                                        .build()
-                        )
-                );
+                .willReturn(List.of(
+                        OrderProduct.builder()
+                                .order(order)
+                                .productId(1L)
+                                .quantity(1)
+                                .name("name1")
+                                .orderAmount(Money.of("20000"))
+                                .build(),
+                        OrderProduct.builder()
+                                .order(order)
+                                .productId(2L)
+                                .quantity(2)
+                                .name("name2")
+                                .orderAmount(Money.of("60000"))
+                                .build()
+                ));
         //when
         OrderCreateResponse response = orderService.create(1L, orderCreateRequest);
 
@@ -94,9 +97,11 @@ class OrderServiceTest {
         assertEquals(2, response.orderProductResponses().size());
         assertEquals(1L, response.orderProductResponses().get(0).productId());
         assertEquals(1, response.orderProductResponses().get(0).quantity());
+        assertEquals("name1", response.orderProductResponses().get(0).productName());
         assertEquals(Money.of("20000"), response.orderProductResponses().get(0).orderAmount());
         assertEquals(2L, response.orderProductResponses().get(1).productId());
         assertEquals(2, response.orderProductResponses().get(1).quantity());
+        assertEquals("name2", response.orderProductResponses().get(1).productName());
         assertEquals(Money.of("60000"), response.orderProductResponses().get(1).orderAmount());
     }
 

@@ -44,7 +44,7 @@ public class ProductService {
 
             Money calculatedAmount = calculator.calculateAmount(product, request.quantity());
 
-            return new ProductPurchaseResponse(product.getId(), request.quantity(), calculatedAmount);
+            return new ProductPurchaseResponse(product.getId(), request.quantity(), product.getName(), calculatedAmount);
         }).toList();
     }
 

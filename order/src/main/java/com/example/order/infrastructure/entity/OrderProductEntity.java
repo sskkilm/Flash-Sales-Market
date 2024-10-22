@@ -35,6 +35,9 @@ public class OrderProductEntity {
     private int quantity;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private BigDecimal orderAmount;
 
     @CreatedDate
@@ -47,6 +50,7 @@ public class OrderProductEntity {
                 .order(OrderEntity.from(orderProduct.getOrder()))
                 .productId(orderProduct.getProductId())
                 .quantity(orderProduct.getQuantity())
+                .name(orderProduct.getName())
                 .orderAmount(orderProduct.getOrderAmount().amount())
                 .createdAt(orderProduct.getCreatedAt())
                 .build();
@@ -58,6 +62,7 @@ public class OrderProductEntity {
                 .order(this.order.toModel())
                 .productId(this.productId)
                 .quantity(this.quantity)
+                .name(this.name)
                 .orderAmount(Money.of(this.orderAmount.toString()))
                 .createdAt(this.createdAt)
                 .build();
