@@ -119,4 +119,17 @@ class OrderServiceTest {
                 () -> orderService.cancel(1L, 1L));
     }
 
+    @Test
+    void 반품_시_존재하지_않는_주문이면_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.empty());
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.returns(1L, 1L));
+    }
 }
