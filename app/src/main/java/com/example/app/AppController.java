@@ -1,6 +1,7 @@
 package com.example.app;
 
 import com.example.order.application.OrderService;
+import com.example.order.dto.OrderCancelResponse;
 import com.example.order.dto.OrderCreateRequest;
 import com.example.order.dto.OrderCreateResponse;
 import com.example.product.application.ProductService;
@@ -39,11 +40,19 @@ public class AppController {
         return orderService.create(memberId, orderCreateRequest);
     }
 
-    @DeleteMapping("/orders/{memberId}/{orderId}")
-    public void cancle(
+    @PostMapping("/orders/{memberId}/{orderId}/cancel")
+    public OrderCancelResponse cancel(
             @PathVariable Long memberId,
             @PathVariable Long orderId
     ) {
-        orderService.cancel(memberId, orderId);
+        return orderService.cancel(memberId, orderId);
+    }
+
+    @PostMapping("/orders/{memberId}/{orderId}/return")
+    public void returns(
+            @PathVariable Long memberId,
+            @PathVariable Long orderId
+    ) {
+        orderService.returns(memberId, orderId);
     }
 }

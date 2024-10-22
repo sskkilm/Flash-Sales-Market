@@ -27,6 +27,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final MemberService memberService;
     private final ProductService productService;
+    private final LocalDateTimeHolder holder;
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
@@ -58,7 +59,8 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "order not found -> orderId: " + orderId
                 ));
-        order.cancel(checkedMemberId);
+        order.cancel(checkedMemberId, holder);
+        orderRepository.save(order);
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
         productService.stockRecovery(orderProducts.stream().map(
@@ -66,13 +68,19 @@ public class OrderService {
                         orderProduct.getProductId(), orderProduct.getQuantity()
                 )
         ).toList());
-        orderProductRepository.deleteAll(orderProducts);
-
-        orderRepository.save(order);
 
         List<OrderProductDto> orderProductDtos = orderProducts.stream()
                 .map(OrderProductDto::from).toList();
         return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductDtos);
     }
 
+    public void returns(Long memberId, Long orderId) {
+        Long checkedMemberId = memberService.findById(memberId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "order not found -> orderId: " + orderId
+                ));
+        order.returns(checkedMemberId, holder);
+        orderRepository.save(order);
+    }
 }
