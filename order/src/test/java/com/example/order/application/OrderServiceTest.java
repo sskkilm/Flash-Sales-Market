@@ -19,8 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
@@ -83,7 +85,7 @@ class OrderServiceTest {
                         )
                 );
         //when
-        OrderCreateResponse response = orderService.order(1L, orderCreateRequest);
+        OrderCreateResponse response = orderService.create(1L, orderCreateRequest);
 
         //then
         assertEquals(1L, response.orderId());
@@ -98,4 +100,130 @@ class OrderServiceTest {
         assertEquals(Money.of("60000"), response.orderProductResponses().get(1).orderAmount());
     }
 
+    @Test
+    void 주문_취소시_존재하지_않는_주문이면_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.empty());
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 주문_취소시_회원에_의한_주문이_아니면_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(2L)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 배송중인_주문을_취소하는_경우_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(1L)
+                                .status(OrderStatus.DELIVERY_IN_PROGRESS)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 배송_완료된_주문을_취소하는_경우_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(1L)
+                                .status(OrderStatus.DELIVERY_COMPLETED)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 반품중인_주문을_취소하는_경우_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(1L)
+                                .status(OrderStatus.RETURN_IN_PROGRESS)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 반품_완료_주문을_취소하는_경우_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(1L)
+                                .status(OrderStatus.RETURN_COMPLETED)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
+
+    @Test
+    void 이미_취소된_주문을_취소하는_경우_예외가_발생한다() {
+        //given
+        given(memberService.findById(1L))
+                .willReturn(1L);
+        given(orderRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Order.builder()
+                                .memberId(1L)
+                                .status(OrderStatus.CANCEL_COMPLETED)
+                                .build()
+                ));
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                //when
+                () -> orderService.cancel(1L, 1L));
+    }
 }
