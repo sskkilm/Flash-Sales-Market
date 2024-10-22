@@ -11,8 +11,7 @@ import java.util.Objects;
 @Builder
 public class Order {
     public static final int CANCELLATION_PERIOD = 1;
-    public static final int DELIVERY_PERIOD = 2;
-    public static final int RETURNABLE_PERIOD = 3;
+    public static final int RETURNABLE_PERIOD_AFTER_DELIVERY = 1;
 
     private Long id;
     private Long memberId;
@@ -29,56 +28,57 @@ public class Order {
 
     public void cancel(Long memberId, LocalDateTimeHolder holder) {
         validateOrderBy(memberId);
-        validateBeforeDelivery(holder);
+        validateCanBeCancelled(holder);
         this.status = OrderStatus.ORDER_CANCELED;
     }
 
     public void returns(Long memberId, LocalDateTimeHolder holder) {
         validateOrderBy(memberId);
-        validateAfterDeliveryCompleted(holder);
         validateCanBeReturned(holder);
         this.status = OrderStatus.RETURN_IN_PROGRESS;
     }
 
-    private void validateAfterDeliveryCompleted(LocalDateTimeHolder holder) {
-        if (isBeforeDeliveryCompleted(holder)) {
-            throw new IllegalStateException("You can return it after the delivery is completed");
+    private void validateOrderBy(Long memberId) {
+        if (isOrderedBy(memberId)) {
+            return;
         }
+        throw new IllegalArgumentException(
+                "this order is not ordered by this member -> memberId: " + memberId
+        );
     }
 
-    private boolean isBeforeDeliveryCompleted(LocalDateTimeHolder holder) {
-        return this.createdAt.plusDays(DELIVERY_PERIOD).isAfter(holder.now());
+    private boolean isOrderedBy(Long memberId) {
+        return Objects.equals(this.memberId, memberId);
+    }
+
+    private void validateCanBeCancelled(LocalDateTimeHolder holder) {
+        if (isOrderCompleted() && isBeforeCancellablePeriod(holder)) {
+            return;
+        }
+        throw new IllegalStateException("This order cannot be canceled");
+    }
+
+    private boolean isOrderCompleted() {
+        return this.status == OrderStatus.ORDER_COMPLETED;
+    }
+
+    private boolean isBeforeCancellablePeriod(LocalDateTimeHolder holder) {
+        return this.createdAt.plusDays(CANCELLATION_PERIOD).isAfter(holder.now());
     }
 
     private void validateCanBeReturned(LocalDateTimeHolder holder) {
-        if (isAfterReturnablePeriod(holder)) {
-            throw new IllegalStateException("Return period has expired");
+        if (isAfterDelivery() && isBeforeReturnablePeriod(holder)) {
+            return;
         }
+        throw new IllegalStateException("This order cannot be returned");
     }
 
-    private boolean isAfterReturnablePeriod(LocalDateTimeHolder holder) {
-        return this.createdAt.plusDays(RETURNABLE_PERIOD).isBefore(holder.now());
+    private boolean isAfterDelivery() {
+        return this.status == OrderStatus.DELIVERY_COMPLETED;
     }
 
-    private void validateOrderBy(Long memberId) {
-        if (isNotOrderedBy(memberId)) {
-            throw new IllegalArgumentException(
-                    "this order is not ordered by this member -> memberId: " + memberId
-            );
-        }
+    private boolean isBeforeReturnablePeriod(LocalDateTimeHolder holder) {
+        return this.updatedAt.plusDays(RETURNABLE_PERIOD_AFTER_DELIVERY).isAfter(holder.now());
     }
 
-    private void validateBeforeDelivery(LocalDateTimeHolder holder) {
-        if (isAfterCancellablePeriod(holder)) {
-            throw new IllegalStateException("Cancellation period has expired");
-        }
-    }
-
-    private boolean isNotOrderedBy(Long memberId) {
-        return !Objects.equals(this.memberId, memberId);
-    }
-
-    private boolean isAfterCancellablePeriod(LocalDateTimeHolder holder) {
-        return this.createdAt.plusDays(CANCELLATION_PERIOD).isBefore(holder.now());
-    }
 }
