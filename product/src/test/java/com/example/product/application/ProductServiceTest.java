@@ -3,6 +3,7 @@ package com.example.product.application;
 import com.example.common.domain.Money;
 import com.example.common.dto.ProductPurchaseRequest;
 import com.example.common.dto.ProductPurchaseResponse;
+import com.example.common.dto.ProductStockRecoveryRequest;
 import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.Product;
 import com.example.product.dto.ProductDetails;
@@ -159,5 +160,21 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class,
                 //when
                 () -> productService.purchaseProducts(productPurchaseRequests));
+    }
+
+    @Test
+    void 재고_복구_시_존재하지_않는_상품이면_예외가_발생한다() {
+        //given
+        List<ProductStockRecoveryRequest> requests = List.of(
+                new ProductStockRecoveryRequest(1L, 2),
+                new ProductStockRecoveryRequest(2L, 2)
+        );
+        given(productRepository.findById(1L))
+                .willReturn(Optional.empty());
+
+        //then
+        assertThrows(IllegalArgumentException.class,
+                // when
+                () -> productService.stockRecovery(requests));
     }
 }
