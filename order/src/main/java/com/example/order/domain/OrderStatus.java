@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum OrderStatus {
     ORDER_COMPLETED("주문 완료"),
+    CANCEL_COMPLETED("취소 완료"),
     DELIVERY_IN_PROGRESS("배송 진행중"),
     DELIVERY_COMPLETED("배송 완료"),
     RETURN_IN_PROGRESS("반품 진행중"),

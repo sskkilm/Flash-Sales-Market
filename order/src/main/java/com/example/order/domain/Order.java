@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -19,5 +20,17 @@ public class Order {
                 .memberId(memberId)
                 .status(OrderStatus.ORDER_COMPLETED)
                 .build();
+    }
+
+    public boolean isNotOrderedBy(Long memberId) {
+        return !Objects.equals(this.memberId, memberId);
+    }
+
+    public boolean canNotBeCanceled() {
+        return this.status != OrderStatus.ORDER_COMPLETED;
+    }
+
+    public void canceled() {
+        this.status = OrderStatus.CANCEL_COMPLETED;
     }
 }

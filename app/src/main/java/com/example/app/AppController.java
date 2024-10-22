@@ -32,10 +32,18 @@ public class AppController {
     }
 
     @PostMapping("/orders/{memberId}")
-    public OrderCreateResponse order(
+    public OrderCreateResponse create(
             @PathVariable Long memberId,
             @RequestBody @Valid OrderCreateRequest orderCreateRequest
     ) {
-        return orderService.order(memberId, orderCreateRequest);
+        return orderService.create(memberId, orderCreateRequest);
+    }
+
+    @DeleteMapping("/orders/{memberId}/{orderId}")
+    public void cancle(
+            @PathVariable Long memberId,
+            @PathVariable Long orderId
+    ) {
+        orderService.cancel(memberId, orderId);
     }
 }

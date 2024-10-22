@@ -1,7 +1,9 @@
 package com.example.order.infrastructure.order.product;
 
 import com.example.order.application.repository.OrderProductRepository;
+import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
+import com.example.order.infrastructure.entity.OrderEntity;
 import com.example.order.infrastructure.entity.OrderProductEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -19,6 +21,17 @@ public class OrderProductRepositoryImpl implements OrderProductRepository {
         return orderProductJpaRepository.saveAll(
                 orderProducts.stream().map(OrderProductEntity::from).toList()
         ).stream().map(OrderProductEntity::toModel).toList();
+    }
+
+    @Override
+    public List<OrderProduct> findAllByOrder(Order order) {
+        return orderProductJpaRepository.findAllByOrder(OrderEntity.from(order)).stream()
+                .map(OrderProductEntity::toModel).toList();
+    }
+
+    @Override
+    public void deleteAll(List<OrderProduct> orderProducts) {
+        orderProductJpaRepository.deleteAll(orderProducts.stream().map(OrderProductEntity::from).toList());
     }
 
 }
