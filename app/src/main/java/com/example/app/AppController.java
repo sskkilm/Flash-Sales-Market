@@ -73,11 +73,13 @@ public class AppController {
         cartItemService.create(memberId, request);
     }
 
-    @PatchMapping("/cart-items/{memberId}")
+    @PatchMapping("/cart-items/{memberId}/{cartItemId}")
     public void update(
             @PathVariable Long memberId,
+            @PathVariable Long cartItemId,
             @RequestBody @Valid CartItemUpdateRequest request
     ) {
-        cartItemService.update(memberId, request);
+        cartItemService.update(memberId, cartItemId, request);
     }
+
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -27,5 +28,9 @@ public class CartItem {
 
     public void updateQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public boolean isNotIncludedBy(Long memberId) {
+        return !Objects.equals(this.memberId, memberId);
     }
 }

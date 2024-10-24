@@ -5,6 +5,8 @@ import com.example.member.domain.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class CartItemRepositoryImpl implements CartItemRepository {
@@ -17,7 +19,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
     }
 
     @Override
-    public CartItem findByMemberIdAndProductId(Long memberId, Long productId) {
-        return cartItemJpaRepository.findByMemberIdAndProductId(memberId, productId).toModel();
+    public Optional<CartItem> findById(Long cartItemId) {
+        return cartItemJpaRepository.findById(cartItemId)
+                .map(CartItemEntity::toModel);
     }
+
 }

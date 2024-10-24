@@ -20,9 +20,16 @@ public class CartItemService {
         cartItemRepository.save(cartItem);
     }
 
-    public void update(Long memberId, CartItemUpdateRequest request) {
-        Long checkedProductId = productService.findById(request.productId());
-        CartItem cartItem = cartItemRepository.findByMemberIdAndProductId(memberId, checkedProductId);
+    public void update(Long memberId, Long cartItemId, CartItemUpdateRequest request) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "cart item not fount -> cartItemId: " + cartItemId
+                ));
+        if (cartItem.isNotIncludedBy(memberId)) {
+            throw new IllegalArgumentException(
+                    "this cart item is not included by this member -> memberId: " + memberId
+            );
+        }
         cartItem.updateQuantity(request.quantity());
         cartItemRepository.save(cartItem);
     }
