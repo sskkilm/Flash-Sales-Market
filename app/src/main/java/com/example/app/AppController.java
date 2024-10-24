@@ -1,5 +1,7 @@
 package com.example.app;
 
+import com.example.member.application.CartItemService;
+import com.example.member.dto.CartItemCreateRequest;
 import com.example.order.application.OrderService;
 import com.example.order.dto.*;
 import com.example.product.application.ProductService;
@@ -17,6 +19,7 @@ public class AppController {
 
     private final ProductService productService;
     private final OrderService orderService;
+    private final CartItemService cartItemService;
 
     @GetMapping("/products")
     public List<ProductDto> getProductList() {
@@ -59,5 +62,13 @@ public class AppController {
             @PathVariable Long memberId
     ) {
         return orderService.getOrderHistory(memberId);
+    }
+
+    @PostMapping("/cart-items/{memberId}")
+    public void createCartItem(
+            @PathVariable Long memberId,
+            @RequestBody @Valid CartItemCreateRequest request
+    ) {
+        cartItemService.create(memberId, request);
     }
 }

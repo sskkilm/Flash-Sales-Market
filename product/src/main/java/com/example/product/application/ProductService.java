@@ -58,4 +58,12 @@ public class ProductService {
             productRepository.save(product);
         });
     }
+
+    public Long findById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "product not found -> productId: " + productId)
+                );
+        return product.getId();
+    }
 }

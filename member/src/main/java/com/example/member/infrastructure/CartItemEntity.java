@@ -1,0 +1,62 @@
+package com.example.member.infrastructure;
+
+import com.example.member.domain.CartItem;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
+
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
+public class CartItemEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long memberId;
+
+    @Column(nullable = false)
+    private Long productId;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    @CreatedDate()
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    public static CartItemEntity from(CartItem cartItem) {
+        return CartItemEntity.builder()
+                .id(cartItem.getId())
+                .memberId(cartItem.getMemberId())
+                .productId(cartItem.getProductId())
+                .quantity(cartItem.getQuantity())
+                .createdAt(cartItem.getCreatedAt())
+                .updatedAt(cartItem.getUpdatedAt())
+                .build();
+    }
+
+    public CartItem toModel() {
+        return CartItem.builder()
+                .id(this.id)
+                .memberId(this.memberId)
+                .productId(this.productId)
+                .quantity(this.quantity)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
+}
