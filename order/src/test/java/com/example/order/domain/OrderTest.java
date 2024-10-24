@@ -124,4 +124,18 @@ class OrderTest {
         //when
         order.returns(1L, holder);
     }
+
+    @Test
+    void 반품_완료() {
+        //given
+        Order order = Order.builder()
+                .status(OrderStatus.RETURN_IN_PROGRESS)
+                .build();
+
+        //when
+        order.returnCompleted();
+
+        //then
+        assertEquals(OrderStatus.RETURN_COMPLETED, order.getStatus());
+    }
 }
