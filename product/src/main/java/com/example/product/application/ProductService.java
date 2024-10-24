@@ -66,4 +66,12 @@ public class ProductService {
                 );
         return product.getId();
     }
+
+    public String findProductNameByProductId(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "product not found -> productId: " + productId)
+                );
+        return product.getName();
+    }
 }

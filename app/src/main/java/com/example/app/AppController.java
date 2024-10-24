@@ -2,6 +2,7 @@ package com.example.app;
 
 import com.example.member.application.CartItemService;
 import com.example.member.dto.CartItemCreateRequest;
+import com.example.member.dto.CartItemDto;
 import com.example.member.dto.CartItemUpdateRequest;
 import com.example.order.application.OrderService;
 import com.example.order.dto.*;
@@ -88,5 +89,12 @@ public class AppController {
             @PathVariable Long cartItemId
     ) {
         cartItemService.delete(memberId, cartItemId);
+    }
+
+    @GetMapping("/cart-items/{memberId}")
+    public List<CartItemDto> getCartItemList(
+            @PathVariable Long memberId
+    ) {
+        return cartItemService.getCartItemList(memberId);
     }
 }

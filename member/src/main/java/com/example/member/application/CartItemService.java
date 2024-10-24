@@ -2,10 +2,13 @@ package com.example.member.application;
 
 import com.example.member.domain.CartItem;
 import com.example.member.dto.CartItemCreateRequest;
+import com.example.member.dto.CartItemDto;
 import com.example.member.dto.CartItemUpdateRequest;
 import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +49,17 @@ public class CartItemService {
         }
 
         cartItemRepository.delete(cartItem);
+    }
+
+    public List<CartItemDto> getCartItemList(Long memberId) {
+        List<CartItem> cartItems = cartItemRepository.findAllByMemberId(memberId);
+
+        return cartItems.stream().map(
+                cartItem -> {
+                    String productName = productService.findProductNameByProductId(cartItem.getProductId());
+
+                    return new CartItemDto(cartItem.getId(), productName, cartItem.getQuantity());
+                }
+        ).toList();
     }
 }

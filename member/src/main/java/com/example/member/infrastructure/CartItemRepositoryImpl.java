@@ -5,6 +5,7 @@ import com.example.member.domain.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,6 +28,12 @@ public class CartItemRepositoryImpl implements CartItemRepository {
     @Override
     public void delete(CartItem cartItem) {
         cartItemJpaRepository.delete(CartItemEntity.from(cartItem));
+    }
+
+    @Override
+    public List<CartItem> findAllByMemberId(Long memberId) {
+        return cartItemJpaRepository.findAllByMemberId(memberId)
+                .stream().map(CartItemEntity::toModel).toList();
     }
 
 }
