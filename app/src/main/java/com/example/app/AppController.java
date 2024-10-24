@@ -82,4 +82,11 @@ public class AppController {
         cartItemService.update(memberId, cartItemId, request);
     }
 
+    @DeleteMapping("/cart-items/{memberId}/{cartItemId}")
+    public void delete(
+            @PathVariable Long memberId,
+            @PathVariable Long cartItemId
+    ) {
+        cartItemService.delete(memberId, cartItemId);
+    }
 }

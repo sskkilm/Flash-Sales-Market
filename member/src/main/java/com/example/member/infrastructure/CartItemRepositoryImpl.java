@@ -24,4 +24,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
                 .map(CartItemEntity::toModel);
     }
 
+    @Override
+    public void delete(CartItem cartItem) {
+        cartItemJpaRepository.delete(CartItemEntity.from(cartItem));
+    }
+
 }

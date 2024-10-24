@@ -33,4 +33,18 @@ public class CartItemService {
         cartItem.updateQuantity(request.quantity());
         cartItemRepository.save(cartItem);
     }
+
+    public void delete(Long memberId, Long cartItemId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "cart item not fount -> cartItemId: " + cartItemId
+                ));
+        if (cartItem.isNotIncludedBy(memberId)) {
+            throw new IllegalArgumentException(
+                    "this cart item is not included by this member -> memberId: " + memberId
+            );
+        }
+
+        cartItemRepository.delete(cartItem);
+    }
 }
