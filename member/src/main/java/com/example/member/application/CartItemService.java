@@ -1,9 +1,7 @@
 package com.example.member.application;
 
 import com.example.member.domain.CartItem;
-import com.example.member.dto.CartItemCreateRequest;
-import com.example.member.dto.CartItemDto;
-import com.example.member.dto.CartItemUpdateRequest;
+import com.example.member.dto.*;
 import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,13 +15,16 @@ public class CartItemService {
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
 
-    public void create(Long memberId, CartItemCreateRequest request) {
+    public CartItemCreateResponse create(Long memberId, CartItemCreateRequest request) {
         Long checkedProductId = productService.findById(request.productId());
-        CartItem cartItem = CartItem.create(memberId, checkedProductId, request.quantity());
-        cartItemRepository.save(cartItem);
+        CartItem cartItem = cartItemRepository.save(
+                CartItem.create(memberId, checkedProductId, request.quantity())
+        );
+
+        return CartItemCreateResponse.from(cartItem);
     }
 
-    public void update(Long memberId, Long cartItemId, CartItemUpdateRequest request) {
+    public CartItemUpdateResponse update(Long memberId, Long cartItemId, CartItemUpdateRequest request) {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "cart item not fount -> cartItemId: " + cartItemId
@@ -34,7 +35,9 @@ public class CartItemService {
             );
         }
         cartItem.updateQuantity(request.quantity());
-        cartItemRepository.save(cartItem);
+        CartItem updatedCartItem = cartItemRepository.save(cartItem);
+
+        return CartItemUpdateResponse.from(updatedCartItem);
     }
 
     public void delete(Long memberId, Long cartItemId) {

@@ -1,9 +1,7 @@
 package com.example.app;
 
 import com.example.member.application.CartItemService;
-import com.example.member.dto.CartItemCreateRequest;
-import com.example.member.dto.CartItemDto;
-import com.example.member.dto.CartItemUpdateRequest;
+import com.example.member.dto.*;
 import com.example.order.application.OrderService;
 import com.example.order.dto.*;
 import com.example.product.application.ProductService;
@@ -67,20 +65,20 @@ public class AppController {
     }
 
     @PostMapping("/cart-items/{memberId}")
-    public void create(
+    public CartItemCreateResponse create(
             @PathVariable Long memberId,
             @RequestBody @Valid CartItemCreateRequest request
     ) {
-        cartItemService.create(memberId, request);
+        return cartItemService.create(memberId, request);
     }
 
     @PatchMapping("/cart-items/{memberId}/{cartItemId}")
-    public void update(
+    public CartItemUpdateResponse update(
             @PathVariable Long memberId,
             @PathVariable Long cartItemId,
             @RequestBody @Valid CartItemUpdateRequest request
     ) {
-        cartItemService.update(memberId, cartItemId, request);
+        return cartItemService.update(memberId, cartItemId, request);
     }
 
     @DeleteMapping("/cart-items/{memberId}/{cartItemId}")
