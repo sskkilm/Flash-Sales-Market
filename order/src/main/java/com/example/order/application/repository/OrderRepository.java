@@ -17,4 +17,8 @@ public interface OrderRepository {
     int updateOrderStatus(
             OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end
     );
+
+    List<Order> findAllByOrderStatusBeforeToday(OrderStatus orderStatus, LocalDateTime today);
+
+    void saveAll(List<Order> orders);
 }

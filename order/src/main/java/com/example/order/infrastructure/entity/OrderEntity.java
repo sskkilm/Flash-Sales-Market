@@ -36,6 +36,7 @@ public class OrderEntity {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     public static OrderEntity from(Order order) {

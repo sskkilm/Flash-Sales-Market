@@ -37,6 +37,10 @@ public class Order {
         this.status = OrderStatus.RETURN_IN_PROGRESS;
     }
 
+    public void returnCompleted() {
+        this.status = OrderStatus.RETURN_COMPLETED;
+    }
+
     private void validateOrderBy(Long memberId) {
         if (isOrderedBy(memberId)) {
             return;

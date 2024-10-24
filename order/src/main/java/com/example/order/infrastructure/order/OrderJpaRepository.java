@@ -27,5 +27,12 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, Long> {
                           @Param("start") LocalDateTime start,
                           @Param("end") LocalDateTime end);
 
-    List<OrderEntity> findByStatus(String orderStatus);
+    @Query("select o from Order o " +
+            "where o.status = :orderStatus " +
+            "and " +
+            "o.updatedAt < :today")
+    List<OrderEntity> findAllByOrderStatusBeforeToday(
+            @Param("orderStatus") String orderStatus, @Param("today") LocalDateTime today
+    );
+
 }

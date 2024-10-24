@@ -40,4 +40,17 @@ public class OrderRepositoryImpl implements OrderRepository {
         );
     }
 
+    @Override
+    public List<Order> findAllByOrderStatusBeforeToday(OrderStatus orderStatus, LocalDateTime today) {
+        return orderJpaRepository.findAllByOrderStatusBeforeToday(orderStatus.name(), today)
+                .stream().map(OrderEntity::toModel).toList();
+    }
+
+    @Override
+    public void saveAll(List<Order> orders) {
+        orderJpaRepository.saveAll(
+                orders.stream().map(OrderEntity::from).toList()
+        );
+    }
+
 }

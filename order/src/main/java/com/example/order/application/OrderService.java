@@ -106,16 +106,37 @@ public class OrderService {
     }
 
     @Transactional
-    public int updateOrderStatus() {
+    public int updateOrderStatus(OrderStatus currentStatus, OrderStatus newStatus) {
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
 
         LocalDateTime start = yesterday.atStartOfDay();
         LocalDateTime end = today.atStartOfDay();
 
-        return orderRepository.updateOrderStatus(
-                OrderStatus.ORDER_COMPLETED,
-                OrderStatus.DELIVERY_IN_PROGRESS,
-                start, end);
+        return orderRepository.updateOrderStatus(currentStatus, newStatus, start, end);
+    }
+
+    @Transactional
+    public void returnProcessing() {
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        List<Order> orders = orderRepository.findAllByOrderStatusBeforeToday(
+                OrderStatus.RETURN_IN_PROGRESS, today
+        );
+
+        orders.forEach(order -> {
+            List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+
+            productService.stockRecovery(
+                    orderProducts.stream().map(
+                            orderProduct -> new ProductStockRecoveryRequest(
+                                    orderProduct.getProductId(), orderProduct.getQuantity()
+                            )
+                    ).toList()
+            );
+
+            order.returnCompleted();
+        });
+
+        orderRepository.saveAll(orders);
     }
 }
