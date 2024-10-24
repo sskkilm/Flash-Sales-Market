@@ -1,10 +1,7 @@
 package com.example.app;
 
 import com.example.order.application.OrderService;
-import com.example.order.dto.OrderCancelResponse;
-import com.example.order.dto.OrderCreateRequest;
-import com.example.order.dto.OrderCreateResponse;
-import com.example.order.dto.OrderHistory;
+import com.example.order.dto.*;
 import com.example.product.application.ProductService;
 import com.example.product.dto.ProductDetails;
 import com.example.product.dto.ProductDto;
@@ -50,11 +47,11 @@ public class AppController {
     }
 
     @PostMapping("/orders/{memberId}/{orderId}/return")
-    public void returns(
+    public OrderReturnResponse returns(
             @PathVariable Long memberId,
             @PathVariable Long orderId
     ) {
-        orderService.returns(memberId, orderId);
+        return orderService.returns(memberId, orderId);
     }
 
     @GetMapping("/orders/{memberId}")

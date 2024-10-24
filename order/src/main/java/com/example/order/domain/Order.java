@@ -10,7 +10,6 @@ import java.util.Objects;
 @Getter
 @Builder
 public class Order {
-    public static final int CANCELLATION_PERIOD = 1;
     public static final int RETURNABLE_PERIOD_AFTER_DELIVERY = 1;
 
     private Long id;
@@ -26,9 +25,9 @@ public class Order {
                 .build();
     }
 
-    public void cancel(Long memberId, LocalDateTimeHolder holder) {
+    public void cancel(Long memberId) {
         validateOrderBy(memberId);
-        validateCanBeCancelled(holder);
+        validateCanBeCancelled();
         this.status = OrderStatus.ORDER_CANCELED;
     }
 
@@ -36,10 +35,6 @@ public class Order {
         validateOrderBy(memberId);
         validateCanBeReturned(holder);
         this.status = OrderStatus.RETURN_IN_PROGRESS;
-    }
-
-    public boolean isNotOrderedBy(Long memberId) {
-        return !Objects.equals(this.memberId, memberId);
     }
 
     private void validateOrderBy(Long memberId) {
@@ -55,8 +50,8 @@ public class Order {
         return Objects.equals(this.memberId, memberId);
     }
 
-    private void validateCanBeCancelled(LocalDateTimeHolder holder) {
-        if (isOrderCompleted() && isBeforeCancellablePeriod(holder)) {
+    private void validateCanBeCancelled() {
+        if (isOrderCompleted()) {
             return;
         }
         throw new IllegalStateException("This order cannot be canceled");
@@ -64,10 +59,6 @@ public class Order {
 
     private boolean isOrderCompleted() {
         return this.status == OrderStatus.ORDER_COMPLETED;
-    }
-
-    private boolean isBeforeCancellablePeriod(LocalDateTimeHolder holder) {
-        return this.createdAt.plusDays(CANCELLATION_PERIOD).isAfter(holder.now());
     }
 
     private void validateCanBeReturned(LocalDateTimeHolder holder) {

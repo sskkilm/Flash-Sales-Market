@@ -8,6 +8,6 @@ public record OrderCreateResponse(
         Long orderId,
         Long memberId,
         OrderStatus status,
-        List<OrderProductDto> orderProducts
+        List<OrderProductResponse> orderProducts
 ) {
 }

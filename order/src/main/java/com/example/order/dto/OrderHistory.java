@@ -9,6 +9,6 @@ public record OrderHistory(
         Long memberId,
         OrderStatus status,
         String totalPrice,
-        List<OrderProductDto> orderProducts
+        List<OrderProductResponse> orderProducts
 ) {
 }

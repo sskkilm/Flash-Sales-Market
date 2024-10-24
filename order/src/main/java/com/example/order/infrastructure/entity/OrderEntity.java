@@ -28,9 +28,8 @@ public class OrderEntity {
     @Column(nullable = false)
     private Long memberId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status;
+    private String status;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -43,7 +42,7 @@ public class OrderEntity {
         return OrderEntity.builder()
                 .id(order.getId())
                 .memberId(order.getMemberId())
-                .status(order.getStatus())
+                .status(order.getStatus().toString())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();
@@ -53,7 +52,7 @@ public class OrderEntity {
         return Order.builder()
                 .id(this.id)
                 .memberId(this.memberId)
-                .status(this.status)
+                .status(OrderStatus.valueOf(this.status))
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();

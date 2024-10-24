@@ -32,10 +32,10 @@ public class OrderProductEntity {
     private Long productId;
 
     @Column(nullable = false)
-    private int quantity;
+    private String name;
 
     @Column(nullable = false)
-    private String name;
+    private int quantity;
 
     @Column(nullable = false)
     private BigDecimal orderAmount;
@@ -49,8 +49,8 @@ public class OrderProductEntity {
                 .id(orderProduct.getId())
                 .order(OrderEntity.from(orderProduct.getOrder()))
                 .productId(orderProduct.getProductId())
-                .quantity(orderProduct.getQuantity())
                 .name(orderProduct.getName())
+                .quantity(orderProduct.getQuantity())
                 .orderAmount(orderProduct.getOrderAmount().amount())
                 .createdAt(orderProduct.getCreatedAt())
                 .build();
@@ -61,8 +61,8 @@ public class OrderProductEntity {
                 .id(this.id)
                 .order(this.order.toModel())
                 .productId(this.productId)
-                .quantity(this.quantity)
                 .name(this.name)
+                .quantity(this.quantity)
                 .orderAmount(Money.of(this.orderAmount.toString()))
                 .createdAt(this.createdAt)
                 .build();

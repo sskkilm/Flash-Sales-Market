@@ -29,9 +29,4 @@ public class OrderProductRepositoryImpl implements OrderProductRepository {
                 .map(OrderProductEntity::toModel).toList();
     }
 
-    @Override
-    public void deleteAll(List<OrderProduct> orderProducts) {
-        orderProductJpaRepository.deleteAll(orderProducts.stream().map(OrderProductEntity::from).toList());
-    }
-
 }

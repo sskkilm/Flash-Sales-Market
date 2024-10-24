@@ -10,5 +10,4 @@ public interface OrderProductRepository {
 
     List<OrderProduct> findAllByOrder(Order order);
 
-    void deleteAll(List<OrderProduct> orderProducts);
 }

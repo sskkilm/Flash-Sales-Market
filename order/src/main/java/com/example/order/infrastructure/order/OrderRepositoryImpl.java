@@ -2,10 +2,12 @@ package com.example.order.infrastructure.order;
 
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
+import com.example.order.domain.OrderStatus;
 import com.example.order.infrastructure.entity.OrderEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +32,12 @@ public class OrderRepositoryImpl implements OrderRepository {
         return orderJpaRepository.findAllByMemberId(memberId)
                 .stream().map(OrderEntity::toModel).toList();
     }
+
+    @Override
+    public int updateOrderStatus(OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end) {
+        return orderJpaRepository.updateOrderStatus(
+                currentStatus.name(), newStatus.name(), start, end
+        );
+    }
+
 }

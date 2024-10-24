@@ -1,6 +1,5 @@
 package com.example.order.domain;
 
-import com.example.order.application.AppLocalDateTimeHolder;
 import com.example.order.application.LocalDateTimeHolder;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +35,7 @@ class OrderTest {
         //then
         assertThrows(IllegalArgumentException.class,
                 //when
-                () -> order.cancel(2L, null));
+                () -> order.cancel(2L));
     }
 
     @Test
@@ -50,24 +49,7 @@ class OrderTest {
         //then
         assertThrows(IllegalStateException.class,
                 //when
-                () -> order.cancel(1L, null));
-    }
-
-    @Test
-    void 주문_취소_시_취소_가능_기간이_지났으면_예외가_발생한다() {
-        //given
-        LocalDateTime orderDateTime = LocalDateTime.now();
-        Order order = Order.builder()
-                .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
-                .createdAt(orderDateTime)
-                .build();
-        LocalDateTimeHolder holder = () -> orderDateTime.plusDays(1).plusNanos(1);
-
-        //then
-        assertThrows(IllegalStateException.class,
-                //when
-                () -> order.cancel(1L, holder));
+                () -> order.cancel(1L));
     }
 
     @Test
@@ -79,10 +61,9 @@ class OrderTest {
                 .status(OrderStatus.ORDER_COMPLETED)
                 .createdAt(now)
                 .build();
-        LocalDateTimeHolder holder = new AppLocalDateTimeHolder();
 
         //then
-        order.cancel(1L, holder);
+        order.cancel(1L);
     }
 
     @Test

@@ -18,14 +18,14 @@ class OrderProductTest {
                 .build();
 
         //when
-        OrderProduct orderProduct = OrderProduct.create(order, 1L, 10, "name", Money.of("10000"));
+        OrderProduct orderProduct = OrderProduct.create(order, 1L, "name", 10, Money.of("10000"));
 
         //then
         assertNull(orderProduct.getId());
         assertEquals(order, orderProduct.getOrder());
         assertEquals(1L, orderProduct.getProductId());
-        assertEquals(10, orderProduct.getQuantity());
         assertEquals("name", orderProduct.getName());
+        assertEquals(10, orderProduct.getQuantity());
         assertEquals(Money.of("10000"), orderProduct.getOrderAmount());
         assertNull(orderProduct.getCreatedAt());
     }
