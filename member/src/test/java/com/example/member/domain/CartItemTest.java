@@ -20,4 +20,18 @@ class CartItemTest {
         assertEquals(1, cartItem.getQuantity());
     }
 
+    @Test
+    void 장바구니_항목_수량_변경() {
+        //given
+        CartItem cartItem = CartItem.builder()
+                .quantity(10)
+                .build();
+
+        //when
+        cartItem.updateQuantity(5);
+
+        //then
+        assertEquals(5, cartItem.getQuantity());
+    }
+
 }
