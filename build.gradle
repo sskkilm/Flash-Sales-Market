@@ -64,6 +64,7 @@ project(':app') {
 project(':member') {
 	dependencies {
 		implementation project(':common')
+		implementation project(':product')
 	}
 }
 
