@@ -1,5 +1,6 @@
 package com.example.member.domain;
 
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,5 +23,9 @@ public class CartItem {
                 .productId(productId)
                 .quantity(quantity)
                 .build();
+    }
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

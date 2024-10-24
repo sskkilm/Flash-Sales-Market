@@ -15,4 +15,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
     public CartItem save(CartItem cartItem) {
         return cartItemJpaRepository.save(CartItemEntity.from(cartItem)).toModel();
     }
+
+    @Override
+    public CartItem findByMemberIdAndProductId(Long memberId, Long productId) {
+        return cartItemJpaRepository.findByMemberIdAndProductId(memberId, productId).toModel();
+    }
 }
