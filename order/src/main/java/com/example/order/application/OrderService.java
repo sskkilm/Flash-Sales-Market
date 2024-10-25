@@ -3,7 +3,6 @@ package com.example.order.application;
 import com.example.common.dto.ProductPurchaseRequest;
 import com.example.common.dto.ProductPurchaseResponse;
 import com.example.common.dto.ProductStockRecoveryRequest;
-import com.example.member.application.MemberService;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
@@ -26,16 +25,13 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final MemberService memberService;
     private final ProductService productService;
     private final LocalDateTimeHolder holder;
     private final OrderProductManager manager;
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
-        Long checkedMemberId = memberService.findById(memberId);
-
-        Order order = orderRepository.save(Order.create(checkedMemberId));
+        Order order = orderRepository.save(Order.create(memberId));
 
         List<ProductPurchaseResponse> productPurchaseResponses = productService.purchaseProducts(
                 orderCreateRequest.orderProducts().stream()
@@ -61,12 +57,11 @@ public class OrderService {
 
     @Transactional
     public OrderCancelResponse cancel(Long memberId, Long orderId) {
-        Long checkedMemberId = memberService.findById(memberId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "order not found -> orderId: " + orderId
                 ));
-        order.cancel(checkedMemberId);
+        order.cancel(memberId);
         orderRepository.save(order);
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
@@ -80,12 +75,11 @@ public class OrderService {
     }
 
     public OrderReturnResponse returns(Long memberId, Long orderId) {
-        Long checkedMemberId = memberService.findById(memberId);
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "order not found -> orderId: " + orderId
                 ));
-        order.returns(checkedMemberId, holder);
+        order.returns(memberId, holder);
         orderRepository.save(order);
 
         return new OrderReturnResponse(order.getId(), order.getMemberId(), order.getStatus());

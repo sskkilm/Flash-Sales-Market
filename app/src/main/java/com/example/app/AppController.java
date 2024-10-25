@@ -95,4 +95,12 @@ public class AppController {
     ) {
         return cartItemService.getCartItemList(memberId);
     }
+
+    @PostMapping("/cart-items/{memberId}/orders")
+    public OrderCreateResponse order(
+            @PathVariable Long memberId
+    ) {
+        return cartItemService.order(memberId);
+    }
+
 }
