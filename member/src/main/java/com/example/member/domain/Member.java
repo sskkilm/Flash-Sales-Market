@@ -11,8 +11,6 @@ public class Member {
     private Long id;
     private String email;
     private String name;
-    private String phoneNumber;
-    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

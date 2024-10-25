@@ -95,7 +95,7 @@ public class OrderService {
 
             List<OrderProductResponse> orderProductResponses = orderProducts.stream().map(OrderProductResponse::from).toList();
 
-            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus(), totalPrice.toString(), orderProductResponses);
+            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus(), totalPrice, orderProductResponses);
         }).toList();
     }
 

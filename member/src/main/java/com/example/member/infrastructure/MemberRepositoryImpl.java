@@ -18,4 +18,9 @@ public class MemberRepositoryImpl implements MemberRepository {
         return memberJpaRepository.findById(id)
                 .map(MemberEntity::toModel);
     }
+
+    @Override
+    public Member save(Member member) {
+        return memberJpaRepository.save(MemberEntity.from(member)).toModel();
+    }
 }
