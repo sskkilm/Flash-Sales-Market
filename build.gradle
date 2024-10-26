@@ -18,29 +18,31 @@ subprojects {
 		}
 	}
 
+	repositories {
+		mavenCentral()
+	}
+
+	ext {
+		set('springCloudVersion', "2023.0.3")
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		}
+	}
+
 	configurations {
 		compileOnly {
 			extendsFrom annotationProcessor
 		}
 	}
 
-	repositories {
-		mavenCentral()
-	}
-
 	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-		implementation 'org.springframework.boot:spring-boot-starter-validation'
-		compileOnly 'org.projectlombok:lombok'
-		runtimeOnly 'com.mysql:mysql-connector-j'
-		annotationProcessor 'org.projectlombok:lombok'
+		implementation 'org.springframework.boot:spring-boot-starter'
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
-		testRuntimeOnly 'com.h2database:h2'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	}
-
-	bootJar { enabled = false }
-	jar { enabled = true }
 
 	tasks.register("prepareKotlinBuildScriptModel"){}
 
@@ -50,22 +52,15 @@ subprojects {
 
 }
 
-project(':app') {
-	bootJar { enabled = true }
+project(':member') {
 	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-web'
-		implementation project(':member')
-		implementation project(':product')
-		implementation project(':order')
 		implementation project(':common')
 	}
 }
 
-project(':member') {
+project(':order') {
 	dependencies {
 		implementation project(':common')
-		implementation project(':product')
-		implementation project(':order')
 	}
 }
 
@@ -75,9 +70,8 @@ project(':product') {
 	}
 }
 
-project(':order') {
+project(':service-discovery') {
 	dependencies {
-		implementation project(':common')
-		implementation project(':product')
+		implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
 	}
 }
