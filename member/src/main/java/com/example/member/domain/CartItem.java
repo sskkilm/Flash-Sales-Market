@@ -1,6 +1,5 @@
 package com.example.member.domain;
 
-import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
 

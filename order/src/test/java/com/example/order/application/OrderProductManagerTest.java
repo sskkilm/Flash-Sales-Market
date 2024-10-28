@@ -1,6 +1,6 @@
 package com.example.order.application;
 
-import com.example.common.domain.Money;
+import com.example.order.domain.Money;
 import com.example.order.domain.OrderProduct;
 import org.junit.jupiter.api.Test;
 

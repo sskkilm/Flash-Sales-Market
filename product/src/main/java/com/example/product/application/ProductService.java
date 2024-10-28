@@ -1,13 +1,9 @@
 package com.example.product.application;
 
-import com.example.common.domain.Money;
-import com.example.common.dto.ProductPurchaseRequest;
-import com.example.common.dto.ProductPurchaseResponse;
-import com.example.common.dto.ProductStockRecoveryRequest;
 import com.example.product.domain.AmountCalculator;
+import com.example.product.domain.Money;
 import com.example.product.domain.Product;
-import com.example.product.dto.ProductDetails;
-import com.example.product.dto.ProductDto;
+import com.example.product.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +29,8 @@ public class ProductService {
         return ProductDetails.from(product);
     }
 
-    public List<ProductPurchaseResponse> purchaseProducts(List<ProductPurchaseRequest> productPurchaseRequests) {
-        return productPurchaseRequests.stream().map(request -> {
+    public List<ProductPurchaseFeignResponse> purchase(List<ProductPurchaseFeignRequest> productPurchaseFeignRequests) {
+        return productPurchaseFeignRequests.stream().map(request -> {
             Product product = productRepository.findById(request.productId())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "product not found -> productId: " + request.productId())
@@ -44,11 +40,11 @@ public class ProductService {
 
             Money calculatedAmount = calculator.calculateAmount(product, request.quantity());
 
-            return new ProductPurchaseResponse(product.getId(), product.getName(), request.quantity(), calculatedAmount);
+            return new ProductPurchaseFeignResponse(product.getId(), product.getName(), request.quantity(), calculatedAmount.amount());
         }).toList();
     }
 
-    public void stockRecovery(List<ProductStockRecoveryRequest> list) {
+    public void restockStock(List<ProductRestoreStockFeignRequest> list) {
         list.forEach(request -> {
             Product product = productRepository.findById(request.productId())
                     .orElseThrow(() -> new IllegalArgumentException(
@@ -59,19 +55,12 @@ public class ProductService {
         });
     }
 
-    public Long findById(Long productId) {
+    public ProductFeignResponse findById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "product not found -> productId: " + productId)
                 );
-        return product.getId();
+        return new ProductFeignResponse(product.getId(), product.getName(), product.getPrice().amount());
     }
 
-    public String findProductNameByProductId(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "product not found -> productId: " + productId)
-                );
-        return product.getName();
-    }
 }

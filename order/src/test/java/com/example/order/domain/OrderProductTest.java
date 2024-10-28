@@ -1,6 +1,5 @@
 package com.example.order.domain;
 
-import com.example.common.domain.Money;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

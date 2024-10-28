@@ -1,6 +1,5 @@
 package com.example.product.domain;
 
-import com.example.common.domain.Money;
 import org.springframework.stereotype.Component;
 
 @Component

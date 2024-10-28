@@ -13,4 +13,6 @@ public interface CartItemRepository {
     void delete(CartItem cartItem);
 
     List<CartItem> findAllByMemberId(Long memberId);
+
+    void deleteAll(List<CartItem> cartItems);
 }

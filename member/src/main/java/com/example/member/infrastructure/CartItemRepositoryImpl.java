@@ -36,4 +36,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
                 .stream().map(CartItemEntity::toModel).toList();
     }
 
+    @Override
+    public void deleteAll(List<CartItem> cartItems) {
+        cartItemJpaRepository.deleteAll(cartItems.stream().map(CartItemEntity::from).toList());
+    }
+
 }

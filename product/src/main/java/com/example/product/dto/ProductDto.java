@@ -2,17 +2,19 @@ package com.example.product.dto;
 
 import com.example.product.domain.Product;
 
+import java.math.BigDecimal;
+
 public record ProductDto(
         Long productId,
         String name,
-        String price
+        BigDecimal price
 ) {
 
     public static ProductDto from(Product product) {
         return new ProductDto(
                 product.getId(),
                 product.getName(),
-                product.getPrice().amount().toString()
+                product.getPrice().amount()
         );
     }
 }

@@ -1,6 +1,5 @@
 package com.example.product.domain;
 
-import com.example.common.domain.Money;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
 package com.example.order.infrastructure.entity;
 
-import com.example.common.domain.Money;
+import com.example.order.domain.Money;
 import com.example.order.domain.OrderProduct;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

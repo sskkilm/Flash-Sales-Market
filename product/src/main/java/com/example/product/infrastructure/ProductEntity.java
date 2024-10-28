@@ -1,6 +1,6 @@
 package com.example.product.infrastructure;
 
-import com.example.common.domain.Money;
+import com.example.product.domain.Money;
 import com.example.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.*;

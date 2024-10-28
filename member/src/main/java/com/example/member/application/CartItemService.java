@@ -1,12 +1,9 @@
 package com.example.member.application;
 
+import com.example.member.application.feign.OrderFeignClient;
+import com.example.member.application.feign.ProductFeignClient;
 import com.example.member.domain.CartItem;
 import com.example.member.dto.*;
-import com.example.order.application.OrderService;
-import com.example.order.dto.OrderCreateRequest;
-import com.example.order.dto.OrderCreateResponse;
-import com.example.order.dto.OrderProductRequest;
-import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +14,13 @@ import java.util.List;
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
-    private final ProductService productService;
-    private final OrderService orderService;
+    private final ProductFeignClient productFeignClient;
+    private final OrderFeignClient orderFeignClient;
 
     public CartItemCreateResponse create(Long memberId, CartItemCreateRequest request) {
-        Long checkedProductId = productService.findById(request.productId());
+        ProductDto productDto = productFeignClient.findById(request.productId());
         CartItem cartItem = cartItemRepository.save(
-                CartItem.create(memberId, checkedProductId, request.quantity())
+                CartItem.create(memberId, productDto.productId(), request.quantity())
         );
 
         return CartItemCreateResponse.from(cartItem);
@@ -64,21 +61,26 @@ public class CartItemService {
 
         return cartItems.stream().map(
                 cartItem -> {
-                    String productName = productService.findProductNameByProductId(cartItem.getProductId());
+                    ProductDto productDto = productFeignClient.findById(cartItem.getProductId());
 
-                    return new CartItemDto(cartItem.getId(), productName, cartItem.getQuantity());
+                    return new CartItemDto(cartItem.getId(), productDto.name(), cartItem.getQuantity());
                 }
         ).toList();
     }
 
-    public OrderCreateResponse order(Long memberId) {
+    public CartOrderResponse order(Long memberId) {
         List<CartItem> cartItems = cartItemRepository.findAllByMemberId(memberId);
-        List<OrderProductRequest> orderProductRequests = cartItems.stream().map(cartItem ->
-                new OrderProductRequest(cartItem.getProductId(), cartItem.getQuantity())
+
+        List<CartItemOrderRequest> cartItemOrderRequests = cartItems.stream().map(cartItem ->
+                new CartItemOrderRequest(cartItem.getProductId(), cartItem.getQuantity())
         ).toList();
-        OrderCreateResponse orderCreateResponse = orderService.create(
-                memberId, new OrderCreateRequest(orderProductRequests)
+
+        CartOrderResponse cartOrderResponse = orderFeignClient.create(
+                memberId, new CartOrderRequest(cartItemOrderRequests)
         );
-        return orderCreateResponse;
+
+        cartItemRepository.deleteAll(cartItems);
+
+        return cartOrderResponse;
     }
 }

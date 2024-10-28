@@ -1,15 +1,13 @@
 package com.example.order.application;
 
-import com.example.common.dto.ProductPurchaseRequest;
-import com.example.common.dto.ProductPurchaseResponse;
-import com.example.common.dto.ProductStockRecoveryRequest;
+import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
+import com.example.order.domain.Money;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
-import com.example.product.application.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +23,15 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final ProductService productService;
     private final LocalDateTimeHolder holder;
     private final OrderProductManager manager;
+    private final ProductFeignClient productFeignClient;
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
         Order order = orderRepository.save(Order.create(memberId));
 
-        List<ProductPurchaseResponse> productPurchaseResponses = productService.purchaseProducts(
+        List<ProductPurchaseResponse> productPurchaseResponses = productFeignClient.purchase(
                 orderCreateRequest.orderProducts().stream()
                         .map(request -> new ProductPurchaseRequest(
                                 request.productId(), request.quantity())
@@ -47,12 +45,12 @@ public class OrderService {
                                 response.productId(),
                                 response.productName(),
                                 response.quantity(),
-                                response.purchaseAmount()
+                                Money.of(response.purchaseAmount())
                         )).toList()
         );
 
         List<OrderProductResponse> orderProductResponses = orderProducts.stream().map(OrderProductResponse::from).toList();
-        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus(), orderProductResponses);
+        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), orderProductResponses);
     }
 
     @Transactional
@@ -65,13 +63,13 @@ public class OrderService {
         orderRepository.save(order);
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        productService.stockRecovery(orderProducts.stream().map(
-                orderProduct -> new ProductStockRecoveryRequest(
+        productFeignClient.restoreStock(orderProducts.stream().map(
+                orderProduct -> new ProductRestoreStockRequest(
                         orderProduct.getProductId(), orderProduct.getQuantity()
                 )
         ).toList());
 
-        return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus());
+        return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus().name());
     }
 
     public OrderReturnResponse returns(Long memberId, Long orderId) {
@@ -82,7 +80,7 @@ public class OrderService {
         order.returns(memberId, holder);
         orderRepository.save(order);
 
-        return new OrderReturnResponse(order.getId(), order.getMemberId(), order.getStatus());
+        return new OrderReturnResponse(order.getId(), order.getMemberId(), order.getStatus().name());
     }
 
     public List<OrderHistory> getOrderHistory(Long memberId) {
@@ -95,7 +93,7 @@ public class OrderService {
 
             List<OrderProductResponse> orderProductResponses = orderProducts.stream().map(OrderProductResponse::from).toList();
 
-            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus(), totalPrice, orderProductResponses);
+            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderProductResponses);
         }).toList();
     }
 
@@ -120,9 +118,9 @@ public class OrderService {
         orders.forEach(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            productService.stockRecovery(
+            productFeignClient.restoreStock(
                     orderProducts.stream().map(
-                            orderProduct -> new ProductStockRecoveryRequest(
+                            orderProduct -> new ProductRestoreStockRequest(
                                     orderProduct.getProductId(), orderProduct.getQuantity()
                             )
                     ).toList()
