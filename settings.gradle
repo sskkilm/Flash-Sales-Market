@@ -1,6 +1,6 @@
 rootProject.name = 'drop-sale-platform'
-include 'app'
 include 'member'
 include 'product'
 include 'order'
-include 'common'
+include 'service-discovery'
+include 'api-gateway'

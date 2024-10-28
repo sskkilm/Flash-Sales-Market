@@ -51,27 +51,3 @@ subprojects {
 	}
 
 }
-
-project(':member') {
-	dependencies {
-		implementation project(':common')
-	}
-}
-
-project(':order') {
-	dependencies {
-		implementation project(':common')
-	}
-}
-
-project(':product') {
-	dependencies {
-		implementation project(':common')
-	}
-}
-
-project(':service-discovery') {
-	dependencies {
-		implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
-	}
-}
