@@ -1,4 +1,10 @@
+server:
+  port: 8084
+
 spring:
+  application:
+    name: order-service
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/drop-sale-platform
@@ -7,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -15,3 +21,10 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8081/eureka/
