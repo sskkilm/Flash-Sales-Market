@@ -9,6 +9,7 @@ import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,5 +131,17 @@ public class OrderService {
         });
 
         orderRepository.saveAll(orders);
+    }
+
+    public ResponseEntity<String> case1() {
+        return productFeignClient.case1();
+    }
+
+    public ResponseEntity<String> case2() {
+        return productFeignClient.case2();
+    }
+
+    public ResponseEntity<String> case3() {
+        return productFeignClient.case3();
     }
 }
