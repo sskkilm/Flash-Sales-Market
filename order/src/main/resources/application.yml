@@ -28,3 +28,13 @@ eureka:
     fetch-registry: true
     serviceUrl:
       defaultZone: http://localhost:8081/eureka/
+
+resilience4j:
+  retry:
+    instances:
+      case1Retry:
+        base-config: case1
+    configs:
+      case1:
+        max-attempts: 3
+        wait-duration: 500ms
