@@ -1,10 +1,9 @@
 package com.example.product.domain;
 
-import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
 
-@Component
 public class AmountCalculator {
-    public Money calculateAmount(Product product, int quantity) {
-        return product.getPrice().multiply(quantity);
+    public BigDecimal calculateAmount(Product product, int quantity) {
+        return product.getPrice().multiply(new BigDecimal(String.valueOf(quantity)));
     }
 }

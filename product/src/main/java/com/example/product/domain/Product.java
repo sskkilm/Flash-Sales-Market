@@ -1,8 +1,10 @@
 package com.example.product.domain;
 
+import com.example.product.exception.InsufficientStockException;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,14 +12,16 @@ import java.time.LocalDateTime;
 public class Product {
     private Long id;
     private String name;
-    private Money price;
+    private BigDecimal price;
     private int stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public void decreaseStock(int quantity) {
         if (stockQuantity < quantity) {
-            throw new IllegalArgumentException("product is out of stock");
+            throw new InsufficientStockException(
+                    "상품 재고가 부족합니다. 남은 재고 수량: " + stockQuantity
+            );
         }
 
         this.stockQuantity -= quantity;

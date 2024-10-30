@@ -4,17 +4,17 @@ import com.example.product.domain.Product;
 
 import java.math.BigDecimal;
 
-public record ProductDto(
+public record ProductResponse(
         Long productId,
         String name,
         BigDecimal price
 ) {
 
-    public static ProductDto from(Product product) {
-        return new ProductDto(
+    public static ProductResponse from(Product product) {
+        return new ProductResponse(
                 product.getId(),
                 product.getName(),
-                product.getPrice().amount()
+                product.getPrice()
         );
     }
 }

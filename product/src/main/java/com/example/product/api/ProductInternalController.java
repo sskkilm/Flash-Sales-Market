@@ -25,9 +25,9 @@ public class ProductInternalController {
     }
 
     @PostMapping("/restore-stock")
-    public void restockStock(
+    public void restoreStock(
             @Valid @RequestBody List<ProductRestoreStockFeignRequest> productRestoreStockFeignRequests) {
-        productService.restockStock(productRestoreStockFeignRequests);
+        productService.restoreStock(productRestoreStockFeignRequests);
     }
 
     @GetMapping("/{productId}")

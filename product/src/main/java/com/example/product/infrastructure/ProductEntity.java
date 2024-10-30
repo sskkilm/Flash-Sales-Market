@@ -1,6 +1,5 @@
 package com.example.product.infrastructure;
 
-import com.example.product.domain.Money;
 import com.example.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,7 +42,7 @@ public class ProductEntity {
         return Product.builder()
                 .id(this.id)
                 .name(this.name)
-                .price(Money.of(this.price.toString()))
+                .price(this.price)
                 .stockQuantity(this.stockQuantity)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
@@ -54,7 +53,7 @@ public class ProductEntity {
         return ProductEntity.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .price(product.getPrice().amount())
+                .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

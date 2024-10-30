@@ -1,11 +1,12 @@
 package com.example.product;
 
 import com.example.product.application.ProductRepository;
-import com.example.product.domain.Money;
 import com.example.product.domain.Product;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 @RequiredArgsConstructor
@@ -17,12 +18,12 @@ public class TestProductDataInit {
     public void init() {
         Product product1 = Product.builder()
                 .name("product1")
-                .price(Money.of("10000"))
+                .price(new BigDecimal("10000"))
                 .stockQuantity(10)
                 .build();
         Product product2 = Product.builder()
                 .name("product2")
-                .price(Money.of("20000"))
+                .price(new BigDecimal("20000"))
                 .stockQuantity(20)
                 .build();
 
