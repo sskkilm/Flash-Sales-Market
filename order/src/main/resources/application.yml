@@ -32,9 +32,35 @@ eureka:
 resilience4j:
   retry:
     instances:
-      case1Retry:
-        base-config: case1
+      default:
+        base-config: default
     configs:
-      case1:
+      default:
         max-attempts: 3
-        wait-duration: 500ms
+        wait-duration:
+          seconds: 500
+
+  circuitbreaker:
+    instances:
+      default:
+        base-config: default
+    configs:
+      default:
+        # sliding window
+        sliding-window-type: count_based
+        sliding-window-size: 5
+
+        #failure call
+        failure-rate-threshold: 60
+
+        # slow call
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold:
+          seconds: 3
+
+        minimum-number-of-calls: 5
+
+        permitted-number-of-calls-in-half-open-state: 3
+        max-wait-duration-in-half-open-state: 0
+        wait-duration-in-open-state:
+          seconds: 10
