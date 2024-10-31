@@ -115,15 +115,20 @@ class OrderServiceTest {
     @Test
     void 주문을_취소한다() {
         //given
+        LocalDateTime orderedDateTime = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
                 .status(OrderStatus.ORDER_COMPLETED)
-                .createdAt(LocalDateTime.now())
+                .createdAt(orderedDateTime)
                 .build();
         given(orderRepository.findById(1L))
                 .willReturn(Optional.of(order));
-        given(holder.now()).willReturn(LocalDateTime.now());
+
+        LocalDateTime canceledDateTime = orderedDateTime.plusHours(1);
+        given(holder.now()).willReturn(canceledDateTime);
 
         given(orderProductRepository.findAllByOrder(order))
                 .willReturn(
@@ -159,16 +164,21 @@ class OrderServiceTest {
     @Test
     void 반품한다() {
         //given
+        LocalDateTime deliveryCompletedDateTime = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         given(orderRepository.findById(1L))
                 .willReturn(Optional.of(
                         Order.builder()
                                 .id(1L)
                                 .memberId(1L)
                                 .status(OrderStatus.DELIVERY_COMPLETED)
-                                .updatedAt(LocalDateTime.now())
+                                .updatedAt(deliveryCompletedDateTime)
                                 .build())
                 );
-        given(holder.now()).willReturn(LocalDateTime.now());
+
+        LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusHours(1);
+        given(holder.now()).willReturn(returnedDateTime);
 
         //when
         OrderReturnResponse orderReturnResponse = orderService.returns(1L, 1L);
@@ -238,7 +248,7 @@ class OrderServiceTest {
     @Test
     void 하루_전_주문_상태를_변경한다() {
         //given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.of(2024, 10, 31);
         given(localDateHolder.now())
                 .willReturn(today);
 
@@ -261,7 +271,7 @@ class OrderServiceTest {
     @Test
     void 반품_처리를_진행한다() {
         //given
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.of(2024, 10, 31);
         given(localDateHolder.now())
                 .willReturn(now);
 

@@ -57,7 +57,9 @@ class OrderTest {
     @Test
     void 주문_취소_시_취소_가능_기간이_지났으면_예외가_발생한다() {
         //given
-        LocalDateTime orderCompleteDatetime = LocalDateTime.now();
+        LocalDateTime orderCompleteDatetime = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         Order order = Order.builder()
                 .memberId(1L)
                 .status(OrderStatus.ORDER_COMPLETED)
@@ -74,7 +76,9 @@ class OrderTest {
     @Test
     void 주문을_취소한다() {
         //given
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         Order order = Order.builder()
                 .memberId(1L)
                 .status(OrderStatus.ORDER_COMPLETED)
@@ -119,7 +123,9 @@ class OrderTest {
     @Test
     void 반품_시_반품_가능_기간이_지났으면_예외가_발생한다() {
         //given
-        LocalDateTime deliveryCompletedDateTime = LocalDateTime.now();
+        LocalDateTime deliveryCompletedDateTime = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         Order order = Order.builder()
                 .memberId(1L)
                 .status(OrderStatus.DELIVERY_COMPLETED)
@@ -136,7 +142,9 @@ class OrderTest {
     @Test
     void 반품한다() {
         //given
-        LocalDateTime deliveryCompletedDateTime = LocalDateTime.now();
+        LocalDateTime deliveryCompletedDateTime = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
         Order order = Order.builder()
                 .memberId(1L)
                 .status(OrderStatus.DELIVERY_COMPLETED)
