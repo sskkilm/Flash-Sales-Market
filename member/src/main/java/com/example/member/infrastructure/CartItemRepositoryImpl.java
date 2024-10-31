@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,9 +19,12 @@ public class CartItemRepositoryImpl implements CartItemRepository {
     }
 
     @Override
-    public Optional<CartItem> findById(Long cartItemId) {
+    public CartItem findById(Long cartItemId) {
         return cartItemJpaRepository.findById(cartItemId)
-                .map(CartItemEntity::toModel);
+                .map(CartItemEntity::toModel)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "cart item not fount -> cartItemId: " + cartItemId)
+                );
     }
 
     @Override

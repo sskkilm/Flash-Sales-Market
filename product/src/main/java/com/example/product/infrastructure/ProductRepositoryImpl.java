@@ -2,11 +2,11 @@ package com.example.product.infrastructure;
 
 import com.example.product.application.ProductRepository;
 import com.example.product.domain.Product;
+import com.example.product.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,9 +21,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> findById(Long id) {
-        return productJpaRepository.findById(id)
-                .map(ProductEntity::toModel);
+    public Product findById(Long id) {
+        return productJpaRepository.findById(id).map(ProductEntity::toModel)
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override

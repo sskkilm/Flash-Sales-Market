@@ -3,6 +3,7 @@ package com.example.order.infrastructure;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderStatus;
+import com.example.order.exception.OrderNotFoundException;
 import com.example.order.infrastructure.entity.OrderEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,8 +24,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public Optional<Order> findById(Long id) {
-        return orderJpaRepository.findById(id).map(OrderEntity::toModel);
+    public Order findById(Long id) {
+        return orderJpaRepository.findById(id).map(OrderEntity::toModel)
+                .orElseThrow(() -> new OrderNotFoundException(id));
     }
 
     @Override

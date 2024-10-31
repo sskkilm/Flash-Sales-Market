@@ -8,7 +8,6 @@ import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderProductManager;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
-import com.example.order.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,8 +52,7 @@ public class OrderService {
 
     @Transactional
     public OrderCancelResponse cancel(Long memberId, Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findById(orderId);
 
         order.cancel(memberId, localDateTimeHolder.now());
         orderRepository.save(order);
@@ -71,8 +69,7 @@ public class OrderService {
     }
 
     public OrderReturnResponse returns(Long memberId, Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findById(orderId);
 
         order.returns(memberId, localDateTimeHolder.now());
         orderRepository.save(order);

@@ -27,10 +27,7 @@ public class CartItemService {
     }
 
     public CartItemUpdateResponse update(Long memberId, Long cartItemId, CartItemUpdateRequest request) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "cart item not fount -> cartItemId: " + cartItemId
-                ));
+        CartItem cartItem = cartItemRepository.findById(cartItemId);
         if (cartItem.isNotIncludedBy(memberId)) {
             throw new IllegalArgumentException(
                     "this cart item is not included by this member -> memberId: " + memberId
@@ -43,10 +40,7 @@ public class CartItemService {
     }
 
     public void delete(Long memberId, Long cartItemId) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "cart item not fount -> cartItemId: " + cartItemId
-                ));
+        CartItem cartItem = cartItemRepository.findById(cartItemId);
         if (cartItem.isNotIncludedBy(memberId)) {
             throw new IllegalArgumentException(
                     "this cart item is not included by this member -> memberId: " + memberId

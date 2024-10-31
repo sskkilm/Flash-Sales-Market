@@ -3,7 +3,6 @@ package com.example.product.application;
 import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
-import com.example.product.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +22,14 @@ public class ProductService {
     }
 
     public ProductDetails getProductDetails(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
+        Product product = productRepository.findById(id);
 
         return ProductDetails.from(product);
     }
 
     public ProductPurchaseResponse purchase(ProductPurchaseRequest productPurchaseRequest) {
         List<PurchasedProductInfo> purchasedProductInfos = productPurchaseRequest.productInfos().stream().map(request -> {
-            Product product = productRepository.findById(request.productId())
-                    .orElseThrow(() -> new ProductNotFoundException(request.productId()));
+            Product product = productRepository.findById(request.productId());
 
             product.decreaseStock(request.quantity());
 
@@ -49,8 +46,7 @@ public class ProductService {
     public void restoreStock(ProductRestoreStockRequest productRestoreStockRequest) {
         List<ProductRestoreStockInfo> productRestoreStockInfos = productRestoreStockRequest.productRestoreStockInfos();
         productRestoreStockInfos.forEach(request -> {
-            Product product = productRepository.findById(request.productId())
-                    .orElseThrow(() -> new ProductNotFoundException(request.productId()));
+            Product product = productRepository.findById(request.productId());
 
             product.increaseStock(request.quantity());
 
@@ -59,8 +55,7 @@ public class ProductService {
     }
 
     public ProductDto findById(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException(productId));
+        Product product = productRepository.findById(productId);
 
         return ProductDto.from(product);
     }

@@ -8,8 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
@@ -27,7 +25,7 @@ class CartItemServiceTest {
         //given
         CartItemUpdateRequest request = new CartItemUpdateRequest(1);
         given(cartItemRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new IllegalArgumentException());
         //then
         assertThrows(IllegalArgumentException.class,
                 // when
@@ -39,12 +37,12 @@ class CartItemServiceTest {
         //given
         CartItemUpdateRequest request = new CartItemUpdateRequest(1);
         given(cartItemRepository.findById(1L))
-                .willReturn(Optional.of(
+                .willReturn(
                         CartItem.builder()
                                 .id(1L)
                                 .memberId(2L)
                                 .build()
-                ));
+                );
         //then
         assertThrows(IllegalArgumentException.class,
                 // when
@@ -55,7 +53,7 @@ class CartItemServiceTest {
     void 장바구니_항목_삭제_시_존재하지_않는_장바구니_항목이면_예외가_발생한다() {
         //given
         given(cartItemRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new IllegalArgumentException());
         //then
         assertThrows(IllegalArgumentException.class,
                 // when
@@ -66,12 +64,12 @@ class CartItemServiceTest {
     void 장바구니_항목_삭제_시_회원_정보가_다르면_예외가_발생한다() {
         //given
         given(cartItemRepository.findById(1L))
-                .willReturn(Optional.of(
+                .willReturn(
                         CartItem.builder()
                                 .id(1L)
                                 .memberId(2L)
                                 .build()
-                ));
+                );
         //then
         assertThrows(IllegalArgumentException.class,
                 // when

@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,7 +76,7 @@ class ProductServiceTest {
     void 존재하지_않는_상품의_상세_정보를_조회하면_예외가_발생한다() {
         //given
         given(productRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new ProductNotFoundException(1L));
 
         //then
         assertThrows(ProductNotFoundException.class,
@@ -95,7 +94,7 @@ class ProductServiceTest {
                 .stockQuantity(100)
                 .build();
         given(productRepository.findById(1L))
-                .willReturn(Optional.of(product));
+                .willReturn(product);
 
         //when
         ProductDetails productDetails = productService.getProductDetails(1L);
@@ -116,7 +115,7 @@ class ProductServiceTest {
         ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productInfos);
 
         given(productRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new ProductNotFoundException(1L));
 
         //then
         assertThrows(ProductNotFoundException.class,
@@ -146,9 +145,9 @@ class ProductServiceTest {
                 .name("name2")
                 .build();
         given(productRepository.findById(1L))
-                .willReturn(Optional.of(product1));
+                .willReturn(product1);
         given(productRepository.findById(2L))
-                .willReturn(Optional.of(product2));
+                .willReturn(product2);
 
         //when
         ProductPurchaseResponse response = productService.purchase(productPurchaseRequest);
@@ -183,7 +182,7 @@ class ProductServiceTest {
         ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(productRestoreStockInfos);
 
         given(productRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new ProductNotFoundException(1L));
 
         //then
         assertThrows(ProductNotFoundException.class,
@@ -214,9 +213,9 @@ class ProductServiceTest {
                 .build();
 
         given(productRepository.findById(1L))
-                .willReturn(Optional.of(product1));
+                .willReturn(product1);
         given(productRepository.findById(2L))
-                .willReturn(Optional.of(product2));
+                .willReturn(product2);
 
         //when
         productService.restoreStock(productRestoreStockRequest);
@@ -230,7 +229,7 @@ class ProductServiceTest {
     void 존재하지_않는_특정_상품을_조회하면_예외가_발생한다() {
         //given
         given(productRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new ProductNotFoundException(1L));
 
         //then
         assertThrows(ProductNotFoundException.class,
@@ -250,7 +249,7 @@ class ProductServiceTest {
                 .build();
 
         given(productRepository.findById(1L))
-                .willReturn(Optional.of(product1));
+                .willReturn(product1);
 
         //when
         ProductDto productDto = productService.findById(1L);

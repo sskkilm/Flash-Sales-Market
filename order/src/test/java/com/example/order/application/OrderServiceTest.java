@@ -98,7 +98,7 @@ class OrderServiceTest {
     void 주문_취소시_존재하지_않는_주문이면_예외가_발생한다() {
         //given
         given(orderRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new OrderNotFoundException(1L));
 
         //then
         assertThrows(OrderNotFoundException.class,
@@ -118,8 +118,7 @@ class OrderServiceTest {
                 .status(OrderStatus.ORDER_COMPLETED)
                 .createdAt(orderedDateTime)
                 .build();
-        given(orderRepository.findById(1L))
-                .willReturn(Optional.of(order));
+        given(orderRepository.findById(1L)).willReturn(order);
 
         LocalDateTime canceledDateTime = orderedDateTime.plusHours(1);
         given(localDateTimeHolder.now()).willReturn(canceledDateTime);
@@ -147,7 +146,7 @@ class OrderServiceTest {
     void 반품_시_존재하지_않는_주문이면_예외가_발생한다() {
         //given
         given(orderRepository.findById(1L))
-                .willReturn(Optional.empty());
+                .willThrow(new OrderNotFoundException(1L));
 
         //then
         assertThrows(OrderNotFoundException.class,
@@ -162,13 +161,13 @@ class OrderServiceTest {
                 2024, 10, 31, 12, 0, 0
         );
         given(orderRepository.findById(1L))
-                .willReturn(Optional.of(
+                .willReturn(
                         Order.builder()
                                 .id(1L)
                                 .memberId(1L)
                                 .status(OrderStatus.DELIVERY_COMPLETED)
                                 .updatedAt(deliveryCompletedDateTime)
-                                .build())
+                                .build()
                 );
 
         LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusHours(1);

@@ -88,7 +88,7 @@ class OrderJpaRepositoryTest {
         LocalDateTime start = updated.toLocalDate().atStartOfDay();
         LocalDateTime end = tomorrow.toLocalDate().atStartOfDay();
 
-        orderJpaRepository.saveAll(List.of(order1, order2, order3));
+        orderJpaRepository.saveAllAndFlush(List.of(order1, order2, order3));
 
         //when
         List<OrderEntity> orderEntities = orderJpaRepository.findAllByOrderStatusBetween(
