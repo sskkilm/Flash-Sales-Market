@@ -3,16 +3,14 @@ package com.example.order.infrastructure.entity;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Entity(name = "Order")
 @Table(name = "orders")
 @EntityListeners(AuditingEntityListener.class)
@@ -32,11 +30,10 @@ public class OrderEntity {
     private String status;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     public static OrderEntity from(Order order) {

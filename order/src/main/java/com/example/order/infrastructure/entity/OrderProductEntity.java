@@ -40,7 +40,7 @@ public class OrderProductEntity {
     private BigDecimal orderAmount;
 
     @CreatedDate
-    @Column(nullable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     public static OrderProductEntity from(OrderProduct orderProduct) {

@@ -33,11 +33,10 @@ public class CartItemEntity {
     private int quantity;
 
     @CreatedDate()
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     public static CartItemEntity from(CartItem cartItem) {

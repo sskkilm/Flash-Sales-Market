@@ -32,7 +32,7 @@ public class ProductEntity {
     private int stockQuantity;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
