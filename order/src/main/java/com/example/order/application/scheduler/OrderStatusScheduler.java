@@ -14,6 +14,6 @@ public class OrderStatusScheduler {
 
     @Scheduled(cron = "0 0 9 * * *")
     public void updateOrderStatusToDeliveryInProgress() {
-        orderService.updateOrderStatus(OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
+        orderService.updateOrderStatusFromOneDayAgo(OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
     }
 }
