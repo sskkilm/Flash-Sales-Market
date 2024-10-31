@@ -3,8 +3,6 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
-import com.example.order.application.timeholder.LocalDateHolder;
-import com.example.order.application.timeholder.LocalDateTimeHolder;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderProductManager;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,7 +25,6 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final ProductFeignClient productFeignClient;
     private final LocalDateTimeHolder localDateTimeHolder;
-    private final LocalDateHolder localDateHolder;
 
     private final OrderProductManager manager = new OrderProductManager();
 
@@ -101,20 +97,22 @@ public class OrderService {
 
     @Transactional
     public int updateOrderStatusFromOneDayAgo(OrderStatus currentStatus, OrderStatus newStatus) {
-        LocalDate today = localDateHolder.now();
-        LocalDate yesterday = today.minusDays(1);
+        LocalDateTime now = localDateTimeHolder.now();
 
-        LocalDateTime start = yesterday.atStartOfDay();
-        LocalDateTime end = today.atStartOfDay();
+        LocalDateTime yesterday = now.minusDays(1).toLocalDate().atStartOfDay();
+        LocalDateTime today = now.toLocalDate().atStartOfDay();
 
-        return orderRepository.updateOrderStatusBetween(currentStatus, newStatus, start, end);
+        return orderRepository.updateOrderStatusBetween(currentStatus, newStatus, yesterday, today);
     }
 
     @Transactional
     public void returnProcessing() {
-        LocalDateTime today = localDateHolder.now().atStartOfDay();
-        List<Order> orders = orderRepository.findAllByOrderStatusBeforeToday(
-                OrderStatus.RETURN_IN_PROGRESS, today
+        LocalDateTime now = localDateTimeHolder.now();
+
+        LocalDateTime yesterday = now.minusDays(1).toLocalDate().atStartOfDay();
+        LocalDateTime today = now.toLocalDate().atStartOfDay();
+        List<Order> orders = orderRepository.findAllByOrderStatusBetween(
+                OrderStatus.RETURN_IN_PROGRESS, yesterday, today
         );
 
         orders.forEach(order -> {

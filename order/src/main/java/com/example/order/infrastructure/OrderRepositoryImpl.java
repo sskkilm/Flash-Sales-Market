@@ -41,8 +41,8 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAllByOrderStatusBeforeToday(OrderStatus orderStatus, LocalDateTime today) {
-        return orderJpaRepository.findAllByOrderStatusBeforeToday(orderStatus.name(), today)
+    public List<Order> findAllByOrderStatusBetween(OrderStatus orderStatus, LocalDateTime start, LocalDateTime end) {
+        return orderJpaRepository.findAllByOrderStatusBetween(orderStatus.name(), start, end)
                 .stream().map(OrderEntity::toModel).toList();
     }
 

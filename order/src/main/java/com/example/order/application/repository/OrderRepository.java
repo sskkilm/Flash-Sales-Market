@@ -18,7 +18,7 @@ public interface OrderRepository {
             OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end
     );
 
-    List<Order> findAllByOrderStatusBeforeToday(OrderStatus orderStatus, LocalDateTime today);
+    List<Order> findAllByOrderStatusBetween(OrderStatus orderStatus, LocalDateTime start, LocalDateTime end);
 
     void saveAll(List<Order> orders);
 }

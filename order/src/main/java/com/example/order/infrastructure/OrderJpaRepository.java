@@ -30,9 +30,11 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, Long> {
     @Query("select o from Order o " +
             "where o.status = :orderStatus " +
             "and " +
-            "o.updatedAt < :today")
-    List<OrderEntity> findAllByOrderStatusBeforeToday(
-            @Param("orderStatus") String orderStatus, @Param("today") LocalDateTime today
+            "o.updatedAt between :start and :end")
+    List<OrderEntity> findAllByOrderStatusBetween(
+            @Param("orderStatus") String orderStatus,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 
 }

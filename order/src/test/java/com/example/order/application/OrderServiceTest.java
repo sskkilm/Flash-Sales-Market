@@ -3,8 +3,6 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
-import com.example.order.application.timeholder.LocalDateHolder;
-import com.example.order.application.timeholder.LocalDateTimeHolder;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderStatus;
@@ -17,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,10 +38,7 @@ class OrderServiceTest {
     ProductFeignClient productFeignClient;
 
     @Mock
-    LocalDateTimeHolder holder;
-
-    @Mock
-    LocalDateHolder localDateHolder;
+    LocalDateTimeHolder localDateTimeHolder;
 
     @InjectMocks
     OrderService orderService;
@@ -128,7 +122,7 @@ class OrderServiceTest {
                 .willReturn(Optional.of(order));
 
         LocalDateTime canceledDateTime = orderedDateTime.plusHours(1);
-        given(holder.now()).willReturn(canceledDateTime);
+        given(localDateTimeHolder.now()).willReturn(canceledDateTime);
 
         given(orderProductRepository.findAllByOrder(order))
                 .willReturn(
@@ -178,7 +172,7 @@ class OrderServiceTest {
                 );
 
         LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusHours(1);
-        given(holder.now()).willReturn(returnedDateTime);
+        given(localDateTimeHolder.now()).willReturn(returnedDateTime);
 
         //when
         OrderReturnResponse orderReturnResponse = orderService.returns(1L, 1L);
@@ -248,17 +242,17 @@ class OrderServiceTest {
     @Test
     void 하루_전_주문_상태를_변경한다() {
         //given
-        LocalDate today = LocalDate.of(2024, 10, 31);
-        given(localDateHolder.now())
-                .willReturn(today);
+        LocalDateTime now = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
+        given(localDateTimeHolder.now())
+                .willReturn(now);
 
-        LocalDate yesterday = today.minusDays(1);
-
-        LocalDateTime start = yesterday.atStartOfDay();
-        LocalDateTime end = today.atStartOfDay();
+        LocalDateTime yesterday = now.minusDays(1).toLocalDate().atStartOfDay();
+        LocalDateTime today = now.toLocalDate().atStartOfDay();
 
         given(orderRepository.updateOrderStatusBetween(
-                OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, start, end
+                OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, yesterday, today
         )).willReturn(10);
 
         //when
@@ -271,16 +265,19 @@ class OrderServiceTest {
     @Test
     void 반품_처리를_진행한다() {
         //given
-        LocalDate now = LocalDate.of(2024, 10, 31);
-        given(localDateHolder.now())
+        LocalDateTime now = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
+        given(localDateTimeHolder.now())
                 .willReturn(now);
 
-        LocalDateTime today = now.atStartOfDay();
+        LocalDateTime yesterday = now.minusDays(1).toLocalDate().atStartOfDay();
+        LocalDateTime today = now.toLocalDate().atStartOfDay();
 
         Order order = Order.builder()
                 .status(OrderStatus.RETURN_IN_PROGRESS)
                 .build();
-        given(orderRepository.findAllByOrderStatusBeforeToday(OrderStatus.RETURN_IN_PROGRESS, today))
+        given(orderRepository.findAllByOrderStatusBetween(OrderStatus.RETURN_IN_PROGRESS, yesterday, today))
                 .willReturn(
                         List.of(order)
                 );

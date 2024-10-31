@@ -61,4 +61,41 @@ class OrderJpaRepositoryTest {
         assertEquals(OrderStatus.DELIVERY_IN_PROGRESS.name(), orderEntities.get(2).getStatus());
     }
 
+    @Test
+    void 수정_일자가_특정_기간_사이에_있고_해당_주문_상태에_맞는_주문을_조회한다() {
+        //given
+        LocalDateTime updated = LocalDateTime.of(
+                2024, 10, 31, 12, 0, 0
+        );
+        OrderEntity order1 = OrderEntity.builder()
+                .memberId(1L)
+                .status(OrderStatus.RETURN_IN_PROGRESS.name())
+                .updatedAt(updated)
+                .build();
+        OrderEntity order2 = OrderEntity.builder()
+                .memberId(1L)
+                .status(OrderStatus.RETURN_IN_PROGRESS.name())
+                .updatedAt(updated)
+                .build();
+        OrderEntity order3 = OrderEntity.builder()
+                .memberId(1L)
+                .status(OrderStatus.RETURN_IN_PROGRESS.name())
+                .updatedAt(updated)
+                .build();
+
+        LocalDateTime tomorrow = updated.plusDays(1);
+
+        LocalDateTime start = updated.toLocalDate().atStartOfDay();
+        LocalDateTime end = tomorrow.toLocalDate().atStartOfDay();
+
+        orderJpaRepository.saveAll(List.of(order1, order2, order3));
+
+        //when
+        List<OrderEntity> orderEntities = orderJpaRepository.findAllByOrderStatusBetween(
+                OrderStatus.RETURN_IN_PROGRESS.name(), start, end
+        );
+
+        //then
+        assertEquals(3, orderEntities.size());
+    }
 }
