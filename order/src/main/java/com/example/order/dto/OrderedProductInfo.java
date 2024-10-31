@@ -4,18 +4,18 @@ import com.example.order.domain.OrderProduct;
 
 import java.math.BigDecimal;
 
-public record OrderProductResponse(
+public record OrderedProductInfo(
         Long orderProductId,
         String productName,
         int quantity,
         BigDecimal orderAmount
 ) {
-    public static OrderProductResponse from(OrderProduct orderProduct) {
-        return new OrderProductResponse(
+    public static OrderedProductInfo from(OrderProduct orderProduct) {
+        return new OrderedProductInfo(
                 orderProduct.getId(),
                 orderProduct.getName(),
                 orderProduct.getQuantity(),
-                orderProduct.getOrderAmount().amount()
+                orderProduct.getOrderAmount()
         );
     }
 }

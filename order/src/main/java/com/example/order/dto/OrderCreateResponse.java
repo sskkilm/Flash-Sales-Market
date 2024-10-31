@@ -6,6 +6,6 @@ public record OrderCreateResponse(
         Long orderId,
         Long memberId,
         String status,
-        List<OrderProductResponse> orderProducts
+        List<OrderedProductInfo> orderedProductInfos
 ) {
 }

@@ -3,11 +3,9 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
-import com.example.order.domain.Money;
-import com.example.order.domain.Order;
-import com.example.order.domain.OrderProduct;
-import com.example.order.domain.OrderStatus;
+import com.example.order.domain.*;
 import com.example.order.dto.*;
+import com.example.order.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,67 +21,63 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final LocalDateTimeHolder holder;
-    private final OrderProductManager manager;
     private final ProductFeignClient productFeignClient;
+    private final LocalDateTimeHolder holder;
+    private final OrderProductManager manager = new OrderProductManager();
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
         Order order = orderRepository.save(Order.create(memberId));
 
-        List<ProductPurchaseResponse> productPurchaseResponses = productFeignClient.purchase(
-                orderCreateRequest.orderProducts().stream()
-                        .map(request -> new ProductPurchaseRequest(
-                                request.productId(), request.quantity())
-                        ).toList()
+        ProductPurchaseResponse productPurchaseResponse = productFeignClient.purchase(
+                convertOrderCreateRequestToProductPurchaseRequest(orderCreateRequest)
         );
 
         List<OrderProduct> orderProducts = orderProductRepository.saveAll(
-                productPurchaseResponses.stream()
-                        .map(response -> OrderProduct.create(
+                productPurchaseResponse.purchasedProductInfos().stream()
+                        .map(purchasedProductInfo -> OrderProduct.create(
                                 order,
-                                response.productId(),
-                                response.productName(),
-                                response.quantity(),
-                                Money.of(response.purchaseAmount())
+                                purchasedProductInfo.productId(),
+                                purchasedProductInfo.productName(),
+                                purchasedProductInfo.quantity(),
+                                purchasedProductInfo.purchaseAmount()
                         )).toList()
         );
 
-        List<OrderProductResponse> orderProductResponses = orderProducts.stream().map(OrderProductResponse::from).toList();
-        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), orderProductResponses);
+        List<OrderedProductInfo> orderedProductInfos = orderProducts.stream().map(OrderedProductInfo::from).toList();
+        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), orderedProductInfos);
     }
 
     @Transactional
     public OrderCancelResponse cancel(Long memberId, Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "order not found -> orderId: " + orderId
-                ));
-        order.cancel(memberId);
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        order.cancel(memberId, holder.now());
         orderRepository.save(order);
 
-        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        productFeignClient.restoreStock(orderProducts.stream().map(
-                orderProduct -> new ProductRestoreStockRequest(
-                        orderProduct.getProductId(), orderProduct.getQuantity()
-                )
-        ).toList());
+        List<ProductRestoreStockInfo> productRestoreStockInfos = orderProductRepository.findAllByOrder(order)
+                .stream().map(
+                        orderProduct -> new ProductRestoreStockInfo(
+                                orderProduct.getProductId(), orderProduct.getQuantity()
+                        )
+                ).toList();
+        productFeignClient.restoreStock(new ProductRestoreStockRequest(productRestoreStockInfos));
 
         return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus().name());
     }
 
     public OrderReturnResponse returns(Long memberId, Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "order not found -> orderId: " + orderId
-                ));
-        order.returns(memberId, holder);
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        order.returns(memberId, holder.now());
         orderRepository.save(order);
 
         return new OrderReturnResponse(order.getId(), order.getMemberId(), order.getStatus().name());
     }
 
-    public List<OrderHistory> getOrderHistory(Long memberId) {
+    public List<OrderHistory> getOrderHistories(Long memberId) {
         List<Order> orders = orderRepository.findAllByMemberId(memberId);
 
         return orders.stream().map(order -> {
@@ -91,9 +85,10 @@ public class OrderService {
 
             BigDecimal totalPrice = manager.calculateTotalPrice(orderProducts);
 
-            List<OrderProductResponse> orderProductResponses = orderProducts.stream().map(OrderProductResponse::from).toList();
+            List<OrderedProductInfo> orderedProductInfos = orderProducts.stream().map(OrderedProductInfo::from).toList();
 
-            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderProductResponses);
+            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderedProductInfos);
+
         }).toList();
     }
 
@@ -105,7 +100,7 @@ public class OrderService {
         LocalDateTime start = yesterday.atStartOfDay();
         LocalDateTime end = today.atStartOfDay();
 
-        return orderRepository.updateOrderStatus(currentStatus, newStatus, start, end);
+        return orderRepository.updateOrderStatusBetween(currentStatus, newStatus, start, end);
     }
 
     @Transactional
@@ -118,18 +113,26 @@ public class OrderService {
         orders.forEach(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            productFeignClient.restoreStock(
-                    orderProducts.stream().map(
-                            orderProduct -> new ProductRestoreStockRequest(
-                                    orderProduct.getProductId(), orderProduct.getQuantity()
-                            )
-                    ).toList()
-            );
+            List<ProductRestoreStockInfo> productRestoreStockInfos = orderProducts.stream().map(
+                    orderProduct -> new ProductRestoreStockInfo(
+                            orderProduct.getProductId(), orderProduct.getQuantity()
+                    )
+            ).toList();
+            productFeignClient.restoreStock(new ProductRestoreStockRequest(productRestoreStockInfos));
 
             order.returnCompleted();
         });
 
         orderRepository.saveAll(orders);
+    }
+
+    private static ProductPurchaseRequest convertOrderCreateRequestToProductPurchaseRequest(OrderCreateRequest orderCreateRequest) {
+        return new ProductPurchaseRequest(
+                orderCreateRequest.productOrderInfos().stream()
+                        .map(productOrderInfo -> new ProductPurchaseInfo(
+                                productOrderInfo.productId(), productOrderInfo.quantity())
+                        ).toList()
+        );
     }
 
 }

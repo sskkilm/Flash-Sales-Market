@@ -14,7 +14,7 @@ public interface OrderRepository {
 
     List<Order> findAllByMemberId(Long memberId);
 
-    int updateOrderStatus(
+    int updateOrderStatusBetween(
             OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end
     );
 

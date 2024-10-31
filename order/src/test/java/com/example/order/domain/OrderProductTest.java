@@ -2,13 +2,15 @@ package com.example.order.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class OrderProductTest {
 
     @Test
-    void 주문_상품_생성() {
+    void 주문_상품을_생성한다() {
         //given
         Order order = Order.builder()
                 .id(1L)
@@ -17,7 +19,9 @@ class OrderProductTest {
                 .build();
 
         //when
-        OrderProduct orderProduct = OrderProduct.create(order, 1L, "name", 10, Money.of("10000"));
+        OrderProduct orderProduct = OrderProduct.create(
+                order, 1L, "name", 10, new BigDecimal("10000")
+        );
 
         //then
         assertNull(orderProduct.getId());
@@ -25,7 +29,7 @@ class OrderProductTest {
         assertEquals(1L, orderProduct.getProductId());
         assertEquals("name", orderProduct.getName());
         assertEquals(10, orderProduct.getQuantity());
-        assertEquals(Money.of("10000"), orderProduct.getOrderAmount());
+        assertEquals(new BigDecimal("10000"), orderProduct.getOrderAmount());
         assertNull(orderProduct.getCreatedAt());
     }
 }

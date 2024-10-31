@@ -40,10 +40,10 @@ public class OrderController {
     }
 
     @GetMapping("/{memberId}")
-    public List<OrderHistory> getOrderHistory(
+    public List<OrderHistory> getOrderHistories(
             @PathVariable Long memberId
     ) {
-        return orderService.getOrderHistory(memberId);
+        return orderService.getOrderHistories(memberId);
     }
 
 }

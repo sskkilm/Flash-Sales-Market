@@ -22,10 +22,10 @@ public interface OrderJpaRepository extends JpaRepository<OrderEntity, Long> {
             "where o.status = :currentStatus " +
             "and " +
             "o.createdAt between :start and :end")
-    int updateOrderStatus(@Param("currentStatus") String currentStatus,
-                          @Param("newStatus") String newStatus,
-                          @Param("start") LocalDateTime start,
-                          @Param("end") LocalDateTime end);
+    int updateOrderStatusBetween(@Param("currentStatus") String currentStatus,
+                                 @Param("newStatus") String newStatus,
+                                 @Param("start") LocalDateTime start,
+                                 @Param("end") LocalDateTime end);
 
     @Query("select o from Order o " +
             "where o.status = :orderStatus " +

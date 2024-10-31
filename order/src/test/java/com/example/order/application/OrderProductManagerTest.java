@@ -1,7 +1,7 @@
 package com.example.order.application;
 
-import com.example.order.domain.Money;
 import com.example.order.domain.OrderProduct;
+import com.example.order.domain.OrderProductManager;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,17 +18,18 @@ class OrderProductManagerTest {
 
         List<OrderProduct> orderProducts = List.of(
                 OrderProduct.builder()
-                        .orderAmount(Money.of("10000"))
+                        .orderAmount(new BigDecimal("10000"))
                         .build(),
                 OrderProduct.builder()
-                        .orderAmount(Money.of("20000"))
+                        .orderAmount(new BigDecimal("20000"))
                         .build(),
                 OrderProduct.builder()
-                        .orderAmount(Money.of("30000"))
+                        .orderAmount(new BigDecimal("30000"))
                         .build()
         );
 
         //when
+
         BigDecimal totalPrice = manager.calculateTotalPrice(orderProducts);
 
         //then

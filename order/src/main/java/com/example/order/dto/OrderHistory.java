@@ -8,6 +8,6 @@ public record OrderHistory(
         Long memberId,
         String status,
         BigDecimal totalPrice,
-        List<OrderProductResponse> orderProducts
+        List<OrderedProductInfo> orderProducts
 ) {
 }

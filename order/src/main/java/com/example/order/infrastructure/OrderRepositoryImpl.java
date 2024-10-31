@@ -34,8 +34,8 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public int updateOrderStatus(OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end) {
-        return orderJpaRepository.updateOrderStatus(
+    public int updateOrderStatusBetween(OrderStatus currentStatus, OrderStatus newStatus, LocalDateTime start, LocalDateTime end) {
+        return orderJpaRepository.updateOrderStatusBetween(
                 currentStatus.name(), newStatus.name(), start, end
         );
     }

@@ -3,6 +3,7 @@ package com.example.order.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,10 +14,10 @@ public class OrderProduct {
     private Long productId;
     private String name;
     private int quantity;
-    private Money orderAmount;
+    private BigDecimal orderAmount;
     private LocalDateTime createdAt;
 
-    public static OrderProduct create(Order order, Long productId, String name, int quantity, Money orderAmount) {
+    public static OrderProduct create(Order order, Long productId, String name, int quantity, BigDecimal orderAmount) {
         return OrderProduct.builder()
                 .order(order)
                 .productId(productId)
