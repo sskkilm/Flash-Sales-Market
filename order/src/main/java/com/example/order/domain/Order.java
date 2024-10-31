@@ -1,6 +1,8 @@
 package com.example.order.domain;
 
-import com.example.order.application.LocalDateTimeHolder;
+import com.example.order.exception.CanNotBeCanceledException;
+import com.example.order.exception.CanNotBeReturnedException;
+import com.example.order.exception.OrderMemberUnmatchedException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,7 +12,8 @@ import java.util.Objects;
 @Getter
 @Builder
 public class Order {
-    public static final int RETURNABLE_PERIOD_AFTER_DELIVERY = 1;
+    private static final int CANCELLABLE_PERIOD_AFTER_ORDER = 1;
+    private static final int RETURNABLE_PERIOD_AFTER_DELIVERY = 1;
 
     private Long id;
     private Long memberId;
@@ -25,15 +28,15 @@ public class Order {
                 .build();
     }
 
-    public void cancel(Long memberId) {
+    public void cancel(Long memberId, LocalDateTime canceledDateTime) {
         validateOrderBy(memberId);
-        validateCanBeCancelled();
+        validateCanBeCancelled(canceledDateTime);
         this.status = OrderStatus.ORDER_CANCELED;
     }
 
-    public void returns(Long memberId, LocalDateTimeHolder holder) {
+    public void returns(Long memberId, LocalDateTime returnedDateTime) {
         validateOrderBy(memberId);
-        validateCanBeReturned(holder);
+        validateCanBeReturned(returnedDateTime);
         this.status = OrderStatus.RETURN_IN_PROGRESS;
     }
 
@@ -45,7 +48,7 @@ public class Order {
         if (isOrderedBy(memberId)) {
             return;
         }
-        throw new IllegalArgumentException(
+        throw new OrderMemberUnmatchedException(
                 "this order is not ordered by this member -> memberId: " + memberId
         );
     }
@@ -54,30 +57,34 @@ public class Order {
         return Objects.equals(this.memberId, memberId);
     }
 
-    private void validateCanBeCancelled() {
-        if (isOrderCompleted()) {
+    private void validateCanBeCancelled(LocalDateTime canceledDateTime) {
+        if (isOrderCompleted() && isBeforeCancellablePeriod(canceledDateTime)) {
             return;
         }
-        throw new IllegalStateException("This order cannot be canceled");
+        throw new CanNotBeCanceledException("This order cannot be canceled");
     }
 
     private boolean isOrderCompleted() {
         return this.status == OrderStatus.ORDER_COMPLETED;
     }
 
-    private void validateCanBeReturned(LocalDateTimeHolder holder) {
-        if (isAfterDelivery() && isBeforeReturnablePeriod(holder)) {
-            return;
-        }
-        throw new IllegalStateException("This order cannot be returned");
+    private boolean isBeforeCancellablePeriod(LocalDateTime canceledDateTime) {
+        return this.createdAt.plusDays(CANCELLABLE_PERIOD_AFTER_ORDER).isAfter(canceledDateTime);
     }
 
-    private boolean isAfterDelivery() {
+    private void validateCanBeReturned(LocalDateTime returnedDateTime) {
+        if (isDeliveryCompleted() && isBeforeReturnablePeriod(returnedDateTime)) {
+            return;
+        }
+        throw new CanNotBeReturnedException("This order cannot be returned");
+    }
+
+    private boolean isDeliveryCompleted() {
         return this.status == OrderStatus.DELIVERY_COMPLETED;
     }
 
-    private boolean isBeforeReturnablePeriod(LocalDateTimeHolder holder) {
-        return this.updatedAt.plusDays(RETURNABLE_PERIOD_AFTER_DELIVERY).isAfter(holder.now());
+    private boolean isBeforeReturnablePeriod(LocalDateTime returnedDateTime) {
+        return this.updatedAt.plusDays(RETURNABLE_PERIOD_AFTER_DELIVERY).isAfter(returnedDateTime);
     }
 
 }
