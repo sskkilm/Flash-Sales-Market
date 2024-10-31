@@ -3,7 +3,12 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
-import com.example.order.domain.*;
+import com.example.order.application.timeholder.LocalDateHolder;
+import com.example.order.application.timeholder.LocalDateTimeHolder;
+import com.example.order.domain.Order;
+import com.example.order.domain.OrderProduct;
+import com.example.order.domain.OrderProductManager;
+import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
 import com.example.order.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +27,9 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final ProductFeignClient productFeignClient;
-    private final LocalDateTimeHolder holder;
+    private final LocalDateTimeHolder localDateTimeHolder;
+    private final LocalDateHolder localDateHolder;
+
     private final OrderProductManager manager = new OrderProductManager();
 
     @Transactional
@@ -53,7 +60,7 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        order.cancel(memberId, holder.now());
+        order.cancel(memberId, localDateTimeHolder.now());
         orderRepository.save(order);
 
         List<ProductRestoreStockInfo> productRestoreStockInfos = orderProductRepository.findAllByOrder(order)
@@ -71,7 +78,7 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        order.returns(memberId, holder.now());
+        order.returns(memberId, localDateTimeHolder.now());
         orderRepository.save(order);
 
         return new OrderReturnResponse(order.getId(), order.getMemberId(), order.getStatus().name());
@@ -93,8 +100,8 @@ public class OrderService {
     }
 
     @Transactional
-    public int updateOrderStatus(OrderStatus currentStatus, OrderStatus newStatus) {
-        LocalDate today = LocalDate.now();
+    public int updateOrderStatusFromOneDayAgo(OrderStatus currentStatus, OrderStatus newStatus) {
+        LocalDate today = localDateHolder.now();
         LocalDate yesterday = today.minusDays(1);
 
         LocalDateTime start = yesterday.atStartOfDay();
@@ -105,7 +112,7 @@ public class OrderService {
 
     @Transactional
     public void returnProcessing() {
-        LocalDateTime today = LocalDate.now().atStartOfDay();
+        LocalDateTime today = localDateHolder.now().atStartOfDay();
         List<Order> orders = orderRepository.findAllByOrderStatusBeforeToday(
                 OrderStatus.RETURN_IN_PROGRESS, today
         );

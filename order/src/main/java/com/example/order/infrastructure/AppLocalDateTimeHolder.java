@@ -1,6 +1,6 @@
-package com.example.order.application;
+package com.example.order.infrastructure;
 
-import com.example.order.domain.LocalDateTimeHolder;
+import com.example.order.application.timeholder.LocalDateTimeHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
