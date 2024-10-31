@@ -3,7 +3,8 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
-import com.example.order.domain.LocalDateTimeHolder;
+import com.example.order.application.timeholder.LocalDateHolder;
+import com.example.order.application.timeholder.LocalDateTimeHolder;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderStatus;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,9 @@ class OrderServiceTest {
     @Mock
     LocalDateTimeHolder holder;
 
+    @Mock
+    LocalDateHolder localDateHolder;
+
     @InjectMocks
     OrderService orderService;
 
@@ -61,11 +66,11 @@ class OrderServiceTest {
 
         given(productFeignClient.purchase(any(ProductPurchaseRequest.class)))
                 .willReturn(new ProductPurchaseResponse(List.of(
-                                new PurchasedProductInfo(
-                                        1L, "name", 1, new BigDecimal("10000")
-                                )
+                        new PurchasedProductInfo(
+                                1L, "name", 1, new BigDecimal("10000")
                         )
-                ));
+                )));
+
         given(orderProductRepository.saveAll(anyList()))
                 .willReturn(List.of(
                         OrderProduct.builder()
@@ -119,6 +124,16 @@ class OrderServiceTest {
         given(orderRepository.findById(1L))
                 .willReturn(Optional.of(order));
         given(holder.now()).willReturn(LocalDateTime.now());
+
+        given(orderProductRepository.findAllByOrder(order))
+                .willReturn(
+                        List.of(
+                                OrderProduct.builder()
+                                        .productId(1L)
+                                        .quantity(1)
+                                        .build()
+                        )
+                );
 
         //when
         OrderCancelResponse orderCancelResponse = orderService.cancel(1L, 1L);
@@ -204,19 +219,75 @@ class OrderServiceTest {
         assertEquals(OrderStatus.ORDER_COMPLETED.name(), orderHistory.status());
         assertEquals(new BigDecimal("30000"), orderHistory.totalPrice());
 
-        List<OrderedProductInfo> orderProductCreateRespons = orderHistory.orderProducts();
-        assertEquals(2, orderProductCreateRespons.size());
+        List<OrderedProductInfo> orderedProductInfos = orderHistory.orderProducts();
+        assertEquals(2, orderedProductInfos.size());
 
-        OrderedProductInfo orderedProductInfo1 = orderProductCreateRespons.get(0);
+        OrderedProductInfo orderedProductInfo1 = orderedProductInfos.get(0);
         assertEquals(1L, orderedProductInfo1.orderProductId());
         assertEquals("name1", orderedProductInfo1.productName());
         assertEquals(1, orderedProductInfo1.quantity());
         assertEquals(new BigDecimal("10000"), orderedProductInfo1.orderAmount());
 
-        OrderedProductInfo orderedProductInfo2 = orderProductCreateRespons.get(1);
+        OrderedProductInfo orderedProductInfo2 = orderedProductInfos.get(1);
         assertEquals(2L, orderedProductInfo2.orderProductId());
         assertEquals("name2", orderedProductInfo2.productName());
         assertEquals(2, orderedProductInfo2.quantity());
         assertEquals(new BigDecimal("20000"), orderedProductInfo2.orderAmount());
+    }
+
+    @Test
+    void 하루_전_주문_상태를_변경한다() {
+        //given
+        LocalDate today = LocalDate.now();
+        given(localDateHolder.now())
+                .willReturn(today);
+
+        LocalDate yesterday = today.minusDays(1);
+
+        LocalDateTime start = yesterday.atStartOfDay();
+        LocalDateTime end = today.atStartOfDay();
+
+        given(orderRepository.updateOrderStatusBetween(
+                OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, start, end
+        )).willReturn(10);
+
+        //when
+        int count = orderService.updateOrderStatusFromOneDayAgo(OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
+
+        //then
+        assertEquals(10, count);
+    }
+
+    @Test
+    void 반품_처리를_진행한다() {
+        //given
+        LocalDate now = LocalDate.now();
+        given(localDateHolder.now())
+                .willReturn(now);
+
+        LocalDateTime today = now.atStartOfDay();
+
+        Order order = Order.builder()
+                .status(OrderStatus.RETURN_IN_PROGRESS)
+                .build();
+        given(orderRepository.findAllByOrderStatusBeforeToday(OrderStatus.RETURN_IN_PROGRESS, today))
+                .willReturn(
+                        List.of(order)
+                );
+        given(orderProductRepository.findAllByOrder(order))
+                .willReturn(
+                        List.of(
+                                OrderProduct.builder()
+                                        .productId(1L)
+                                        .quantity(1)
+                                        .build()
+                        )
+                );
+
+        //when
+        orderService.returnProcessing();
+
+        //then
+        assertEquals(OrderStatus.RETURN_COMPLETED, order.getStatus());
     }
 }
