@@ -1,7 +1,8 @@
 package com.example.order.dto;
 
+import java.util.List;
+
 public record ProductRestoreStockRequest(
-        Long productId,
-        int quantity
+        List<ProductRestoreStockInfo> productRestoreStockInfos
 ) {
 }

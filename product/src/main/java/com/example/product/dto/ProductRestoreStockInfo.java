@@ -3,7 +3,8 @@ package com.example.product.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record ProductPurchaseFeignRequest(
+public record ProductRestoreStockInfo(
         @NotNull Long productId,
-        @Min(1) int quantity) {
+        @Min(1) int quantity
+) {
 }

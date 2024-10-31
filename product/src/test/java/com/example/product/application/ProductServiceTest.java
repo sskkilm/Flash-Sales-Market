@@ -52,25 +52,25 @@ class ProductServiceTest {
                 .willReturn(List.of(product1, product2, product3));
 
         //when
-        List<ProductResponse> productList = productService.getProductList();
+        List<ProductDto> productList = productService.getProductList();
 
         //then
         assertEquals(3, productList.size());
 
-        ProductResponse productResponse1 = productList.get(0);
-        assertEquals(1L, productResponse1.productId());
-        assertEquals("name1", productResponse1.name());
-        assertEquals(new BigDecimal("10000"), productResponse1.price());
+        ProductDto productDto1 = productList.get(0);
+        assertEquals(1L, productDto1.productId());
+        assertEquals("name1", productDto1.name());
+        assertEquals(new BigDecimal("10000"), productDto1.price());
 
-        ProductResponse productResponse2 = productList.get(1);
-        assertEquals(2L, productResponse2.productId());
-        assertEquals("name2", productResponse2.name());
-        assertEquals(new BigDecimal("20000"), productResponse2.price());
+        ProductDto productDto2 = productList.get(1);
+        assertEquals(2L, productDto2.productId());
+        assertEquals("name2", productDto2.name());
+        assertEquals(new BigDecimal("20000"), productDto2.price());
 
-        ProductResponse productResponse3 = productList.get(2);
-        assertEquals(3L, productResponse3.productId());
-        assertEquals("name3", productResponse3.name());
-        assertEquals(new BigDecimal("30000"), productResponse3.price());
+        ProductDto productDto3 = productList.get(2);
+        assertEquals(3L, productDto3.productId());
+        assertEquals("name3", productDto3.name());
+        assertEquals(new BigDecimal("30000"), productDto3.price());
     }
 
     @Test
@@ -110,25 +110,29 @@ class ProductServiceTest {
     @Test
     void 존재하지_않는_상품을_구매하면_예외가_발생한다() {
         //given
-        List<ProductPurchaseFeignRequest> productPurchaseFeignRequests = List.of(
-                new ProductPurchaseFeignRequest(1L, 1)
+        List<ProductInfo> productInfos = List.of(
+                new ProductInfo(1L, 1)
         );
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productInfos);
+
         given(productRepository.findById(1L))
                 .willReturn(Optional.empty());
 
         //then
         assertThrows(ProductNotFoundException.class,
                 //when
-                () -> productService.purchase(productPurchaseFeignRequests));
+                () -> productService.purchase(productPurchaseRequest));
     }
 
     @Test
     void 상품을_구매한다() {
         //given
-        List<ProductPurchaseFeignRequest> productPurchaseFeignRequests = List.of(
-                new ProductPurchaseFeignRequest(1L, 1),
-                new ProductPurchaseFeignRequest(2L, 2)
+        List<ProductInfo> productInfos = List.of(
+                new ProductInfo(1L, 1),
+                new ProductInfo(2L, 2)
         );
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productInfos);
+
         Product product1 = Product.builder()
                 .id(1L)
                 .price(new BigDecimal("10000"))
@@ -141,57 +145,61 @@ class ProductServiceTest {
                 .stockQuantity(10)
                 .name("name2")
                 .build();
-
         given(productRepository.findById(1L))
                 .willReturn(Optional.of(product1));
         given(productRepository.findById(2L))
                 .willReturn(Optional.of(product2));
 
         //when
-        List<ProductPurchaseFeignResponse> productPurchaseFeignRespons = productService.purchase(productPurchaseFeignRequests);
+        ProductPurchaseResponse response = productService.purchase(productPurchaseRequest);
 
         //then
         assertEquals(8, product2.getStockQuantity());
         assertEquals(9, product1.getStockQuantity());
 
-        assertEquals(2, productPurchaseFeignRespons.size());
+        List<PurchasedProductInfo> purchasedProductPurchaseFeignRespons = response.purchasedProductInfos();
+        assertEquals(2, purchasedProductPurchaseFeignRespons.size());
 
-        ProductPurchaseFeignResponse productPurchaseFeignResponse1 = productPurchaseFeignRespons.get(0);
-        assertEquals(1L, productPurchaseFeignResponse1.productId());
-        assertEquals(1, productPurchaseFeignResponse1.quantity());
-        assertEquals("name1", productPurchaseFeignResponse1.productName());
-        assertEquals(new BigDecimal("10000"), productPurchaseFeignResponse1.purchaseAmount());
+        PurchasedProductInfo purchasedProductInfo1 = purchasedProductPurchaseFeignRespons.get(0);
+        assertEquals(1L, purchasedProductInfo1.productId());
+        assertEquals(1, purchasedProductInfo1.quantity());
+        assertEquals("name1", purchasedProductInfo1.productName());
+        assertEquals(new BigDecimal("10000"), purchasedProductInfo1.purchaseAmount());
 
-        ProductPurchaseFeignResponse productPurchaseFeignResponse2 = productPurchaseFeignRespons.get(1);
-        assertEquals(2L, productPurchaseFeignResponse2.productId());
-        assertEquals(2, productPurchaseFeignResponse2.quantity());
-        assertEquals("name2", productPurchaseFeignResponse2.productName());
-        assertEquals(new BigDecimal("40000"), productPurchaseFeignResponse2.purchaseAmount());
+        PurchasedProductInfo purchasedProductInfo2 = purchasedProductPurchaseFeignRespons.get(1);
+        assertEquals(2L, purchasedProductInfo2.productId());
+        assertEquals(2, purchasedProductInfo2.quantity());
+        assertEquals("name2", purchasedProductInfo2.productName());
+        assertEquals(new BigDecimal("40000"), purchasedProductInfo2.purchaseAmount());
     }
 
     @Test
     void 존재하지_않는_상품의_재고를_복구하면_예외가_발생한다() {
         //given
-        List<ProductRestoreStockFeignRequest> requests = List.of(
-                new ProductRestoreStockFeignRequest(1L, 1),
-                new ProductRestoreStockFeignRequest(2L, 2)
+        List<ProductRestoreStockInfo> productRestoreStockInfos = List.of(
+                new ProductRestoreStockInfo(1L, 1),
+                new ProductRestoreStockInfo(2L, 2)
         );
+        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(productRestoreStockInfos);
+
         given(productRepository.findById(1L))
                 .willReturn(Optional.empty());
 
         //then
         assertThrows(ProductNotFoundException.class,
                 // when
-                () -> productService.restoreStock(requests));
+                () -> productService.restoreStock(productRestoreStockRequest));
     }
 
     @Test
     void 상품_재고를_복구한다() {
         //given
-        List<ProductRestoreStockFeignRequest> requests = List.of(
-                new ProductRestoreStockFeignRequest(1L, 1),
-                new ProductRestoreStockFeignRequest(2L, 2)
+        List<ProductRestoreStockInfo> productRestoreStockInfos = List.of(
+                new ProductRestoreStockInfo(1L, 1),
+                new ProductRestoreStockInfo(2L, 2)
         );
+        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(productRestoreStockInfos);
+
         Product product1 = Product.builder()
                 .id(1L)
                 .price(new BigDecimal("10000"))
@@ -211,7 +219,7 @@ class ProductServiceTest {
                 .willReturn(Optional.of(product2));
 
         //when
-        productService.restoreStock(requests);
+        productService.restoreStock(productRestoreStockRequest);
 
         //then
         assertEquals(11, product1.getStockQuantity());
@@ -245,11 +253,11 @@ class ProductServiceTest {
                 .willReturn(Optional.of(product1));
 
         //when
-        ProductFeignResponse productFeignResponse = productService.findById(1L);
+        ProductDto productDto = productService.findById(1L);
 
         //then
-        assertEquals(1L, productFeignResponse.productId());
-        assertEquals("name1", productFeignResponse.name());
-        assertEquals(new BigDecimal("10000"), productFeignResponse.price());
+        assertEquals(1L, productDto.productId());
+        assertEquals("name1", productDto.name());
+        assertEquals(new BigDecimal("10000"), productDto.price());
     }
 }

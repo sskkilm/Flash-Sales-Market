@@ -4,14 +4,14 @@ import com.example.product.domain.Product;
 
 import java.math.BigDecimal;
 
-public record ProductResponse(
+public record ProductDto(
         Long productId,
         String name,
         BigDecimal price
 ) {
 
-    public static ProductResponse from(Product product) {
-        return new ProductResponse(
+    public static ProductDto from(Product product) {
+        return new ProductDto(
                 product.getId(),
                 product.getName(),
                 product.getPrice()

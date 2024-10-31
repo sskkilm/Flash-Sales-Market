@@ -4,25 +4,22 @@ import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
 import com.example.product.exception.ProductNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final AmountCalculator calculator;
+    private final AmountCalculator calculator = new AmountCalculator();
 
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-        this.calculator = new AmountCalculator();
-    }
-
-    public List<ProductResponse> getProductList() {
+    public List<ProductDto> getProductList() {
         return productRepository.findAll()
-                .stream().map(ProductResponse::from).toList();
+                .stream().map(ProductDto::from).toList();
     }
 
     public ProductDetails getProductDetails(Long id) {
@@ -32,8 +29,8 @@ public class ProductService {
         return ProductDetails.from(product);
     }
 
-    public List<ProductPurchaseFeignResponse> purchase(List<ProductPurchaseFeignRequest> productPurchaseFeignRequests) {
-        return productPurchaseFeignRequests.stream().map(request -> {
+    public ProductPurchaseResponse purchase(ProductPurchaseRequest productPurchaseRequest) {
+        List<PurchasedProductInfo> purchasedProductInfos = productPurchaseRequest.productInfos().stream().map(request -> {
             Product product = productRepository.findById(request.productId())
                     .orElseThrow(() -> new ProductNotFoundException(request.productId()));
 
@@ -43,12 +40,15 @@ public class ProductService {
 
             BigDecimal calculatedAmount = calculator.calculateAmount(product, request.quantity());
 
-            return new ProductPurchaseFeignResponse(product.getId(), product.getName(), request.quantity(), calculatedAmount);
+            return new PurchasedProductInfo(product.getId(), product.getName(), request.quantity(), calculatedAmount);
         }).toList();
+
+        return new ProductPurchaseResponse(purchasedProductInfos);
     }
 
-    public void restoreStock(List<ProductRestoreStockFeignRequest> list) {
-        list.forEach(request -> {
+    public void restoreStock(ProductRestoreStockRequest productRestoreStockRequest) {
+        List<ProductRestoreStockInfo> productRestoreStockInfos = productRestoreStockRequest.productRestoreStockInfos();
+        productRestoreStockInfos.forEach(request -> {
             Product product = productRepository.findById(request.productId())
                     .orElseThrow(() -> new ProductNotFoundException(request.productId()));
 
@@ -58,11 +58,11 @@ public class ProductService {
         });
     }
 
-    public ProductFeignResponse findById(Long productId) {
+    public ProductDto findById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
-        return new ProductFeignResponse(product.getId(), product.getName(), product.getPrice());
+        return ProductDto.from(product);
     }
 
 }

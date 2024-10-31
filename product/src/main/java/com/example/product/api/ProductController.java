@@ -2,7 +2,7 @@ package com.example.product.api;
 
 import com.example.product.application.ProductService;
 import com.example.product.dto.ProductDetails;
-import com.example.product.dto.ProductResponse;
+import com.example.product.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductResponse> getProductList() {
+    public List<ProductDto> getProductList() {
         return productService.getProductList();
     }
 
