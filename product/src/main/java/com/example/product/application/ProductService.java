@@ -28,7 +28,7 @@ public class ProductService {
     }
 
     public ProductPurchaseResponse purchase(ProductPurchaseRequest productPurchaseRequest) {
-        List<PurchasedProductInfo> purchasedProductInfos = productPurchaseRequest.productInfos().stream().map(request -> {
+        List<PurchasedProductInfo> purchasedProductInfos = productPurchaseRequest.productPurchaseInfos().stream().map(request -> {
             Product product = productRepository.findById(request.productId());
 
             product.decreaseStock(request.quantity());

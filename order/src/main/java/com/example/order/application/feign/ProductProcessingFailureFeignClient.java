@@ -7,9 +7,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@Retry(name = "default")
+//@Retry(name = "default")
 @CircuitBreaker(name = "default")
-@FeignClient(name = "api-gateway", path = "/products", fallback = ProductProcessingFailureFallBack.class)
+@FeignClient(name = "api-gateway", path = "/products", contextId = "productProcessingFailureClient")
 public interface ProductProcessingFailureFeignClient {
 
     @GetMapping("/disability-situation/case1")

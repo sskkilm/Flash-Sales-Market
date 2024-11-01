@@ -109,10 +109,10 @@ class ProductServiceTest {
     @Test
     void 존재하지_않는_상품을_구매하면_예외가_발생한다() {
         //given
-        List<ProductInfo> productInfos = List.of(
-                new ProductInfo(1L, 1)
+        List<ProductPurchaseInfo> productPurchaseInfos = List.of(
+                new ProductPurchaseInfo(1L, 1)
         );
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productInfos);
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productPurchaseInfos);
 
         given(productRepository.findById(1L))
                 .willThrow(new ProductNotFoundException(1L));
@@ -126,11 +126,11 @@ class ProductServiceTest {
     @Test
     void 상품을_구매한다() {
         //given
-        List<ProductInfo> productInfos = List.of(
-                new ProductInfo(1L, 1),
-                new ProductInfo(2L, 2)
+        List<ProductPurchaseInfo> productPurchaseInfos = List.of(
+                new ProductPurchaseInfo(1L, 1),
+                new ProductPurchaseInfo(2L, 2)
         );
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productInfos);
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productPurchaseInfos);
 
         Product product1 = Product.builder()
                 .id(1L)

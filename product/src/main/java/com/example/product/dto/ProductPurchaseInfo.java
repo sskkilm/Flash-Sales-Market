@@ -3,7 +3,8 @@ package com.example.product.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record ProductInfo(
+public record ProductPurchaseInfo(
         @NotNull Long productId,
-        @Min(1) int quantity) {
+        @Min(1) int quantity
+) {
 }

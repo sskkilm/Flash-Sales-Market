@@ -128,7 +128,7 @@ public class OrderService {
         orderRepository.saveAll(orders);
     }
 
-    private static ProductPurchaseRequest convertOrderCreateRequestToProductPurchaseRequest(OrderCreateRequest orderCreateRequest) {
+    private ProductPurchaseRequest convertOrderCreateRequestToProductPurchaseRequest(OrderCreateRequest orderCreateRequest) {
         return new ProductPurchaseRequest(
                 orderCreateRequest.productOrderInfos().stream()
                         .map(productOrderInfo -> new ProductPurchaseInfo(
