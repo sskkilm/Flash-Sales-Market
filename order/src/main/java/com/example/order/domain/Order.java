@@ -24,14 +24,14 @@ public class Order {
     public static Order create(Long memberId) {
         return Order.builder()
                 .memberId(memberId)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .build();
     }
 
     public void cancel(Long memberId, LocalDateTime canceledDateTime) {
         validateOrderBy(memberId);
         validateCanBeCancelled(canceledDateTime);
-        this.status = OrderStatus.ORDER_CANCELED;
+        this.status = OrderStatus.CANCELED;
     }
 
     public void returns(Long memberId, LocalDateTime returnedDateTime) {
@@ -40,8 +40,8 @@ public class Order {
         this.status = OrderStatus.RETURN_IN_PROGRESS;
     }
 
-    public void returnCompleted() {
-        this.status = OrderStatus.RETURN_COMPLETED;
+    public void returned() {
+        this.status = OrderStatus.RETURNED;
     }
 
     private void validateOrderBy(Long memberId) {
@@ -58,14 +58,14 @@ public class Order {
     }
 
     private void validateCanBeCancelled(LocalDateTime canceledDateTime) {
-        if (isOrderCompleted() && isBeforeCancellablePeriod(canceledDateTime)) {
+        if (isCompleted() && isBeforeCancellablePeriod(canceledDateTime)) {
             return;
         }
         throw new CanNotBeCanceledException("This order cannot be canceled");
     }
 
-    private boolean isOrderCompleted() {
-        return this.status == OrderStatus.ORDER_COMPLETED;
+    private boolean isCompleted() {
+        return this.status == OrderStatus.COMPLETED;
     }
 
     private boolean isBeforeCancellablePeriod(LocalDateTime canceledDateTime) {
@@ -73,14 +73,14 @@ public class Order {
     }
 
     private void validateCanBeReturned(LocalDateTime returnedDateTime) {
-        if (isDeliveryCompleted() && isBeforeReturnablePeriod(returnedDateTime)) {
+        if (isDelivered() && isBeforeReturnablePeriod(returnedDateTime)) {
             return;
         }
         throw new CanNotBeReturnedException("This order cannot be returned");
     }
 
-    private boolean isDeliveryCompleted() {
-        return this.status == OrderStatus.DELIVERY_COMPLETED;
+    private boolean isDelivered() {
+        return this.status == OrderStatus.DELIVERED;
     }
 
     private boolean isBeforeReturnablePeriod(LocalDateTime returnedDateTime) {

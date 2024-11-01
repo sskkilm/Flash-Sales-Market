@@ -15,7 +15,6 @@ class OrderProductTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
                 .build();
 
         //when

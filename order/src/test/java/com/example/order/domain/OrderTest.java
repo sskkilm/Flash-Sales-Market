@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrderTest {
 
     @Test
-    void 주문한다() {
+    void 주문_생성() {
         //given
         Long memberId = 1L;
 
@@ -22,7 +22,7 @@ class OrderTest {
         //then
         assertNull(order.getId());
         assertEquals(1L, order.getMemberId());
-        assertEquals(OrderStatus.ORDER_COMPLETED, order.getStatus());
+        assertEquals(OrderStatus.COMPLETED, order.getStatus());
         assertNull(order.getCreatedAt());
         assertNull(order.getUpdatedAt());
     }
@@ -62,7 +62,7 @@ class OrderTest {
         );
         Order order = Order.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .createdAt(orderCompleteDatetime)
                 .build();
         LocalDateTime canceledDateTime = orderCompleteDatetime.plusDays(1).plusNanos(1);
@@ -74,14 +74,14 @@ class OrderTest {
     }
 
     @Test
-    void 주문을_취소한다() {
+    void 주문_취소() {
         //given
         LocalDateTime now = LocalDateTime.of(
                 2024, 10, 31, 12, 0, 0
         );
         Order order = Order.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .createdAt(now)
                 .build();
         LocalDateTime canceledDateTime = now.plusDays(1).minusNanos(1);
@@ -90,7 +90,7 @@ class OrderTest {
         order.cancel(1L, canceledDateTime);
 
         //then
-        assertEquals(OrderStatus.ORDER_CANCELED, order.getStatus());
+        assertEquals(OrderStatus.CANCELED, order.getStatus());
     }
 
     @Test
@@ -111,7 +111,7 @@ class OrderTest {
         //given
         Order order = Order.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .build();
 
         //then
@@ -128,7 +128,7 @@ class OrderTest {
         );
         Order order = Order.builder()
                 .memberId(1L)
-                .status(OrderStatus.DELIVERY_COMPLETED)
+                .status(OrderStatus.DELIVERED)
                 .updatedAt(deliveryCompletedDateTime)
                 .build();
         LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusDays(1).plusNanos(1);
@@ -140,14 +140,14 @@ class OrderTest {
     }
 
     @Test
-    void 반품한다() {
+    void 반품() {
         //given
         LocalDateTime deliveryCompletedDateTime = LocalDateTime.of(
                 2024, 10, 31, 12, 0, 0
         );
         Order order = Order.builder()
                 .memberId(1L)
-                .status(OrderStatus.DELIVERY_COMPLETED)
+                .status(OrderStatus.DELIVERED)
                 .updatedAt(deliveryCompletedDateTime)
                 .build();
         LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusDays(1).minusNanos(1);
@@ -160,16 +160,16 @@ class OrderTest {
     }
 
     @Test
-    void 반품이_완료된다() {
+    void 반품_완료() {
         //given
         Order order = Order.builder()
                 .status(OrderStatus.RETURN_IN_PROGRESS)
                 .build();
 
         //when
-        order.returnCompleted();
+        order.returned();
 
         //then
-        assertEquals(OrderStatus.RETURN_COMPLETED, order.getStatus());
+        assertEquals(OrderStatus.RETURNED, order.getStatus());
     }
 }

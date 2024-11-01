@@ -122,7 +122,7 @@ public class OrderService {
             ).toList();
             productFeignClient.restoreStock(new ProductRestoreStockRequest(productRestoreStockInfos));
 
-            order.returnCompleted();
+            order.returned();
         });
 
         orderRepository.saveAll(orders);

@@ -25,17 +25,17 @@ class OrderJpaRepositoryTest {
         );
         OrderEntity order1 = OrderEntity.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED.name())
+                .status(OrderStatus.COMPLETED.name())
                 .createdAt(createdAt)
                 .build();
         OrderEntity order2 = OrderEntity.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED.name())
+                .status(OrderStatus.COMPLETED.name())
                 .createdAt(createdAt)
                 .build();
         OrderEntity order3 = OrderEntity.builder()
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED.name())
+                .status(OrderStatus.COMPLETED.name())
                 .createdAt(createdAt)
                 .build();
         orderJpaRepository.saveAll(List.of(order1, order2, order3));
@@ -47,7 +47,7 @@ class OrderJpaRepositoryTest {
 
         //when
         int count = orderJpaRepository.updateOrderStatusBetween(
-                OrderStatus.ORDER_COMPLETED.name(), OrderStatus.DELIVERY_IN_PROGRESS.name(), start, end
+                OrderStatus.COMPLETED.name(), OrderStatus.DELIVERY_IN_PROGRESS.name(), start, end
         );
 
         List<OrderEntity> orderEntities = orderJpaRepository.findAllById(
@@ -88,7 +88,7 @@ class OrderJpaRepositoryTest {
         LocalDateTime start = updated.toLocalDate().atStartOfDay();
         LocalDateTime end = tomorrow.toLocalDate().atStartOfDay();
 
-        orderJpaRepository.saveAllAndFlush(List.of(order1, order2, order3));
+        orderJpaRepository.saveAll(List.of(order1, order2, order3));
 
         //when
         List<OrderEntity> orderEntities = orderJpaRepository.findAllByOrderStatusBetween(

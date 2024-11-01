@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,7 +52,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .build();
         given(orderRepository.save(any(Order.class)))
                 .willReturn(order);
@@ -83,7 +82,7 @@ class OrderServiceTest {
         //then
         assertEquals(1L, orderCreateResponse.orderId());
         assertEquals(1L, orderCreateResponse.memberId());
-        assertEquals(OrderStatus.ORDER_COMPLETED.name(), orderCreateResponse.status());
+        assertEquals(OrderStatus.COMPLETED.name(), orderCreateResponse.status());
 
         assertEquals(1, orderCreateResponse.orderedProductInfos().size());
 
@@ -115,7 +114,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .createdAt(orderedDateTime)
                 .build();
         given(orderRepository.findById(1L)).willReturn(order);
@@ -139,7 +138,7 @@ class OrderServiceTest {
         //then
         assertEquals(1L, orderCancelResponse.orderId());
         assertEquals(1L, orderCancelResponse.memberId());
-        assertEquals(OrderStatus.ORDER_CANCELED.name(), orderCancelResponse.status());
+        assertEquals(OrderStatus.CANCELED.name(), orderCancelResponse.status());
     }
 
     @Test
@@ -165,7 +164,7 @@ class OrderServiceTest {
                         Order.builder()
                                 .id(1L)
                                 .memberId(1L)
-                                .status(OrderStatus.DELIVERY_COMPLETED)
+                                .status(OrderStatus.DELIVERED)
                                 .updatedAt(deliveryCompletedDateTime)
                                 .build()
                 );
@@ -188,7 +187,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.ORDER_COMPLETED)
+                .status(OrderStatus.COMPLETED)
                 .build();
         given(orderRepository.findAllByMemberId(1L))
                 .willReturn(List.of(order));
@@ -219,7 +218,7 @@ class OrderServiceTest {
         OrderHistory orderHistory = orderHistories.getFirst();
         assertEquals(1L, orderHistory.orderId());
         assertEquals(1L, orderHistory.memberId());
-        assertEquals(OrderStatus.ORDER_COMPLETED.name(), orderHistory.status());
+        assertEquals(OrderStatus.COMPLETED.name(), orderHistory.status());
         assertEquals(new BigDecimal("30000"), orderHistory.totalPrice());
 
         List<OrderedProductInfo> orderedProductInfos = orderHistory.orderProducts();
@@ -251,11 +250,11 @@ class OrderServiceTest {
         LocalDateTime today = now.toLocalDate().atStartOfDay();
 
         given(orderRepository.updateOrderStatusBetween(
-                OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, yesterday, today
+                OrderStatus.COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, yesterday, today
         )).willReturn(10);
 
         //when
-        int count = orderService.updateOrderStatusFromOneDayAgo(OrderStatus.ORDER_COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
+        int count = orderService.updateOrderStatusFromOneDayAgo(OrderStatus.COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
 
         //then
         assertEquals(10, count);
@@ -294,6 +293,6 @@ class OrderServiceTest {
         orderService.returnProcessing();
 
         //then
-        assertEquals(OrderStatus.RETURN_COMPLETED, order.getStatus());
+        assertEquals(OrderStatus.RETURNED, order.getStatus());
     }
 }
