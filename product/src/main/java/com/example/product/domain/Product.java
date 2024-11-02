@@ -1,15 +1,15 @@
 package com.example.product.domain;
 
 import com.example.product.exception.InsufficientStockException;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
-public class Product {
+@SuperBuilder
+public abstract class Product {
     private Long id;
     private String name;
     private BigDecimal price;

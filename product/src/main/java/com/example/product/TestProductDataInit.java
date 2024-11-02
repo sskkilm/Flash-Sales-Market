@@ -1,12 +1,15 @@
 package com.example.product;
 
 import com.example.product.application.ProductRepository;
+import com.example.product.domain.LimitedProduct;
+import com.example.product.domain.NormalProduct;
 import com.example.product.domain.Product;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -16,18 +19,19 @@ public class TestProductDataInit {
 
     @PostConstruct
     public void init() {
-        Product product1 = Product.builder()
-                .name("product1")
+        NormalProduct normalProduct = NormalProduct.builder()
+                .name("normal product")
                 .price(new BigDecimal("10000"))
                 .stockQuantity(10)
                 .build();
-        Product product2 = Product.builder()
-                .name("product2")
+        LimitedProduct limitedProduct = LimitedProduct.builder()
+                .name("limited product")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(20)
+                .openTime(LocalDateTime.MAX)
                 .build();
 
-        productRepository.save(product1);
-        productRepository.save(product2);
+        productRepository.save(normalProduct);
+        productRepository.save(limitedProduct);
     }
 }
