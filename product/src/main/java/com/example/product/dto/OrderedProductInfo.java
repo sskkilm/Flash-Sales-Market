@@ -1,8 +1,8 @@
-package com.example.order.dto;
+package com.example.product.dto;
 
 import java.math.BigDecimal;
 
-public record PurchasedProductInfo(
+public record OrderedProductInfo(
         Long productId, String productName, int quantity, BigDecimal purchaseAmount
 ) {
 }

@@ -3,7 +3,7 @@ package com.example.product.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record ProductRestoreStockInfo(
+public record ProductOrderInfo(
         @NotNull Long productId,
         @Min(1) int quantity
 ) {
