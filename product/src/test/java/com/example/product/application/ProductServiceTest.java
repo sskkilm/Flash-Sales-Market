@@ -321,4 +321,33 @@ class ProductServiceTest {
         assertEquals("name1", productDto.name());
         assertEquals(new BigDecimal("10000"), productDto.price());
     }
+
+    @Test
+    void 존재하지_않는_상품의_재고_수량_조회_시_예외가_발생한다() {
+        //given
+        given(productRepository.findById(1L))
+                .willThrow(new ProductNotFoundException(1L));
+
+        //then
+        assertThrows(ProductNotFoundException.class,
+                //when
+                () -> productService.findById(1L));
+    }
+
+    @Test
+    void 상품의_재고_수량을_조회한다() {
+        //given
+        given(productRepository.findById(1L))
+                .willReturn(
+                        LimitedProduct.builder()
+                                .stockQuantity(3)
+                                .build()
+                );
+
+        //when
+        int stockQuantity = productService.getStockQuantity(1L);
+
+        //then
+        assertEquals(3, stockQuantity);
+    }
 }
