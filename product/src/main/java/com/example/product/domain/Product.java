@@ -30,4 +30,6 @@ public abstract class Product {
     public void increaseStock(int quantity) {
         this.stockQuantity += quantity;
     }
+
+    public abstract ProductType getType();
 }

@@ -11,4 +11,8 @@ public class LimitedProduct extends Product {
 
     private LocalDateTime openTime;
 
+    @Override
+    public ProductType getType() {
+        return ProductType.LIMITED;
+    }
 }

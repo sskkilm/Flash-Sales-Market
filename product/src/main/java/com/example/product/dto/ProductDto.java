@@ -7,14 +7,16 @@ import java.math.BigDecimal;
 public record ProductDto(
         Long productId,
         String name,
-        BigDecimal price
+        BigDecimal price,
+        String type
 ) {
 
     public static ProductDto from(Product product) {
         return new ProductDto(
                 product.getId(),
                 product.getName(),
-                product.getPrice()
+                product.getPrice(),
+                product.getType().name()
         );
     }
 }

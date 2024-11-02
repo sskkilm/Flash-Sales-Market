@@ -4,4 +4,9 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 public class NormalProduct extends Product {
+
+    @Override
+    public ProductType getType() {
+        return ProductType.NORMAL;
+    }
 }
