@@ -1,7 +1,11 @@
 package com.example.product.application;
 
+import com.example.product.domain.LimitedProduct;
+import com.example.product.domain.NormalProduct;
 import com.example.product.domain.Product;
+import com.example.product.domain.ProductType;
 import com.example.product.dto.*;
+import com.example.product.exception.InsufficientStockException;
 import com.example.product.exception.ProductNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,48 +33,37 @@ class ProductServiceTest {
     @Test
     void 상품_목록을_조회한다() {
         //given
-        Product product1 = Product.builder()
+        Product product1 = NormalProduct.builder()
                 .id(1L)
                 .name("name1")
                 .price(new BigDecimal("10000"))
-                .stockQuantity(100)
                 .build();
-        Product product2 = Product.builder()
+        Product product2 = LimitedProduct.builder()
                 .id(2L)
                 .name("name2")
                 .price(new BigDecimal("20000"))
-                .stockQuantity(200)
-                .build();
-        Product product3 = Product.builder()
-                .id(3L)
-                .name("name3")
-                .price(new BigDecimal("30000"))
-                .stockQuantity(300)
                 .build();
 
         given(productRepository.findAll())
-                .willReturn(List.of(product1, product2, product3));
+                .willReturn(List.of(product1, product2));
 
         //when
         List<ProductDto> productList = productService.getProductList();
 
         //then
-        assertEquals(3, productList.size());
+        assertEquals(2, productList.size());
 
         ProductDto productDto1 = productList.get(0);
         assertEquals(1L, productDto1.productId());
         assertEquals("name1", productDto1.name());
+        assertEquals(ProductType.NORMAL.name(), productDto1.type());
         assertEquals(new BigDecimal("10000"), productDto1.price());
 
         ProductDto productDto2 = productList.get(1);
         assertEquals(2L, productDto2.productId());
         assertEquals("name2", productDto2.name());
+        assertEquals(ProductType.LIMITED.name(), productDto2.type());
         assertEquals(new BigDecimal("20000"), productDto2.price());
-
-        ProductDto productDto3 = productList.get(2);
-        assertEquals(3L, productDto3.productId());
-        assertEquals("name3", productDto3.name());
-        assertEquals(new BigDecimal("30000"), productDto3.price());
     }
 
     @Test
@@ -85,14 +79,22 @@ class ProductServiceTest {
     }
 
     @Test
-    void 상품의_상세_정보를_조회한다() {
+    void 일반_상품의_상세_정보를_조회한다() {
         //given
-        Product product = Product.builder()
+        LocalDateTime createdAt = LocalDateTime.of(
+                2024, 11, 2, 12, 0, 0
+        );
+        LocalDateTime updatedAt = LocalDateTime.of(
+                2024, 11, 2, 12, 0, 0
+        );
+        Product product = NormalProduct.builder()
                 .id(1L)
                 .name("name")
                 .price(new BigDecimal("10000"))
-                .stockQuantity(100)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
+
         given(productRepository.findById(1L))
                 .willReturn(product);
 
@@ -103,16 +105,51 @@ class ProductServiceTest {
         assertEquals(1L, productDetails.productId());
         assertEquals("name", productDetails.name());
         assertEquals(new BigDecimal("10000"), productDetails.price());
-        assertEquals(100, productDetails.stockQuantity());
+        assertEquals(ProductType.NORMAL.name(), productDetails.type());
+        assertEquals(createdAt, productDetails.createdAt());
+        assertEquals(updatedAt, productDetails.updatedAt());
+    }
+
+    @Test
+    void 한정판_상품의_상세_정보를_조회한다() {
+        //given
+        LocalDateTime createdAt = LocalDateTime.of(
+                2024, 11, 2, 12, 0, 0
+        );
+        LocalDateTime updatedAt = LocalDateTime.of(
+                2024, 11, 2, 12, 0, 0
+        );
+        Product product = LimitedProduct.builder()
+                .id(1L)
+                .name("name")
+                .price(new BigDecimal("10000"))
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+
+        given(productRepository.findById(1L))
+                .willReturn(product);
+
+        //when
+        ProductDetails productDetails = productService.getProductDetails(1L);
+
+        //then
+        assertEquals(1L, productDetails.productId());
+        assertEquals("name", productDetails.name());
+        assertEquals(new BigDecimal("10000"), productDetails.price());
+        assertEquals(ProductType.LIMITED.name(), productDetails.type());
+        assertEquals(createdAt, productDetails.createdAt());
+        assertEquals(updatedAt, productDetails.updatedAt());
     }
 
     @Test
     void 존재하지_않는_상품을_구매하면_예외가_발생한다() {
         //given
-        List<ProductPurchaseInfo> productPurchaseInfos = List.of(
-                new ProductPurchaseInfo(1L, 1)
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+                List.of(
+                        new ProductPurchaseInfo(1L, 1)
+                )
         );
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productPurchaseInfos);
 
         given(productRepository.findById(1L))
                 .willThrow(new ProductNotFoundException(1L));
@@ -124,21 +161,44 @@ class ProductServiceTest {
     }
 
     @Test
+    void 상품_구매_시_재고가_부족하면_예외가_발생한다() {
+        //given
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+                List.of(
+                        new ProductPurchaseInfo(1L, 1)
+                )
+        );
+
+        given(productRepository.findById(1L))
+                .willReturn(
+                        NormalProduct.builder()
+                                .stockQuantity(0)
+                                .build()
+                );
+
+        //then
+        assertThrows(InsufficientStockException.class,
+                //when
+                () -> productService.purchase(productPurchaseRequest));
+    }
+
+    @Test
     void 상품을_구매한다() {
         //given
-        List<ProductPurchaseInfo> productPurchaseInfos = List.of(
-                new ProductPurchaseInfo(1L, 1),
-                new ProductPurchaseInfo(2L, 2)
+        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+                List.of(
+                        new ProductPurchaseInfo(1L, 1),
+                        new ProductPurchaseInfo(2L, 2)
+                )
         );
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(productPurchaseInfos);
 
-        Product product1 = Product.builder()
+        Product product1 = NormalProduct.builder()
                 .id(1L)
                 .price(new BigDecimal("10000"))
                 .stockQuantity(10)
                 .name("name1")
                 .build();
-        Product product2 = Product.builder()
+        Product product2 = LimitedProduct.builder()
                 .id(2L)
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10)
@@ -175,11 +235,12 @@ class ProductServiceTest {
     @Test
     void 존재하지_않는_상품의_재고를_복구하면_예외가_발생한다() {
         //given
-        List<ProductRestoreStockInfo> productRestoreStockInfos = List.of(
-                new ProductRestoreStockInfo(1L, 1),
-                new ProductRestoreStockInfo(2L, 2)
+        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(
+                List.of(
+                        new ProductRestoreStockInfo(1L, 1),
+                        new ProductRestoreStockInfo(2L, 2)
+                )
         );
-        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(productRestoreStockInfos);
 
         given(productRepository.findById(1L))
                 .willThrow(new ProductNotFoundException(1L));
@@ -193,19 +254,20 @@ class ProductServiceTest {
     @Test
     void 상품_재고를_복구한다() {
         //given
-        List<ProductRestoreStockInfo> productRestoreStockInfos = List.of(
-                new ProductRestoreStockInfo(1L, 1),
-                new ProductRestoreStockInfo(2L, 2)
+        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(
+                List.of(
+                        new ProductRestoreStockInfo(1L, 1),
+                        new ProductRestoreStockInfo(2L, 2)
+                )
         );
-        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(productRestoreStockInfos);
 
-        Product product1 = Product.builder()
+        Product product1 = NormalProduct.builder()
                 .id(1L)
                 .price(new BigDecimal("10000"))
                 .stockQuantity(10)
                 .name("name1")
                 .build();
-        Product product2 = Product.builder()
+        Product product2 = LimitedProduct.builder()
                 .id(2L)
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10)
@@ -242,7 +304,7 @@ class ProductServiceTest {
     @Test
     void 특정_상품을_조회한다() {
         //given
-        Product product1 = Product.builder()
+        Product product1 = NormalProduct.builder()
                 .id(1L)
                 .price(new BigDecimal("10000"))
                 .name("name1")
