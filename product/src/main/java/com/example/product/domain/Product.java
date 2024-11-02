@@ -17,12 +17,18 @@ public abstract class Product {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public void decreaseStock(int quantity) {
-        if (stockQuantity < quantity) {
+    public abstract ProductType getType();
+
+    public void checkOutOfStock(int quantity) {
+        if (this.stockQuantity < quantity) {
             throw new InsufficientStockException(
-                    "상품 재고가 부족합니다. 남은 재고 수량: " + stockQuantity
+                    "상품 재고가 부족합니다. 상품 id: " + this.id + ", 남은 재고 수량: " + stockQuantity
             );
         }
+    }
+
+    public void decreaseStock(int quantity) {
+        checkOutOfStock(quantity);
 
         this.stockQuantity -= quantity;
     }
@@ -31,5 +37,4 @@ public abstract class Product {
         this.stockQuantity += quantity;
     }
 
-    public abstract ProductType getType();
 }
