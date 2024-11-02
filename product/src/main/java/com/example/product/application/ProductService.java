@@ -27,25 +27,24 @@ public class ProductService {
         return ProductDetails.from(product);
     }
 
-    public ProductPurchaseResponse purchase(ProductPurchaseRequest productPurchaseRequest) {
-        List<PurchasedProductInfo> purchasedProductInfos = productPurchaseRequest.productPurchaseInfos().stream().map(request -> {
-            Product product = productRepository.findById(request.productId());
+    public ProductOrderResponse order(ProductOrderRequest productOrderRequest) {
+        List<OrderedProductInfo> orderedProductInfos = productOrderRequest.productOrderInfos().stream()
+                .map(request -> {
+                    Product product = productRepository.findById(request.productId());
 
-            product.decreaseStock(request.quantity());
+                    product.checkOutOfStock(request.quantity());
 
-            productRepository.save(product);
+                    BigDecimal calculatedAmount = calculator.calculateAmount(product, request.quantity());
 
-            BigDecimal calculatedAmount = calculator.calculateAmount(product, request.quantity());
+                    return new OrderedProductInfo(product.getId(), product.getName(), request.quantity(), calculatedAmount);
+                }).toList();
 
-            return new PurchasedProductInfo(product.getId(), product.getName(), request.quantity(), calculatedAmount);
-        }).toList();
-
-        return new ProductPurchaseResponse(purchasedProductInfos);
+        return new ProductOrderResponse(orderedProductInfos);
     }
 
-    public void restoreStock(ProductRestoreStockRequest productRestoreStockRequest) {
-        List<ProductRestoreStockInfo> productRestoreStockInfos = productRestoreStockRequest.productRestoreStockInfos();
-        productRestoreStockInfos.forEach(request -> {
+    public void restock(ProductRestockRequest productRestockRequest) {
+        List<ProductRestockInfo> productRestockInfos = productRestockRequest.productRestockInfos();
+        productRestockInfos.forEach(request -> {
             Product product = productRepository.findById(request.productId());
 
             product.increaseStock(request.quantity());

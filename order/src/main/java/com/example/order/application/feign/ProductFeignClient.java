@@ -1,18 +1,18 @@
 package com.example.order.application.feign;
 
-import com.example.order.dto.ProductPurchaseRequest;
-import com.example.order.dto.ProductPurchaseResponse;
-import com.example.order.dto.ProductRestoreStockRequest;
+import com.example.order.dto.ProductOrderRequest;
+import com.example.order.dto.ProductOrderResponse;
+import com.example.order.dto.ProductRestockRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "api-gateway", path = "/products", contextId = "productClient")
 public interface ProductFeignClient {
 
-    @PostMapping("/internal/purchase")
-    ProductPurchaseResponse purchase(ProductPurchaseRequest productPurchaseRequest);
+    @PostMapping("/internal/order")
+    ProductOrderResponse order(ProductOrderRequest productOrderRequest);
 
-    @PostMapping("/internal/restore-stock")
-    void restoreStock(ProductRestoreStockRequest productRestoreStockRequest);
+    @PostMapping("/internal/restock")
+    void restock(ProductRestockRequest productRestockRequest);
 
 }

@@ -1,11 +1,11 @@
 package com.example.order.dto;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 public record OrderCreateResponse(
         Long orderId,
         Long memberId,
         String status,
-        List<OrderedProductInfo> orderedProductInfos
+        BigDecimal totalAmount
 ) {
 }

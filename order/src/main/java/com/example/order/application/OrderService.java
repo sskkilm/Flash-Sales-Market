@@ -25,29 +25,25 @@ public class OrderService {
     private final ProductFeignClient productFeignClient;
     private final LocalDateTimeHolder localDateTimeHolder;
 
-    private final OrderProductManager manager = new OrderProductManager();
+    private final OrderProductManager orderProductManager = new OrderProductManager();
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
-        Order order = orderRepository.save(Order.create(memberId));
+        Order order = Order.create(memberId);
 
-        ProductPurchaseResponse productPurchaseResponse = productFeignClient.purchase(
-                convertOrderCreateRequestToProductPurchaseRequest(orderCreateRequest)
+        ProductOrderResponse productOrderResponse = productFeignClient.order(
+                mapOrderCreateRequestToProductOrderRequest(orderCreateRequest)
         );
+        List<OrderProduct> orderProducts = mapProductOrderResponseToOrderProducts(productOrderResponse, order);
 
-        List<OrderProduct> orderProducts = orderProductRepository.saveAll(
-                productPurchaseResponse.purchasedProductInfos().stream()
-                        .map(purchasedProductInfo -> OrderProduct.create(
-                                order,
-                                purchasedProductInfo.productId(),
-                                purchasedProductInfo.productName(),
-                                purchasedProductInfo.quantity(),
-                                purchasedProductInfo.purchaseAmount()
-                        )).toList()
-        );
+        BigDecimal totalAmount = orderProductManager.calculateTotalPrice(orderProducts);
 
-        List<OrderedProductInfo> orderedProductInfos = orderProducts.stream().map(OrderedProductInfo::from).toList();
-        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), orderedProductInfos);
+        order.waitingForPayment();
+
+        Order savedOrder = orderRepository.save(order);
+        orderProductRepository.saveAll(orderProducts);
+
+        return new OrderCreateResponse(savedOrder.getId(), savedOrder.getMemberId(), savedOrder.getStatus().name(), totalAmount);
     }
 
     @Transactional
@@ -57,13 +53,13 @@ public class OrderService {
         order.cancel(memberId, localDateTimeHolder.now());
         orderRepository.save(order);
 
-        List<ProductRestoreStockInfo> productRestoreStockInfos = orderProductRepository.findAllByOrder(order)
+        List<ProductRestockInfo> productRestockInfos = orderProductRepository.findAllByOrder(order)
                 .stream().map(
-                        orderProduct -> new ProductRestoreStockInfo(
+                        orderProduct -> new ProductRestockInfo(
                                 orderProduct.getProductId(), orderProduct.getQuantity()
                         )
                 ).toList();
-        productFeignClient.restoreStock(new ProductRestoreStockRequest(productRestoreStockInfos));
+        productFeignClient.restock(new ProductRestockRequest(productRestockInfos));
 
         return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus().name());
     }
@@ -83,11 +79,11 @@ public class OrderService {
         return orders.stream().map(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            BigDecimal totalPrice = manager.calculateTotalPrice(orderProducts);
+            BigDecimal totalPrice = orderProductManager.calculateTotalPrice(orderProducts);
 
-            List<OrderedProductInfo> orderedProductInfos = orderProducts.stream().map(OrderedProductInfo::from).toList();
+            List<OrderProductDto> orderProductDtos = orderProducts.stream().map(OrderProductDto::from).toList();
 
-            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderedProductInfos);
+            return new OrderHistory(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderProductDtos);
 
         }).toList();
     }
@@ -115,12 +111,12 @@ public class OrderService {
         orders.forEach(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            List<ProductRestoreStockInfo> productRestoreStockInfos = orderProducts.stream().map(
-                    orderProduct -> new ProductRestoreStockInfo(
+            List<ProductRestockInfo> productRestockInfos = orderProducts.stream().map(
+                    orderProduct -> new ProductRestockInfo(
                             orderProduct.getProductId(), orderProduct.getQuantity()
                     )
             ).toList();
-            productFeignClient.restoreStock(new ProductRestoreStockRequest(productRestoreStockInfos));
+            productFeignClient.restock(new ProductRestockRequest(productRestockInfos));
 
             order.returned();
         });
@@ -128,13 +124,25 @@ public class OrderService {
         orderRepository.saveAll(orders);
     }
 
-    private ProductPurchaseRequest convertOrderCreateRequestToProductPurchaseRequest(OrderCreateRequest orderCreateRequest) {
-        return new ProductPurchaseRequest(
-                orderCreateRequest.productOrderInfos().stream()
-                        .map(productOrderInfo -> new ProductPurchaseInfo(
+    private ProductOrderRequest mapOrderCreateRequestToProductOrderRequest(OrderCreateRequest orderCreateRequest) {
+        return new ProductOrderRequest(
+                orderCreateRequest.productInfos().stream().map(
+                        productOrderInfo -> new ProductOrderInfo(
                                 productOrderInfo.productId(), productOrderInfo.quantity())
-                        ).toList()
+                ).toList()
         );
+    }
+
+    private static List<OrderProduct> mapProductOrderResponseToOrderProducts(ProductOrderResponse productOrderResponse, Order order) {
+        return productOrderResponse.orderedProductInfos().stream().map(
+                orderedProductInfo -> OrderProduct.create(
+                        order,
+                        orderedProductInfo.productId(),
+                        orderedProductInfo.productName(),
+                        orderedProductInfo.quantity(),
+                        orderedProductInfo.orderAmount()
+                )
+        ).toList();
     }
 
 }
