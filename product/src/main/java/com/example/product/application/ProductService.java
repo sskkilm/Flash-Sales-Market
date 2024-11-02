@@ -60,4 +60,8 @@ public class ProductService {
         return ProductDto.from(product);
     }
 
+    public int getStockQuantity(Long productId) {
+        Product product = productRepository.findById(productId);
+        return product.getStockQuantity();
+    }
 }
