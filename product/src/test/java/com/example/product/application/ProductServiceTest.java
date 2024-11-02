@@ -143,11 +143,11 @@ class ProductServiceTest {
     }
 
     @Test
-    void 존재하지_않는_상품을_구매하면_예외가_발생한다() {
+    void 존재하지_않는_상품을_주문하면_예외가_발생한다() {
         //given
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
                 List.of(
-                        new ProductPurchaseInfo(1L, 1)
+                        new ProductOrderInfo(1L, 1)
                 )
         );
 
@@ -157,15 +157,15 @@ class ProductServiceTest {
         //then
         assertThrows(ProductNotFoundException.class,
                 //when
-                () -> productService.purchase(productPurchaseRequest));
+                () -> productService.order(productOrderRequest));
     }
 
     @Test
-    void 상품_구매_시_재고가_부족하면_예외가_발생한다() {
+    void 상품_주문_시_재고가_부족하면_예외가_발생한다() {
         //given
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
                 List.of(
-                        new ProductPurchaseInfo(1L, 1)
+                        new ProductOrderInfo(1L, 1)
                 )
         );
 
@@ -179,16 +179,16 @@ class ProductServiceTest {
         //then
         assertThrows(InsufficientStockException.class,
                 //when
-                () -> productService.purchase(productPurchaseRequest));
+                () -> productService.order(productOrderRequest));
     }
 
     @Test
-    void 상품을_구매한다() {
+    void 상품을_주문한다() {
         //given
-        ProductPurchaseRequest productPurchaseRequest = new ProductPurchaseRequest(
+        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
                 List.of(
-                        new ProductPurchaseInfo(1L, 1),
-                        new ProductPurchaseInfo(2L, 2)
+                        new ProductOrderInfo(1L, 1),
+                        new ProductOrderInfo(2L, 2)
                 )
         );
 
@@ -210,35 +210,35 @@ class ProductServiceTest {
                 .willReturn(product2);
 
         //when
-        ProductPurchaseResponse response = productService.purchase(productPurchaseRequest);
+        ProductOrderResponse response = productService.order(productOrderRequest);
 
         //then
-        assertEquals(8, product2.getStockQuantity());
-        assertEquals(9, product1.getStockQuantity());
+        assertEquals(10, product2.getStockQuantity());
+        assertEquals(10, product1.getStockQuantity());
 
-        List<PurchasedProductInfo> purchasedProductPurchaseFeignRespons = response.purchasedProductInfos();
+        List<OrderedProductInfo> purchasedProductPurchaseFeignRespons = response.orderedProductInfos();
         assertEquals(2, purchasedProductPurchaseFeignRespons.size());
 
-        PurchasedProductInfo purchasedProductInfo1 = purchasedProductPurchaseFeignRespons.get(0);
-        assertEquals(1L, purchasedProductInfo1.productId());
-        assertEquals(1, purchasedProductInfo1.quantity());
-        assertEquals("name1", purchasedProductInfo1.productName());
-        assertEquals(new BigDecimal("10000"), purchasedProductInfo1.purchaseAmount());
+        OrderedProductInfo orderedProductInfo1 = purchasedProductPurchaseFeignRespons.get(0);
+        assertEquals(1L, orderedProductInfo1.productId());
+        assertEquals(1, orderedProductInfo1.quantity());
+        assertEquals("name1", orderedProductInfo1.productName());
+        assertEquals(new BigDecimal("10000"), orderedProductInfo1.purchaseAmount());
 
-        PurchasedProductInfo purchasedProductInfo2 = purchasedProductPurchaseFeignRespons.get(1);
-        assertEquals(2L, purchasedProductInfo2.productId());
-        assertEquals(2, purchasedProductInfo2.quantity());
-        assertEquals("name2", purchasedProductInfo2.productName());
-        assertEquals(new BigDecimal("40000"), purchasedProductInfo2.purchaseAmount());
+        OrderedProductInfo orderedProductInfo2 = purchasedProductPurchaseFeignRespons.get(1);
+        assertEquals(2L, orderedProductInfo2.productId());
+        assertEquals(2, orderedProductInfo2.quantity());
+        assertEquals("name2", orderedProductInfo2.productName());
+        assertEquals(new BigDecimal("40000"), orderedProductInfo2.purchaseAmount());
     }
 
     @Test
     void 존재하지_않는_상품의_재고를_복구하면_예외가_발생한다() {
         //given
-        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(
+        ProductRestockRequest productRestockRequest = new ProductRestockRequest(
                 List.of(
-                        new ProductRestoreStockInfo(1L, 1),
-                        new ProductRestoreStockInfo(2L, 2)
+                        new ProductRestockInfo(1L, 1),
+                        new ProductRestockInfo(2L, 2)
                 )
         );
 
@@ -248,16 +248,16 @@ class ProductServiceTest {
         //then
         assertThrows(ProductNotFoundException.class,
                 // when
-                () -> productService.restoreStock(productRestoreStockRequest));
+                () -> productService.restock(productRestockRequest));
     }
 
     @Test
     void 상품_재고를_복구한다() {
         //given
-        ProductRestoreStockRequest productRestoreStockRequest = new ProductRestoreStockRequest(
+        ProductRestockRequest productRestockRequest = new ProductRestockRequest(
                 List.of(
-                        new ProductRestoreStockInfo(1L, 1),
-                        new ProductRestoreStockInfo(2L, 2)
+                        new ProductRestockInfo(1L, 1),
+                        new ProductRestockInfo(2L, 2)
                 )
         );
 
@@ -280,7 +280,7 @@ class ProductServiceTest {
                 .willReturn(product2);
 
         //when
-        productService.restoreStock(productRestoreStockRequest);
+        productService.restock(productRestockRequest);
 
         //then
         assertEquals(11, product1.getStockQuantity());

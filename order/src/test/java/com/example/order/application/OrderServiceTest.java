@@ -5,7 +5,6 @@ import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
 import com.example.order.exception.OrderNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.order.domain.OrderStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,23 +46,23 @@ class OrderServiceTest {
     void 상품을_주문한다() {
         //given
         OrderCreateRequest orderCreateRequest = new OrderCreateRequest(
-                List.of(new ProductOrderInfo(1L, 1))
+                List.of(new ProductInfo(1L, 1))
         );
+
+        given(productFeignClient.order(any(ProductOrderRequest.class)))
+                .willReturn(new ProductOrderResponse(List.of(
+                        new OrderedProductInfo(
+                                1L, "name", 1, new BigDecimal("10000")
+                        )
+                )));
 
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.COMPLETED)
+                .status(WAITING_FOR_PAYMENT)
                 .build();
         given(orderRepository.save(any(Order.class)))
                 .willReturn(order);
-
-        given(productFeignClient.purchase(any(ProductPurchaseRequest.class)))
-                .willReturn(new ProductPurchaseResponse(List.of(
-                        new PurchasedProductInfo(
-                                1L, "name", 1, new BigDecimal("10000")
-                        )
-                )));
 
         given(orderProductRepository.saveAll(anyList()))
                 .willReturn(List.of(
@@ -82,15 +82,8 @@ class OrderServiceTest {
         //then
         assertEquals(1L, orderCreateResponse.orderId());
         assertEquals(1L, orderCreateResponse.memberId());
-        assertEquals(OrderStatus.COMPLETED.name(), orderCreateResponse.status());
-
-        assertEquals(1, orderCreateResponse.orderedProductInfos().size());
-
-        OrderedProductInfo orderedProductInfo = orderCreateResponse.orderedProductInfos().getFirst();
-        assertEquals(1L, orderedProductInfo.orderProductId());
-        assertEquals("name", orderedProductInfo.productName());
-        assertEquals(1, orderedProductInfo.quantity());
-        assertEquals(new BigDecimal("10000"), orderedProductInfo.orderAmount());
+        assertEquals(WAITING_FOR_PAYMENT.name(), orderCreateResponse.status());
+        assertEquals(new BigDecimal("10000"), orderCreateResponse.totalAmount());
     }
 
     @Test
@@ -114,7 +107,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.COMPLETED)
+                .status(COMPLETED)
                 .createdAt(orderedDateTime)
                 .build();
         given(orderRepository.findById(1L)).willReturn(order);
@@ -138,7 +131,7 @@ class OrderServiceTest {
         //then
         assertEquals(1L, orderCancelResponse.orderId());
         assertEquals(1L, orderCancelResponse.memberId());
-        assertEquals(OrderStatus.CANCELED.name(), orderCancelResponse.status());
+        assertEquals(CANCELED.name(), orderCancelResponse.status());
     }
 
     @Test
@@ -164,7 +157,7 @@ class OrderServiceTest {
                         Order.builder()
                                 .id(1L)
                                 .memberId(1L)
-                                .status(OrderStatus.DELIVERED)
+                                .status(DELIVERED)
                                 .updatedAt(deliveryCompletedDateTime)
                                 .build()
                 );
@@ -178,7 +171,7 @@ class OrderServiceTest {
         //then
         assertEquals(1L, orderReturnResponse.orderId());
         assertEquals(1L, orderReturnResponse.memberId());
-        assertEquals(OrderStatus.RETURN_IN_PROGRESS.name(), orderReturnResponse.status());
+        assertEquals(RETURN_IN_PROGRESS.name(), orderReturnResponse.status());
     }
 
     @Test
@@ -187,7 +180,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(OrderStatus.COMPLETED)
+                .status(COMPLETED)
                 .build();
         given(orderRepository.findAllByMemberId(1L))
                 .willReturn(List.of(order));
@@ -218,23 +211,23 @@ class OrderServiceTest {
         OrderHistory orderHistory = orderHistories.getFirst();
         assertEquals(1L, orderHistory.orderId());
         assertEquals(1L, orderHistory.memberId());
-        assertEquals(OrderStatus.COMPLETED.name(), orderHistory.status());
+        assertEquals(COMPLETED.name(), orderHistory.status());
         assertEquals(new BigDecimal("30000"), orderHistory.totalPrice());
 
-        List<OrderedProductInfo> orderedProductInfos = orderHistory.orderProducts();
-        assertEquals(2, orderedProductInfos.size());
+        List<OrderProductDto> orderProductDtos = orderHistory.orderProducts();
+        assertEquals(2, orderProductDtos.size());
 
-        OrderedProductInfo orderedProductInfo1 = orderedProductInfos.get(0);
-        assertEquals(1L, orderedProductInfo1.orderProductId());
-        assertEquals("name1", orderedProductInfo1.productName());
-        assertEquals(1, orderedProductInfo1.quantity());
-        assertEquals(new BigDecimal("10000"), orderedProductInfo1.orderAmount());
+        OrderProductDto orderProductDto1 = orderProductDtos.get(0);
+        assertEquals(1L, orderProductDto1.orderProductId());
+        assertEquals("name1", orderProductDto1.productName());
+        assertEquals(1, orderProductDto1.quantity());
+        assertEquals(new BigDecimal("10000"), orderProductDto1.orderAmount());
 
-        OrderedProductInfo orderedProductInfo2 = orderedProductInfos.get(1);
-        assertEquals(2L, orderedProductInfo2.orderProductId());
-        assertEquals("name2", orderedProductInfo2.productName());
-        assertEquals(2, orderedProductInfo2.quantity());
-        assertEquals(new BigDecimal("20000"), orderedProductInfo2.orderAmount());
+        OrderProductDto orderProductDto2 = orderProductDtos.get(1);
+        assertEquals(2L, orderProductDto2.orderProductId());
+        assertEquals("name2", orderProductDto2.productName());
+        assertEquals(2, orderProductDto2.quantity());
+        assertEquals(new BigDecimal("20000"), orderProductDto2.orderAmount());
     }
 
     @Test
@@ -250,11 +243,11 @@ class OrderServiceTest {
         LocalDateTime today = now.toLocalDate().atStartOfDay();
 
         given(orderRepository.updateOrderStatusBetween(
-                OrderStatus.COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS, yesterday, today
+                COMPLETED, DELIVERY_IN_PROGRESS, yesterday, today
         )).willReturn(10);
 
         //when
-        int count = orderService.updateOrderStatusFromOneDayAgo(OrderStatus.COMPLETED, OrderStatus.DELIVERY_IN_PROGRESS);
+        int count = orderService.updateOrderStatusFromOneDayAgo(COMPLETED, DELIVERY_IN_PROGRESS);
 
         //then
         assertEquals(10, count);
@@ -273,9 +266,9 @@ class OrderServiceTest {
         LocalDateTime today = now.toLocalDate().atStartOfDay();
 
         Order order = Order.builder()
-                .status(OrderStatus.RETURN_IN_PROGRESS)
+                .status(RETURN_IN_PROGRESS)
                 .build();
-        given(orderRepository.findAllByOrderStatusBetween(OrderStatus.RETURN_IN_PROGRESS, yesterday, today))
+        given(orderRepository.findAllByOrderStatusBetween(RETURN_IN_PROGRESS, yesterday, today))
                 .willReturn(
                         List.of(order)
                 );
@@ -293,6 +286,6 @@ class OrderServiceTest {
         orderService.returnProcessing();
 
         //then
-        assertEquals(OrderStatus.RETURNED, order.getStatus());
+        assertEquals(RETURNED, order.getStatus());
     }
 }
