@@ -9,6 +9,8 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static com.example.order.domain.OrderStatus.*;
+
 @Getter
 @Builder
 public class Order {
@@ -24,24 +26,28 @@ public class Order {
     public static Order create(Long memberId) {
         return Order.builder()
                 .memberId(memberId)
-                .status(OrderStatus.COMPLETED)
+                .status(IN_PROGRESS)
                 .build();
+    }
+
+    public void waitingForPayment() {
+        this.status = WAITING_FOR_PAYMENT;
     }
 
     public void cancel(Long memberId, LocalDateTime canceledDateTime) {
         validateOrderBy(memberId);
         validateCanBeCancelled(canceledDateTime);
-        this.status = OrderStatus.CANCELED;
+        this.status = CANCELED;
     }
 
     public void returns(Long memberId, LocalDateTime returnedDateTime) {
         validateOrderBy(memberId);
         validateCanBeReturned(returnedDateTime);
-        this.status = OrderStatus.RETURN_IN_PROGRESS;
+        this.status = RETURN_IN_PROGRESS;
     }
 
     public void returned() {
-        this.status = OrderStatus.RETURNED;
+        this.status = RETURNED;
     }
 
     private void validateOrderBy(Long memberId) {
@@ -65,7 +71,7 @@ public class Order {
     }
 
     private boolean isCompleted() {
-        return this.status == OrderStatus.COMPLETED;
+        return this.status == COMPLETED;
     }
 
     private boolean isBeforeCancellablePeriod(LocalDateTime canceledDateTime) {
@@ -80,7 +86,7 @@ public class Order {
     }
 
     private boolean isDelivered() {
-        return this.status == OrderStatus.DELIVERED;
+        return this.status == DELIVERED;
     }
 
     private boolean isBeforeReturnablePeriod(LocalDateTime returnedDateTime) {
