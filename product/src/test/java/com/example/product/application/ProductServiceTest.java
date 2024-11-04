@@ -27,6 +27,9 @@ class ProductServiceTest {
     @Mock
     ProductRepository productRepository;
 
+    @Mock
+    LocalDateTimeHolder localDateTimeHolder;
+
     @InjectMocks
     ProductService productService;
 
@@ -44,7 +47,12 @@ class ProductServiceTest {
                 .price(new BigDecimal("20000"))
                 .build();
 
-        given(productRepository.findAll())
+        LocalDateTime now = LocalDateTime.of(
+                2024, 11, 4, 12, 0, 0
+        );
+        given(localDateTimeHolder.now())
+                .willReturn(now);
+        given(productRepository.findAllSellableProduct(now))
                 .willReturn(List.of(product1, product2));
 
         //when

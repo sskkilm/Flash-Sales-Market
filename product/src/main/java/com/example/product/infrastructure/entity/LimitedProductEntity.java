@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @Getter
-@Entity
+@Entity(name = "LimitedProduct")
 @DiscriminatorValue("LIMITED")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder

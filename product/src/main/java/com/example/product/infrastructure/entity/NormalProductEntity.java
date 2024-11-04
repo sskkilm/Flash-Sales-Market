@@ -8,7 +8,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Entity
+@Entity(name = "NormalProduct")
 @DiscriminatorValue("NORMAL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder

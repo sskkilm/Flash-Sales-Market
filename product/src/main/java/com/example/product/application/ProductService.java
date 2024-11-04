@@ -14,10 +14,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final LocalDateTimeHolder localDateTimeHolder;
     private final AmountCalculator calculator = new AmountCalculator();
 
     public List<ProductDto> getProductList() {
-        return productRepository.findAll()
+        return productRepository.findAllSellableProduct(localDateTimeHolder.now())
                 .stream().map(ProductDto::from).toList();
     }
 

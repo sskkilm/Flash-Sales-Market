@@ -18,21 +18,28 @@ public class TestProductDataInit {
 
     @PostConstruct
     public void init() {
+        LocalDateTime now = LocalDateTime.now();
+
         NormalProduct product1 = NormalProduct.builder()
-                .name("normal product")
+                .name("normal product1")
                 .price(new BigDecimal("10000"))
                 .stockQuantity(100)
                 .build();
         LimitedProduct product2 = LimitedProduct.builder()
-                .name("limited product")
+                .name("limited product2")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10)
-                .openTime(LocalDateTime.of(
-                        2024, 11, 2, 12, 0, 0
-                ))
+                .openTime(now.minusMinutes(10))
+                .build();
+        LimitedProduct product3 = LimitedProduct.builder()
+                .name("limited product3")
+                .price(new BigDecimal("20000"))
+                .stockQuantity(10)
+                .openTime(now.plusMinutes(10))
                 .build();
 
         productRepository.save(product1);
         productRepository.save(product2);
+        productRepository.save(product3);
     }
 }

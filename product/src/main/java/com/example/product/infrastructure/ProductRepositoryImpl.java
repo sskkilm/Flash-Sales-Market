@@ -8,6 +8,7 @@ import com.example.product.infrastructure.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -15,13 +16,8 @@ import java.util.List;
 public class ProductRepositoryImpl implements ProductRepository {
 
     private final ProductJpaRepository productJpaRepository;
+    private final ProductQueryRepository productQueryRepository;
     private final ProductMapper productMapper;
-
-    @Override
-    public List<Product> findAll() {
-        return productJpaRepository.findAll()
-                .stream().map(ProductEntity::toModel).toList();
-    }
 
     @Override
     public Product findById(Long id) {
@@ -32,6 +28,12 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Product save(Product product) {
         return productJpaRepository.save(productMapper.toEntity(product)).toModel();
+    }
+
+    @Override
+    public List<Product> findAllSellableProduct(LocalDateTime now) {
+        return productQueryRepository.findAllSellableProduct(now)
+                .stream().map(ProductEntity::toModel).toList();
     }
 
 }
