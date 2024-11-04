@@ -26,12 +26,8 @@ public class Order {
     public static Order create(Long memberId) {
         return Order.builder()
                 .memberId(memberId)
-                .status(IN_PROGRESS)
+                .status(WAITING_FOR_PAYMENT)
                 .build();
-    }
-
-    public void waitingForPayment() {
-        this.status = WAITING_FOR_PAYMENT;
     }
 
     public void cancel(Long memberId, LocalDateTime canceledDateTime) {

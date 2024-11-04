@@ -23,23 +23,9 @@ class OrderTest {
         //then
         assertNull(order.getId());
         assertEquals(1L, order.getMemberId());
-        assertEquals(IN_PROGRESS, order.getStatus());
+        assertEquals(WAITING_FOR_PAYMENT, order.getStatus());
         assertNull(order.getCreatedAt());
         assertNull(order.getUpdatedAt());
-    }
-
-    @Test
-    void 결제_대기() {
-        //given
-        Order order = Order.builder()
-                .status(IN_PROGRESS)
-                .build();
-
-        //when
-        order.waitingForPayment();
-
-        //then
-        assertEquals(WAITING_FOR_PAYMENT, order.getStatus());
     }
 
     @Test

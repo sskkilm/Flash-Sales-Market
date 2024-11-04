@@ -21,7 +21,6 @@ import static com.example.order.domain.OrderStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,18 +62,6 @@ class OrderServiceTest {
                 .build();
         given(orderRepository.save(any(Order.class)))
                 .willReturn(order);
-
-        given(orderProductRepository.saveAll(anyList()))
-                .willReturn(List.of(
-                        OrderProduct.builder()
-                                .id(1L)
-                                .order(order)
-                                .productId(1L)
-                                .name("name")
-                                .quantity(1)
-                                .orderAmount(new BigDecimal("10000"))
-                                .build()
-                ));
 
         //when
         OrderCreateResponse orderCreateResponse = orderService.create(1L, orderCreateRequest);

@@ -29,21 +29,19 @@ public class OrderService {
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
-        Order order = Order.create(memberId);
 
         ProductOrderResponse productOrderResponse = productFeignClient.order(
                 mapOrderCreateRequestToProductOrderRequest(orderCreateRequest)
         );
+
+        Order order = orderRepository.save(Order.create(memberId));
+
         List<OrderProduct> orderProducts = mapProductOrderResponseToOrderProducts(productOrderResponse, order);
+        orderProductRepository.saveAll(orderProducts);
 
         BigDecimal totalAmount = orderProductManager.calculateTotalPrice(orderProducts);
 
-        order.waitingForPayment();
-
-        Order savedOrder = orderRepository.save(order);
-        orderProductRepository.saveAll(orderProducts);
-
-        return new OrderCreateResponse(savedOrder.getId(), savedOrder.getMemberId(), savedOrder.getStatus().name(), totalAmount);
+        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), totalAmount);
     }
 
     @Transactional
