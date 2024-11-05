@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient
+@FeignClient(name = "api-gateway", path = "/orders", contextId = "orderClient")
 public interface OrderFeignClient {
 
-    @GetMapping("/orders/internal/{memberId}/validate")
+    @GetMapping("/internal/{memberId}/validate")
     boolean validateOrderInfo(@PathVariable Long memberId, OrderInfo orderInfo);
 
 }

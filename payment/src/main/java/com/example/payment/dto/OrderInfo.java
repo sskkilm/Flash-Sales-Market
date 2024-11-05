@@ -1,9 +1,11 @@
 package com.example.payment.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 
 public record OrderInfo(
-        Long orderId,
-        BigDecimal totalAmount
+        @NotNull Long orderId,
+        @NotNull BigDecimal totalAmount
 ) {
 }

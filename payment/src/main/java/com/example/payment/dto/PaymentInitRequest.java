@@ -1,7 +1,9 @@
 package com.example.payment.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record PaymentInitRequest(
-        OrderInfo orderInfo,
-        PaymentInfo paymentInfo
+        @NotNull OrderInfo orderInfo,
+        @NotNull PaymentInfo paymentInfo
 ) {
 }

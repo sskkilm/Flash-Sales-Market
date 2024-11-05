@@ -5,12 +5,13 @@ import com.example.payment.domain.Payment;
 import com.example.payment.dto.*;
 import com.example.payment.exception.PaymentServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.example.payment.exception.error.ErrorCode.INVALID_ORDER_INFO;
 import static com.example.payment.exception.error.ErrorCode.PAYMENT_FAILED;
 
-
+@Service
 @RequiredArgsConstructor
 public class PaymentService {
 
