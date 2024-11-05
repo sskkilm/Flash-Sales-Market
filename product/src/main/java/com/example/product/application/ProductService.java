@@ -28,7 +28,7 @@ public class ProductService {
         return ProductDetails.from(product);
     }
 
-    public ProductOrderResponse order(ProductOrderRequest productOrderRequest) {
+    public ProductOrderResponse getProductOrderInfo(ProductOrderRequest productOrderRequest) {
         List<OrderedProductInfo> orderedProductInfos = productOrderRequest.productOrderInfos().stream()
                 .map(request -> {
                     Product product = productRepository.findById(request.productId());

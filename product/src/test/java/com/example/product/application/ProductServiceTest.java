@@ -165,7 +165,7 @@ class ProductServiceTest {
         //then
         assertThrows(ProductNotFoundException.class,
                 //when
-                () -> productService.order(productOrderRequest));
+                () -> productService.getProductOrderInfo(productOrderRequest));
     }
 
     @Test
@@ -187,7 +187,7 @@ class ProductServiceTest {
         //then
         assertThrows(InsufficientStockException.class,
                 //when
-                () -> productService.order(productOrderRequest));
+                () -> productService.getProductOrderInfo(productOrderRequest));
     }
 
     @Test
@@ -218,7 +218,7 @@ class ProductServiceTest {
                 .willReturn(product2);
 
         //when
-        ProductOrderResponse response = productService.order(productOrderRequest);
+        ProductOrderResponse response = productService.getProductOrderInfo(productOrderRequest);
 
         //then
         assertEquals(10, product2.getStockQuantity());
@@ -231,13 +231,13 @@ class ProductServiceTest {
         assertEquals(1L, orderedProductInfo1.productId());
         assertEquals(1, orderedProductInfo1.quantity());
         assertEquals("name1", orderedProductInfo1.productName());
-        assertEquals(new BigDecimal("10000"), orderedProductInfo1.purchaseAmount());
+        assertEquals(new BigDecimal("10000"), orderedProductInfo1.amount());
 
         OrderedProductInfo orderedProductInfo2 = purchasedProductPurchaseFeignRespons.get(1);
         assertEquals(2L, orderedProductInfo2.productId());
         assertEquals(2, orderedProductInfo2.quantity());
         assertEquals("name2", orderedProductInfo2.productName());
-        assertEquals(new BigDecimal("40000"), orderedProductInfo2.purchaseAmount());
+        assertEquals(new BigDecimal("40000"), orderedProductInfo2.amount());
     }
 
     @Test

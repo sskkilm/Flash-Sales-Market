@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface ProductFeignClient {
 
     @PostMapping("/internal/order")
-    ProductOrderResponse order(ProductOrderRequest productOrderRequest);
+    ProductOrderResponse getProductOrderInfo(ProductOrderRequest productOrderRequest);
 
     @PostMapping("/internal/restock")
     void restock(ProductRestockRequest productRestockRequest);
