@@ -17,6 +17,7 @@ public class Payment {
     private String paymentKey;
     private PaymentStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static Payment create(Long orderId, BigDecimal amount) {
         return Payment.builder()
