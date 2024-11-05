@@ -13,7 +13,7 @@ public class OrderInternalController {
 
     private final OrderService orderService;
 
-    @GetMapping("/orders/internal/{memberId}/validate")
+    @PostMapping("/{memberId}/validate")
     public boolean validateOrderInfo(
             @PathVariable Long memberId,
             @RequestBody @Valid OrderInfo orderInfo

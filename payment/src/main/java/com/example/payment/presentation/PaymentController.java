@@ -17,7 +17,7 @@ public class PaymentController {
     @PostMapping("/init/{memberId}")
     public PaymentInitResponse init(
             @PathVariable Long memberId,
-            @RequestBody @Valid PaymentInitRequest request) {
-        return paymentService.init(memberId, request);
+            @RequestBody @Valid PaymentInitRequest paymentInitRequest) {
+        return paymentService.init(memberId, paymentInitRequest);
     }
 }

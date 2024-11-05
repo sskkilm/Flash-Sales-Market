@@ -34,7 +34,7 @@ public class PaymentEntity {
     private String paymentKey;
 
     @Column(nullable = false)
-    private PaymentStatus status;
+    private String status;
 
     @CreatedDate
     @Column(updatable = false)
@@ -49,7 +49,7 @@ public class PaymentEntity {
                 .orderId(payment.getOrderId())
                 .amount(payment.getAmount())
                 .paymentKey(payment.getPaymentKey())
-                .status(payment.getStatus())
+                .status(payment.getStatus().name())
                 .createdAt(payment.getCreatedAt())
                 .updatedAt(payment.getUpdatedAt())
                 .build();
@@ -61,7 +61,7 @@ public class PaymentEntity {
                 .orderId(this.orderId)
                 .amount(this.amount)
                 .paymentKey(this.paymentKey)
-                .status(this.status)
+                .status(PaymentStatus.valueOf(this.status))
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();
