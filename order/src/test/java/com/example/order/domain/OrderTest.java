@@ -23,7 +23,7 @@ class OrderTest {
         //then
         assertNull(order.getId());
         assertEquals(1L, order.getMemberId());
-        assertEquals(WAITING_FOR_PAYMENT, order.getStatus());
+        assertEquals(PENDING, order.getStatus());
         assertNull(order.getCreatedAt());
         assertNull(order.getUpdatedAt());
     }
@@ -172,5 +172,33 @@ class OrderTest {
 
         //then
         assertEquals(RETURNED, order.getStatus());
+    }
+
+    @Test
+    void 주문과_회원_정보가_일치하면_true를_반환한다() {
+        //given
+        Order order = Order.builder()
+                .memberId(1L)
+                .build();
+
+        //when
+        boolean result = order.isNotOrderBy(1L);
+
+        //then
+        assertTrue(result);
+    }
+
+    @Test
+    void 주문과_회원_정보가_일치하지_않으면_false를_반환한다() {
+        //given
+        Order order = Order.builder()
+                .memberId(1L)
+                .build();
+
+        //when
+        boolean result = order.isNotOrderBy(2L);
+
+        //then
+        assertFalse(result);
     }
 }
