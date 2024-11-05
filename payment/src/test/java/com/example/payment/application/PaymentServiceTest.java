@@ -34,12 +34,30 @@ class PaymentServiceTest {
     PaymentService paymentService;
 
     @Test
+    void 결제_진입_시_이미_결제_정보가_존재하면_예외가_발생한다() {
+        //given
+        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("10000"));
+        PaymentInfo paymentInfo = new PaymentInfo(true);
+        PaymentInitRequest request = new PaymentInitRequest(orderInfo, paymentInfo);
+
+        given(paymentRepository.existsByOrderId(1L))
+                .willReturn(true);
+
+        //then
+        assertThrows(PaymentServiceException.class,
+                // when
+                () -> paymentService.init(1L, request));
+    }
+
+    @Test
     void 결제_진입_시_주문_정보가_유효하지_않으면_예외가_발생한다() {
         //given
         OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("10000"));
         PaymentInfo paymentInfo = new PaymentInfo(true);
         PaymentInitRequest request = new PaymentInitRequest(orderInfo, paymentInfo);
 
+        given(paymentRepository.existsByOrderId(1L))
+                .willReturn(false);
         given(orderFeignClient.validateOrderInfo(1L, orderInfo))
                 .willReturn(false);
 
@@ -56,6 +74,8 @@ class PaymentServiceTest {
         PaymentInfo paymentInfo = new PaymentInfo(true);
         PaymentInitRequest request = new PaymentInitRequest(orderInfo, paymentInfo);
 
+        given(paymentRepository.existsByOrderId(1L))
+                .willReturn(false);
         given(orderFeignClient.validateOrderInfo(1L, orderInfo))
                 .willReturn(true);
         given(pgService.requestPayment(any(PGPaymentRequest.class)))
@@ -74,6 +94,8 @@ class PaymentServiceTest {
         PaymentInfo paymentInfo = new PaymentInfo(true);
         PaymentInitRequest request = new PaymentInitRequest(orderInfo, paymentInfo);
 
+        given(paymentRepository.existsByOrderId(1L))
+                .willReturn(false);
         given(orderFeignClient.validateOrderInfo(1L, orderInfo))
                 .willReturn(true);
         String paymentKey = "paymentKey";
