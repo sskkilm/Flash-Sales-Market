@@ -30,7 +30,7 @@ public class OrderService {
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
 
-        ProductOrderResponse productOrderResponse = productFeignClient.order(
+        ProductOrderResponse productOrderResponse = productFeignClient.getProductOrderInfo(
                 mapOrderCreateRequestToProductOrderRequest(orderCreateRequest)
         );
 
@@ -39,9 +39,9 @@ public class OrderService {
         List<OrderProduct> orderProducts = mapProductOrderResponseToOrderProducts(productOrderResponse, order);
         orderProductRepository.saveAll(orderProducts);
 
-        BigDecimal totalAmount = orderProductManager.calculateTotalPrice(orderProducts);
+        BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
 
-        return new OrderCreateResponse(order.getId(), order.getMemberId(), order.getStatus().name(), totalAmount);
+        return new OrderCreateResponse(order.getId(), totalAmount);
     }
 
     @Transactional
@@ -77,7 +77,7 @@ public class OrderService {
         return orders.stream().map(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            BigDecimal totalPrice = orderProductManager.calculateTotalPrice(orderProducts);
+            BigDecimal totalPrice = orderProductManager.calculateTotalAmount(orderProducts);
 
             List<OrderProductDto> orderProductDtos = orderProducts.stream().map(OrderProductDto::from).toList();
 
@@ -138,9 +138,28 @@ public class OrderService {
                         orderedProductInfo.productId(),
                         orderedProductInfo.productName(),
                         orderedProductInfo.quantity(),
-                        orderedProductInfo.orderAmount()
+                        orderedProductInfo.amount()
                 )
         ).toList();
     }
 
+    public boolean validateOrderInfo(Long memberId, OrderInfo orderInfo) {
+        Long orderId = orderInfo.orderId();
+        Order order = orderRepository.findById(orderId);
+        if (order.isNotOrderBy(memberId)) {
+            return false;
+        }
+
+        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
+        if (totalAmountMisMatch(orderInfo, totalAmount)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean totalAmountMisMatch(OrderInfo orderInfo, BigDecimal totalAmount) {
+        return orderInfo.totalAmount().compareTo(totalAmount) != 0;
+    }
 }

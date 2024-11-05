@@ -26,7 +26,7 @@ public class Order {
     public static Order create(Long memberId) {
         return Order.builder()
                 .memberId(memberId)
-                .status(WAITING_FOR_PAYMENT)
+                .status(PENDING)
                 .build();
     }
 
@@ -44,6 +44,10 @@ public class Order {
 
     public void returned() {
         this.status = RETURNED;
+    }
+
+    public boolean isNotOrderBy(Long memberId) {
+        return !Objects.equals(this.memberId, memberId);
     }
 
     private void validateOrderBy(Long memberId) {
@@ -88,5 +92,4 @@ public class Order {
     private boolean isBeforeReturnablePeriod(LocalDateTime returnedDateTime) {
         return this.updatedAt.plusDays(RETURNABLE_PERIOD_AFTER_DELIVERY).isAfter(returnedDateTime);
     }
-
 }
