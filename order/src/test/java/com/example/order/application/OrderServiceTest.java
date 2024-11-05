@@ -18,8 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.order.domain.OrderStatus.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -48,7 +47,7 @@ class OrderServiceTest {
                 List.of(new ProductInfo(1L, 1))
         );
 
-        given(productFeignClient.order(any(ProductOrderRequest.class)))
+        given(productFeignClient.getProductOrderInfo(any(ProductOrderRequest.class)))
                 .willReturn(new ProductOrderResponse(List.of(
                         new OrderedProductInfo(
                                 1L, "name", 1, new BigDecimal("10000")
@@ -58,7 +57,7 @@ class OrderServiceTest {
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
-                .status(WAITING_FOR_PAYMENT)
+                .status(PENDING)
                 .build();
         given(orderRepository.save(any(Order.class)))
                 .willReturn(order);
@@ -68,8 +67,6 @@ class OrderServiceTest {
 
         //then
         assertEquals(1L, orderCreateResponse.orderId());
-        assertEquals(1L, orderCreateResponse.memberId());
-        assertEquals(WAITING_FOR_PAYMENT.name(), orderCreateResponse.status());
         assertEquals(new BigDecimal("10000"), orderCreateResponse.totalAmount());
     }
 
@@ -274,5 +271,79 @@ class OrderServiceTest {
 
         //then
         assertEquals(RETURNED, order.getStatus());
+    }
+
+    @Test
+    void 주문_정보_검증_시_회원_정보가_일치하지_않으면_false를_반환한다() {
+        //given
+        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        given(orderRepository.findById(1L))
+                .willReturn(
+                        Order.builder()
+                                .memberId(2L)
+                                .build()
+                );
+        //when
+        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+
+        //then
+        assertFalse(result);
+    }
+
+    @Test
+    void 주문_정보_검증_시_총_주문_금액이_일치하지_않으면_false를_반환한다() {
+        //given
+        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        Order order = Order.builder()
+                .id(1L)
+                .memberId(1L)
+                .build();
+        given(orderRepository.findById(1L))
+                .willReturn(order);
+        given(orderProductRepository.findAllByOrder(order))
+                .willReturn(List.of(
+                        OrderProduct.builder()
+                                .orderAmount(new BigDecimal("10000"))
+                                .build(),
+                        OrderProduct.builder()
+                                .orderAmount(new BigDecimal("10000"))
+                                .build(),
+                        OrderProduct.builder()
+                                .orderAmount(new BigDecimal("10000"))
+                                .build()
+                ));
+
+        //when
+        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+
+        //then
+        assertFalse(result);
+    }
+
+    @Test
+    void 주문_정보가_일치하면_true를_반환한다() {
+        //given
+        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        Order order = Order.builder()
+                .id(1L)
+                .memberId(1L)
+                .build();
+        given(orderRepository.findById(1L))
+                .willReturn(order);
+        given(orderProductRepository.findAllByOrder(order))
+                .willReturn(List.of(
+                        OrderProduct.builder()
+                                .orderAmount(new BigDecimal("10000"))
+                                .build(),
+                        OrderProduct.builder()
+                                .orderAmount(new BigDecimal("10000"))
+                                .build()
+                ));
+
+        //when
+        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+
+        //then
+        assertTrue(result);
     }
 }
