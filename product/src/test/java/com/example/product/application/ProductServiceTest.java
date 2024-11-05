@@ -107,20 +107,24 @@ class ProductServiceTest {
                 .willReturn(product);
 
         //when
-        ProductDetails productDetails = productService.getProductDetails(1L);
+        Object productDetails = productService.getProductDetails(1L).data();
+        NormalProductDetails normalProductDetails = (NormalProductDetails) productDetails;
 
         //then
-        assertEquals(1L, productDetails.productId());
-        assertEquals("name", productDetails.name());
-        assertEquals(new BigDecimal("10000"), productDetails.price());
-        assertEquals(ProductType.NORMAL.name(), productDetails.type());
-        assertEquals(createdAt, productDetails.createdAt());
-        assertEquals(updatedAt, productDetails.updatedAt());
+        assertEquals(1L, normalProductDetails.productId());
+        assertEquals("name", normalProductDetails.name());
+        assertEquals(new BigDecimal("10000"), normalProductDetails.price());
+        assertEquals(ProductType.NORMAL.name(), normalProductDetails.type());
+        assertEquals(createdAt, normalProductDetails.createdAt());
+        assertEquals(updatedAt, normalProductDetails.updatedAt());
     }
 
     @Test
     void 한정판_상품의_상세_정보를_조회한다() {
         //given
+        LocalDateTime openTime = LocalDateTime.of(
+                2024, 11, 2, 12, 0, 0
+        );
         LocalDateTime createdAt = LocalDateTime.of(
                 2024, 11, 2, 12, 0, 0
         );
@@ -131,6 +135,7 @@ class ProductServiceTest {
                 .id(1L)
                 .name("name")
                 .price(new BigDecimal("10000"))
+                .openTime(openTime)
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
@@ -139,15 +144,18 @@ class ProductServiceTest {
                 .willReturn(product);
 
         //when
-        ProductDetails productDetails = productService.getProductDetails(1L);
+        Object productDetails = productService.getProductDetails(1L).data();
+        LimitedProductDetails limitedProductDetails = (LimitedProductDetails) productDetails;
+
 
         //then
-        assertEquals(1L, productDetails.productId());
-        assertEquals("name", productDetails.name());
-        assertEquals(new BigDecimal("10000"), productDetails.price());
-        assertEquals(ProductType.LIMITED.name(), productDetails.type());
-        assertEquals(createdAt, productDetails.createdAt());
-        assertEquals(updatedAt, productDetails.updatedAt());
+        assertEquals(1L, limitedProductDetails.productId());
+        assertEquals("name", limitedProductDetails.name());
+        assertEquals(new BigDecimal("10000"), limitedProductDetails.price());
+        assertEquals(ProductType.LIMITED.name(), limitedProductDetails.type());
+        assertEquals(createdAt, limitedProductDetails.openTime());
+        assertEquals(createdAt, limitedProductDetails.createdAt());
+        assertEquals(updatedAt, limitedProductDetails.updatedAt());
     }
 
     @Test

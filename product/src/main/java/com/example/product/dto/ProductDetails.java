@@ -1,26 +1,22 @@
 package com.example.product.dto;
 
+import com.example.product.domain.LimitedProduct;
+import com.example.product.domain.NormalProduct;
 import com.example.product.domain.Product;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+public record ProductDetails<T>(T data) {
 
-public record ProductDetails(
-        Long productId,
-        String name,
-        BigDecimal price,
-        String type,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
-    public static ProductDetails from(Product product) {
-        return new ProductDetails(
-                product.getId(),
-                product.getName(),
-                product.getPrice(),
-                product.getType().name(),
-                product.getCreatedAt(),
-                product.getUpdatedAt()
-        );
+    public static ProductDetails<?> of(Product product) {
+        if (product instanceof NormalProduct normalProduct) {
+            return new ProductDetails<>(
+                    NormalProductDetails.from(normalProduct)
+            );
+        }
+        if (product instanceof LimitedProduct limitedProduct) {
+            return new ProductDetails<>(
+                    LimitedProductDetails.from(limitedProduct)
+            );
+        }
+        throw new RuntimeException("Not supported product");
     }
 }

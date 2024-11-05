@@ -22,10 +22,9 @@ public class ProductService {
                 .stream().map(ProductDto::from).toList();
     }
 
-    public ProductDetails getProductDetails(Long id) {
+    public ProductDetails<?> getProductDetails(Long id) {
         Product product = productRepository.findById(id);
-
-        return ProductDetails.from(product);
+        return ProductDetails.of(product);
     }
 
     public ProductOrderResponse getProductOrderInfo(ProductOrderRequest productOrderRequest) {
