@@ -5,7 +5,7 @@ import java.util.List;
 
 public class OrderProductManager {
 
-    public BigDecimal calculateTotalPrice(List<OrderProduct> orderProducts) {
+    public BigDecimal calculateTotalAmount(List<OrderProduct> orderProducts) {
         return orderProducts.stream()
                 .map(OrderProduct::getOrderAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

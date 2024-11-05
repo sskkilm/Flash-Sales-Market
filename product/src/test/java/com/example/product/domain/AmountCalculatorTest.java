@@ -17,7 +17,7 @@ class AmountCalculatorTest {
                 .build();
 
         //when
-        BigDecimal calculatedAmount = calculator.calculateAmount(product, 3);
+        BigDecimal calculatedAmount = calculator.calculate(product, 3);
 
         //then
         assertEquals(new BigDecimal("30000"), calculatedAmount);
@@ -32,7 +32,7 @@ class AmountCalculatorTest {
                 .build();
 
         //when
-        BigDecimal calculatedAmount = calculator.calculateAmount(product, 3);
+        BigDecimal calculatedAmount = calculator.calculate(product, 3);
 
         //then
         assertEquals(new BigDecimal("30000"), calculatedAmount);

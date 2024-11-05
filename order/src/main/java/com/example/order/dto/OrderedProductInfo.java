@@ -6,6 +6,6 @@ public record OrderedProductInfo(
         Long productId,
         String productName,
         int quantity,
-        BigDecimal orderAmount
+        BigDecimal amount
 ) {
 }

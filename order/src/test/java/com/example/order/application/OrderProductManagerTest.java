@@ -30,7 +30,7 @@ class OrderProductManagerTest {
 
         //when
 
-        BigDecimal totalPrice = manager.calculateTotalPrice(orderProducts);
+        BigDecimal totalPrice = manager.calculateTotalAmount(orderProducts);
 
         //then
         assertEquals(new BigDecimal("60000"), totalPrice);

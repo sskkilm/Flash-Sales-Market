@@ -15,7 +15,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final LocalDateTimeHolder localDateTimeHolder;
-    private final AmountCalculator calculator = new AmountCalculator();
+    private final AmountCalculator amountCalculator = new AmountCalculator();
 
     public List<ProductDto> getProductList() {
         return productRepository.findAllSellableProduct(localDateTimeHolder.now())
@@ -35,9 +35,9 @@ public class ProductService {
 
                     product.checkOutOfStock(request.quantity());
 
-                    BigDecimal calculatedAmount = calculator.calculateAmount(product, request.quantity());
+                    BigDecimal amount = amountCalculator.calculate(product, request.quantity());
 
-                    return new OrderedProductInfo(product.getId(), product.getName(), request.quantity(), calculatedAmount);
+                    return new OrderedProductInfo(product.getId(), product.getName(), request.quantity(), amount);
                 }).toList();
 
         return new ProductOrderResponse(orderedProductInfos);
