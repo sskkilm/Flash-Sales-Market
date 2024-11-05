@@ -16,4 +16,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public Payment save(Payment payment) {
         return paymentJpaRepository.save(PaymentEntity.from(payment)).toModel();
     }
+
+    @Override
+    public boolean existsByOrderId(Long orderId) {
+        return paymentJpaRepository.existsByOrderId(orderId);
+    }
 }

@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.payment.exception.error.ErrorCode.INVALID_ORDER_INFO;
-import static com.example.payment.exception.error.ErrorCode.PAYMENT_FAILED;
+import static com.example.payment.exception.error.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +23,10 @@ public class PaymentService {
 
         // 주문 정보 검증
         OrderInfo orderInfo = request.orderInfo();
+        if (paymentRepository.existsByOrderId(orderInfo.orderId())) {
+            throw new PaymentServiceException(PAYMENT_INFO_ALREADY_EXIST);
+        }
+
         if (invalidOrderInfo(memberId, orderInfo)) {
             throw new PaymentServiceException(INVALID_ORDER_INFO);
         }

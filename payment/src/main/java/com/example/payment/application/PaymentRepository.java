@@ -6,4 +6,5 @@ public interface PaymentRepository {
 
     Payment save(Payment payment);
 
+    boolean existsByOrderId(Long orderId);
 }
