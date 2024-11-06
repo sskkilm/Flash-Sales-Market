@@ -2,9 +2,10 @@ package com.example.payment.dto;
 
 import java.math.BigDecimal;
 
-public record PGPaymentResponse(
+public record PGConfirmRequest(
+        String paymentKey,
         Long orderId,
         BigDecimal amount,
-        String paymentKey
+        MemberPaymentInfo memberPaymentInfo
 ) {
 }
