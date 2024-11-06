@@ -26,12 +26,28 @@ class PaymentTest {
     }
 
     @Test
+    void 결제_검증_시_이미_승인된_결제이면_예외가_발생한다() {
+        //given
+        Payment payment = Payment.builder()
+                .orderId(1L)
+                .amount(new BigDecimal("10000"))
+                .status(CONFIRMED)
+                .build();
+
+        //then
+        assertThrows(PaymentServiceException.class,
+                //when
+                () -> payment.validate(2L, new BigDecimal("10000"))
+        );
+    }
+
+    @Test
     void 결제_검증_시_주문_ID가_일치하지_않으면_예외가_발생한다() {
         //given
         Payment payment = Payment.builder()
                 .orderId(1L)
                 .amount(new BigDecimal("10000"))
-                .paymentKey("paymentKey")
+                .status(READY)
                 .build();
 
         //then
@@ -47,7 +63,7 @@ class PaymentTest {
         Payment payment = Payment.builder()
                 .orderId(1L)
                 .amount(new BigDecimal("10000"))
-                .paymentKey("paymentKey")
+                .status(READY)
                 .build();
 
         //then
