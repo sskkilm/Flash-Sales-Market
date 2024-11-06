@@ -10,8 +10,7 @@ import java.util.Objects;
 
 import static com.example.payment.domain.PaymentStatus.CONFIRMED;
 import static com.example.payment.domain.PaymentStatus.READY;
-import static com.example.payment.exception.error.ErrorCode.ORDER_AMOUNT_DOES_NOT_MATCH;
-import static com.example.payment.exception.error.ErrorCode.ORDER_ID_DOES_NOT_MATCH;
+import static com.example.payment.exception.error.ErrorCode.*;
 
 @Getter
 @Builder
@@ -33,6 +32,7 @@ public class Payment {
     }
 
     public void validate(Long orderId, BigDecimal amount) {
+        validateAlreadyConfirmed();
         validateOrderId(orderId);
         validateAmount(amount);
     }
@@ -40,6 +40,12 @@ public class Payment {
     public void confirmed(String paymentKey) {
         this.paymentKey = paymentKey;
         this.status = CONFIRMED;
+    }
+
+    private void validateAlreadyConfirmed() {
+        if (this.status == CONFIRMED) {
+            throw new PaymentServiceException(PAYMENT_ALREADY_CONFIRMED);
+        }
     }
 
     private void validateOrderId(Long orderId) {
