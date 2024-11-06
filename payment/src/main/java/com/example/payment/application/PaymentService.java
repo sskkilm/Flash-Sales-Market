@@ -51,6 +51,7 @@ public class PaymentService {
 
     }
 
+    @Transactional
     public PaymentConfirmResponse confirm(String paymentKey, Long orderId, BigDecimal amount, MemberPaymentInfo memberPaymentInfo) {
 
         Payment payment = paymentRepository.findByOrderId(orderId);
@@ -69,6 +70,7 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         // TODO: 주문 상태 완료로 변경
+        // TODO: 상품 재고 차감
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
     }
