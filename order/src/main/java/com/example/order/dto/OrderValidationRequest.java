@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-public record OrderInfo(
+public record OrderValidationRequest(
         @NotNull Long orderId,
-        @NotNull BigDecimal totalAmount
+        @NotNull BigDecimal amount
 ) {
 }

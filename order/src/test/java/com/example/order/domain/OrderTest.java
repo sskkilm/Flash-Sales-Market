@@ -175,10 +175,10 @@ class OrderTest {
     }
 
     @Test
-    void 주문과_회원_정보가_일치하면_true를_반환한다() {
+    void 주문과_회원_정보가_일치하지_않으면_true를_반환한다() {
         //given
         Order order = Order.builder()
-                .memberId(1L)
+                .memberId(2L)
                 .build();
 
         //when
@@ -189,14 +189,14 @@ class OrderTest {
     }
 
     @Test
-    void 주문과_회원_정보가_일치하지_않으면_false를_반환한다() {
+    void 주문과_회원_정보가_일치하면_false를_반환한다() {
         //given
         Order order = Order.builder()
                 .memberId(1L)
                 .build();
 
         //when
-        boolean result = order.isNotOrderBy(2L);
+        boolean result = order.isNotOrderBy(1L);
 
         //then
         assertFalse(result);

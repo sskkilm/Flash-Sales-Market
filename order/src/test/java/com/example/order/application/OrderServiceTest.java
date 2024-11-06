@@ -276,7 +276,9 @@ class OrderServiceTest {
     @Test
     void 주문_정보_검증_시_회원_정보가_일치하지_않으면_false를_반환한다() {
         //given
-        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
+                1L, new BigDecimal("10000")
+        );
         given(orderRepository.findById(1L))
                 .willReturn(
                         Order.builder()
@@ -284,7 +286,7 @@ class OrderServiceTest {
                                 .build()
                 );
         //when
-        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+        boolean result = orderService.validateOrderInfo(1L, orderValidationRequest);
 
         //then
         assertFalse(result);
@@ -293,7 +295,9 @@ class OrderServiceTest {
     @Test
     void 주문_정보_검증_시_총_주문_금액이_일치하지_않으면_false를_반환한다() {
         //given
-        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
+                1L, new BigDecimal("20000")
+        );
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
@@ -314,7 +318,7 @@ class OrderServiceTest {
                 ));
 
         //when
-        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+        boolean result = orderService.validateOrderInfo(1L, orderValidationRequest);
 
         //then
         assertFalse(result);
@@ -323,7 +327,9 @@ class OrderServiceTest {
     @Test
     void 주문_정보가_일치하면_true를_반환한다() {
         //given
-        OrderInfo orderInfo = new OrderInfo(1L, new BigDecimal("20000"));
+        OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
+                1L, new BigDecimal("20000")
+        );
         Order order = Order.builder()
                 .id(1L)
                 .memberId(1L)
@@ -341,7 +347,7 @@ class OrderServiceTest {
                 ));
 
         //when
-        boolean result = orderService.validateOrderInfo(1L, orderInfo);
+        boolean result = orderService.validateOrderInfo(1L, orderValidationRequest);
 
         //then
         assertTrue(result);

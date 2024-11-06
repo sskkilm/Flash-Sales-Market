@@ -1,7 +1,7 @@
 package com.example.order.presentation;
 
 import com.example.order.application.OrderService;
-import com.example.order.dto.OrderInfo;
+import com.example.order.dto.OrderValidationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +16,8 @@ public class OrderInternalController {
     @PostMapping("/{memberId}/validate")
     public boolean validateOrderInfo(
             @PathVariable Long memberId,
-            @RequestBody @Valid OrderInfo orderInfo
+            @RequestBody @Valid OrderValidationRequest request
     ) {
-        return orderService.validateOrderInfo(memberId, orderInfo);
+        return orderService.validateOrderInfo(memberId, request);
     }
 }

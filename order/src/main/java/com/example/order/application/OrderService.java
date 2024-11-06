@@ -143,8 +143,8 @@ public class OrderService {
         ).toList();
     }
 
-    public boolean validateOrderInfo(Long memberId, OrderInfo orderInfo) {
-        Long orderId = orderInfo.orderId();
+    public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) {
+        Long orderId = request.orderId();
         Order order = orderRepository.findById(orderId);
         if (order.isNotOrderBy(memberId)) {
             return false;
@@ -152,14 +152,14 @@ public class OrderService {
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
         BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
-        if (totalAmountMisMatch(orderInfo, totalAmount)) {
+        if (totalAmountMisMatch(request, totalAmount)) {
             return false;
         }
 
         return true;
     }
 
-    private static boolean totalAmountMisMatch(OrderInfo orderInfo, BigDecimal totalAmount) {
-        return orderInfo.totalAmount().compareTo(totalAmount) != 0;
+    private static boolean totalAmountMisMatch(OrderValidationRequest request, BigDecimal totalAmount) {
+        return request.amount().compareTo(totalAmount) != 0;
     }
 }
