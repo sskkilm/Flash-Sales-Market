@@ -8,6 +8,7 @@ import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderProductManager;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
+import com.example.order.exception.OrderServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.example.order.exception.error.ErrorCode.MEMBER_UN_MATCHED;
+import static com.example.order.exception.error.ErrorCode.TOTAL_AMOUNT_MIS_MATCH;
 
 @Service
 @RequiredArgsConstructor
@@ -143,17 +147,17 @@ public class OrderService {
         ).toList();
     }
 
-    public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) {
+    public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) throws OrderServiceException {
         Long orderId = request.orderId();
         Order order = orderRepository.findById(orderId);
         if (order.isNotOrderBy(memberId)) {
-            return false;
+            throw new OrderServiceException(MEMBER_UN_MATCHED);
         }
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
         BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
         if (totalAmountMisMatch(request, totalAmount)) {
-            return false;
+            throw new OrderServiceException(TOTAL_AMOUNT_MIS_MATCH);
         }
 
         return true;

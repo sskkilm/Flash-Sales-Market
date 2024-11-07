@@ -19,7 +19,9 @@ import static com.example.order.exception.error.ErrorCode.INTERNAL_SERVER_ERROR;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderServiceException.class)
-    public ResponseEntity<?> handleProductServiceException(OrderServiceException e) {
+    public ResponseEntity<?> handleOrderServiceException(OrderServiceException e) {
+        log.info("Error Code: {}", e.getErrorCode());
+        log.info("Error Code Message: {}", e.getErrorCode().getMessage());
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(new ErrorResponse(e.getErrorCode()));
@@ -75,7 +77,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
-        log.error("{}", e.getMessage());
+        log.error("Error Message: {}", e.getMessage());
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR));
     }

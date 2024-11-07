@@ -274,7 +274,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void 주문_정보_검증_시_회원_정보가_일치하지_않으면_false를_반환한다() {
+    void 주문_정보_검증_시_회원_정보가_일치하지_않으면_예외를_반환한다() {
         //given
         OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
                 1L, new BigDecimal("10000")
@@ -285,15 +285,14 @@ class OrderServiceTest {
                                 .memberId(2L)
                                 .build()
                 );
-        //when
-        boolean result = orderService.validateOrderInfo(1L, orderValidationRequest);
-
         //then
-        assertFalse(result);
+        assertThrows(OrderServiceException.class,
+                //when
+                () -> orderService.validateOrderInfo(1L, orderValidationRequest));
     }
 
     @Test
-    void 주문_정보_검증_시_총_주문_금액이_일치하지_않으면_false를_반환한다() {
+    void 주문_정보_검증_시_총_주문_금액이_일치하지_않으면_예외를_반환한다() {
         //given
         OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
                 1L, new BigDecimal("20000")
@@ -317,11 +316,10 @@ class OrderServiceTest {
                                 .build()
                 ));
 
-        //when
-        boolean result = orderService.validateOrderInfo(1L, orderValidationRequest);
-
         //then
-        assertFalse(result);
+        assertThrows(OrderServiceException.class,
+                //when
+                () -> orderService.validateOrderInfo(1L, orderValidationRequest));
     }
 
     @Test
