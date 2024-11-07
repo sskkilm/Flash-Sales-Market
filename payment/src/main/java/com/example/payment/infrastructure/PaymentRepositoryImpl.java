@@ -7,6 +7,8 @@ import com.example.payment.infrastructure.entity.PaymentEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 import static com.example.payment.exception.error.ErrorCode.PAYMENT_INFO_DOES_NOT_EXIST;
 
 @Repository
@@ -21,15 +23,16 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public boolean existsByOrderId(Long orderId) {
-        return paymentJpaRepository.existsByOrderId(orderId);
-    }
-
-    @Override
     public Payment findByOrderId(Long orderId) {
         return paymentJpaRepository.findByOrderId(orderId)
                 .orElseThrow(
                         () -> new PaymentServiceException(PAYMENT_INFO_DOES_NOT_EXIST)
                 ).toModel();
+    }
+
+    @Override
+    public Optional<Payment> findOptionalPaymentByOrderId(Long orderId) {
+        return paymentJpaRepository.findByOrderId(orderId)
+                .map(PaymentEntity::toModel);
     }
 }

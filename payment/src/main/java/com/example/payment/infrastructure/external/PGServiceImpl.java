@@ -4,8 +4,11 @@ import com.example.payment.application.PGService;
 import com.example.payment.dto.PGConfirmRequest;
 import com.example.payment.dto.PGConfirmResponse;
 import com.example.payment.dto.PGInitRequest;
+import com.example.payment.dto.PGInitResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -17,21 +20,26 @@ public class PGServiceImpl implements PGService {
     private final PGRepository pgRepository;
 
     @Override
-    public void init(PGInitRequest request) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PGInitResponse pgInit(PGInitRequest request) {
 
         boolean isAuthenticated = thirdPartyPaymentService.authenticate(request.memberPaymentInfo());
         if (!isAuthenticated) {
-            throw new PGServiceException("결제 진입 실패");
+            throw new PGServiceException("결제 인증 실패");
         }
 
         String paymentKey = UUID.randomUUID().toString();
-        pgRepository.save(PGEntity.create(request.orderId(), request.amount(), paymentKey));
+        PGEntity pgEntity = pgRepository.findByOrderId(request.orderId())
+                .map(entity -> entity.updatePaymentKey(paymentKey))
+                .orElseGet(() -> PGEntity.create(request.orderId(), request.amount(), paymentKey));
+        pgRepository.save(pgEntity);
 
-        redirectToConfirm();
+        return new PGInitResponse(paymentKey, request.orderId(), request.amount(), request.memberPaymentInfo());
     }
 
     @Override
-    public PGConfirmResponse confirm(PGConfirmRequest request) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PGConfirmResponse pgConfirm(PGConfirmRequest request) {
 
         PGEntity pgEntity = pgRepository.findByPaymentKey(request.paymentKey())
                 .orElseThrow(() -> new PGServiceException("존재하지 않는 결제 정보입니다."));
@@ -39,12 +47,9 @@ public class PGServiceImpl implements PGService {
 
         boolean isPaid = thirdPartyPaymentService.pay(request.memberPaymentInfo());
         if (!isPaid) {
-            throw new PGServiceException("결제 승인 실패");
+            throw new PGServiceException("결제 실패");
         }
 
         return new PGConfirmResponse(request.orderId(), request.amount(), request.paymentKey());
-    }
-
-    private void redirectToConfirm() {
     }
 }

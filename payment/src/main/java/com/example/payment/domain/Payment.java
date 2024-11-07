@@ -37,8 +37,15 @@ public class Payment {
         validateAmount(amount);
     }
 
-    public void confirmed(String paymentKey) {
+    public void updatePaymentKey(String paymentKey) {
         this.paymentKey = paymentKey;
+    }
+
+    public boolean isConfirmed() {
+        return this.status == CONFIRMED;
+    }
+
+    public void confirmed() {
         this.status = CONFIRMED;
     }
 

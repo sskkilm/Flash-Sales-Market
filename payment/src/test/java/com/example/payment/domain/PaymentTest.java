@@ -7,8 +7,7 @@ import java.math.BigDecimal;
 
 import static com.example.payment.domain.PaymentStatus.CONFIRMED;
 import static com.example.payment.domain.PaymentStatus.READY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PaymentTest {
 
@@ -74,6 +73,34 @@ class PaymentTest {
     }
 
     @Test
+    void 결제_승인_상태인지_확인() {
+        //given
+        Payment payment = Payment.builder()
+                .status(CONFIRMED)
+                .build();
+
+        //when
+        boolean result = payment.isConfirmed();
+
+        //then
+        assertTrue(result);
+    }
+
+    @Test
+    void paymentKey를_업데이트한다() {
+        //given
+        Payment payment = Payment.builder()
+                .paymentKey("old")
+                .build();
+
+        //when
+        payment.updatePaymentKey("new");
+
+        //then
+        assertEquals("new", payment.getPaymentKey());
+    }
+
+    @Test
     void 결제_승인() {
         //given
         Payment payment = Payment.builder()
@@ -81,10 +108,10 @@ class PaymentTest {
                 .build();
 
         //when
-        payment.confirmed("paymentKey");
+        payment.confirmed();
 
         //then
-        assertEquals("paymentKey", payment.getPaymentKey());
         assertEquals(CONFIRMED, payment.getStatus());
     }
+
 }

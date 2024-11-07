@@ -22,7 +22,7 @@ public class PaymentService {
     private final PGService pgService;
 
     @Transactional
-    public void init(Long memberId, PaymentInitRequest request) {
+    public PaymentInitResponse init(Long memberId, PaymentInitRequest request) {
 
         OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
                 request.orderId(), request.amount()
@@ -30,25 +30,31 @@ public class PaymentService {
         if (invalidOrderInfo(memberId, orderValidationRequest)) {
             throw new PaymentServiceException(INVALID_ORDER_INFO);
         }
-        if (paymentRepository.existsByOrderId(request.orderId())) {
-            throw new PaymentServiceException(PAYMENT_INFO_ALREADY_EXIST);
-        }
 
-        // 결제 데이터 임시 저장
-        paymentRepository.save(
-                Payment.create(request.orderId(), request.amount())
-        );
+        Payment payment = paymentRepository.findOptionalPaymentByOrderId(request.orderId())
+                .map(p -> {
+                    if (p.isConfirmed()) {
+                        throw new PaymentServiceException(PAYMENT_ALREADY_CONFIRMED);
+                    }
+                    return p;
+                })
+                .orElseGet(
+                        () -> Payment.create(request.orderId(), request.amount())
+                );
+        paymentRepository.save(payment);
 
+        PGInitResponse pgInitResponse = null;
         try {
-            pgService.init(
+            pgInitResponse = pgService.pgInit(
                     new PGInitRequest(
                             request.orderId(), request.amount(), request.memberPaymentInfo()
                     )
             );
         } catch (PGServiceException e) {
-            throw new PaymentServiceException(PAYMENT_FAILED_AUTHENTICATION_FAILURE);
+            throw new PaymentServiceException(PAYMENT_FAILED_INIT_FAILURE);
         }
 
+        return PaymentInitResponse.from(pgInitResponse);
     }
 
     @Transactional
@@ -59,14 +65,15 @@ public class PaymentService {
 
         PGConfirmResponse response = null;
         try {
-            response = pgService.confirm(
+            response = pgService.pgConfirm(
                     new PGConfirmRequest(paymentKey, orderId, amount, memberPaymentInfo)
             );
         } catch (PGServiceException e) {
             throw new PaymentServiceException(PAYMENT_FAILED_CONFIRM_FAILURE);
         }
 
-        payment.confirmed(response.paymentKey());
+        payment.updatePaymentKey(paymentKey);
+        payment.confirmed();
         paymentRepository.save(payment);
 
         // TODO: 주문 상태 완료로 변경

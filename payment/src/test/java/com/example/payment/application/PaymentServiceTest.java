@@ -12,7 +12,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
+import static com.example.payment.domain.PaymentStatus.CONFIRMED;
 import static com.example.payment.domain.PaymentStatus.READY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,20 +55,24 @@ class PaymentServiceTest {
     }
 
     @Test
-    void 결제_진입_시_이미_결제_정보가_존재하면_예외가_발생한다() {
+    void 결제_진입_시_이미_승인된_결제이면_예외가_발생한다() {
         //given
         MemberPaymentInfo memberPaymentInfo = new MemberPaymentInfo(true, true);
         PaymentInitRequest request = new PaymentInitRequest(
                 1L, new BigDecimal("10000"), memberPaymentInfo);
-
         given(orderFeignClient.validateOrderInfo(eq(1L), any(OrderValidationRequest.class)))
                 .willReturn(true);
-        given(paymentRepository.existsByOrderId(1L))
-                .willReturn(true);
+        given(paymentRepository.findOptionalPaymentByOrderId(1L))
+                .willReturn(Optional.of(
+                                Payment.builder()
+                                        .status(CONFIRMED)
+                                        .build()
+                        )
+                );
 
         //then
         assertThrows(PaymentServiceException.class,
-                // when
+                //when
                 () -> paymentService.init(1L, request));
     }
 
@@ -79,11 +85,11 @@ class PaymentServiceTest {
 
         given(orderFeignClient.validateOrderInfo(eq(1L), any(OrderValidationRequest.class)))
                 .willReturn(true);
-        given(paymentRepository.existsByOrderId(1L))
-                .willReturn(false);
+        given(paymentRepository.findOptionalPaymentByOrderId(1L))
+                .willReturn(Optional.empty());
         willThrow(PGServiceException.class)
                 .given(pgService)
-                .init(any(PGInitRequest.class));
+                .pgInit(any(PGInitRequest.class));
 
         //then
         assertThrows(PaymentServiceException.class,
@@ -100,13 +106,21 @@ class PaymentServiceTest {
 
         given(orderFeignClient.validateOrderInfo(eq(1L), any(OrderValidationRequest.class)))
                 .willReturn(true);
-        given(paymentRepository.existsByOrderId(1L))
-                .willReturn(false);
+        given(paymentRepository.findOptionalPaymentByOrderId(1L))
+                .willReturn(Optional.empty());
+        given(pgService.pgInit(any(PGInitRequest.class)))
+                .willReturn(new PGInitResponse(
+                        "paymentKey", 1L, new BigDecimal(10000), memberPaymentInfo)
+                );
 
         //when
-        paymentService.init(1L, request);
+        PaymentInitResponse response = paymentService.init(1L, request);
 
         //then
+        assertEquals("paymentKey", response.paymentKey());
+        assertEquals(1L, response.orderId());
+        assertEquals(new BigDecimal(10000), response.amount());
+        assertEquals(memberPaymentInfo, response.memberPaymentInfo());
     }
 
     @Test
@@ -138,7 +152,7 @@ class PaymentServiceTest {
                                 .status(READY)
                                 .build()
                 );
-        given(pgService.confirm(any(PGConfirmRequest.class)))
+        given(pgService.pgConfirm(any(PGConfirmRequest.class)))
                 .willThrow(PGServiceException.class);
 
         //then
@@ -163,7 +177,7 @@ class PaymentServiceTest {
                                 .status(READY)
                                 .build()
                 );
-        given(pgService.confirm(any(PGConfirmRequest.class)))
+        given(pgService.pgConfirm(any(PGConfirmRequest.class)))
                 .willReturn(
                         new PGConfirmResponse(1L, new BigDecimal("10000"), "paymentKey")
                 );

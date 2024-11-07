@@ -3,11 +3,12 @@ package com.example.payment.application;
 import com.example.payment.dto.PGConfirmRequest;
 import com.example.payment.dto.PGConfirmResponse;
 import com.example.payment.dto.PGInitRequest;
+import com.example.payment.dto.PGInitResponse;
 
 public interface PGService {
 
-    void init(PGInitRequest pgInitRequest);
+    PGInitResponse pgInit(PGInitRequest pgInitRequest);
 
-    PGConfirmResponse confirm(PGConfirmRequest request);
+    PGConfirmResponse pgConfirm(PGConfirmRequest request);
 
 }
