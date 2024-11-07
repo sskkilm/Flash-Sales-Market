@@ -6,7 +6,7 @@ import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.dto.*;
-import com.example.order.exception.OrderNotFoundException;
+import com.example.order.exception.OrderServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -74,10 +74,10 @@ class OrderServiceTest {
     void 주문_취소시_존재하지_않는_주문이면_예외가_발생한다() {
         //given
         given(orderRepository.findById(1L))
-                .willThrow(new OrderNotFoundException(1L));
+                .willThrow(OrderServiceException.class);
 
         //then
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> orderService.cancel(1L, 1L));
     }
@@ -122,10 +122,10 @@ class OrderServiceTest {
     void 반품_시_존재하지_않는_주문이면_예외가_발생한다() {
         //given
         given(orderRepository.findById(1L))
-                .willThrow(new OrderNotFoundException(1L));
+                .willThrow(OrderServiceException.class);
 
         //then
-        assertThrows(OrderNotFoundException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> orderService.returns(1L, 1L));
     }

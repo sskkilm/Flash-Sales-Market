@@ -1,8 +1,11 @@
 package com.example.order.exception;
 
-public abstract class OrderServiceException extends RuntimeException {
+import com.example.order.exception.error.ErrorCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    public OrderServiceException(String message) {
-        super(message);
-    }
+@Getter
+@RequiredArgsConstructor
+public class OrderServiceException extends RuntimeException {
+    private final ErrorCode errorCode;
 }

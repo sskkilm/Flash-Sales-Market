@@ -1,8 +1,6 @@
 package com.example.order.domain;
 
-import com.example.order.exception.CanNotBeCanceledException;
-import com.example.order.exception.CanNotBeReturnedException;
-import com.example.order.exception.OrderMemberUnmatchedException;
+import com.example.order.exception.OrderServiceException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -36,7 +34,7 @@ class OrderTest {
                 .build();
 
         //then
-        assertThrows(OrderMemberUnmatchedException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.cancel(2L, null));
     }
@@ -50,7 +48,7 @@ class OrderTest {
                 .build();
 
         //then
-        assertThrows(CanNotBeCanceledException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.cancel(1L, null));
     }
@@ -69,7 +67,7 @@ class OrderTest {
         LocalDateTime canceledDateTime = orderCompleteDatetime.plusDays(1).plusNanos(1);
 
         //then
-        assertThrows(CanNotBeCanceledException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.cancel(1L, canceledDateTime));
     }
@@ -102,7 +100,7 @@ class OrderTest {
                 .build();
 
         //then
-        assertThrows(OrderMemberUnmatchedException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.returns(2L, null));
     }
@@ -116,7 +114,7 @@ class OrderTest {
                 .build();
 
         //then
-        assertThrows(CanNotBeReturnedException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.returns(1L, null));
     }
@@ -135,7 +133,7 @@ class OrderTest {
         LocalDateTime returnedDateTime = deliveryCompletedDateTime.plusDays(1).plusNanos(1);
 
         //then
-        assertThrows(CanNotBeReturnedException.class,
+        assertThrows(OrderServiceException.class,
                 //when
                 () -> order.returns(1L, returnedDateTime));
     }

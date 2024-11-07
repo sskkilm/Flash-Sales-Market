@@ -1,8 +1,6 @@
 package com.example.order.domain;
 
-import com.example.order.exception.CanNotBeCanceledException;
-import com.example.order.exception.CanNotBeReturnedException;
-import com.example.order.exception.OrderMemberUnmatchedException;
+import com.example.order.exception.OrderServiceException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.example.order.domain.OrderStatus.*;
+import static com.example.order.exception.error.ErrorCode.*;
 
 @Getter
 @Builder
@@ -54,9 +53,7 @@ public class Order {
         if (isOrderedBy(memberId)) {
             return;
         }
-        throw new OrderMemberUnmatchedException(
-                "this order is not ordered by this member -> memberId: " + memberId
-        );
+        throw new OrderServiceException(MEMBER_UN_MATCHED);
     }
 
     private boolean isOrderedBy(Long memberId) {
@@ -67,7 +64,7 @@ public class Order {
         if (isCompleted() && isBeforeCancellablePeriod(canceledDateTime)) {
             return;
         }
-        throw new CanNotBeCanceledException("This order cannot be canceled");
+        throw new OrderServiceException(CAN_NOT_BE_CANCELED);
     }
 
     private boolean isCompleted() {
@@ -82,7 +79,7 @@ public class Order {
         if (isDelivered() && isBeforeReturnablePeriod(returnedDateTime)) {
             return;
         }
-        throw new CanNotBeReturnedException("This order cannot be returned");
+        throw new OrderServiceException(CAN_NOT_BE_RETURNED);
     }
 
     private boolean isDelivered() {
