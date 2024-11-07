@@ -1,13 +1,12 @@
-package com.example.product.api;
+package com.example.product.presentation;
 
 import com.example.product.application.ProductService;
-import com.example.product.dto.ProductDto;
-import com.example.product.dto.ProductOrderRequest;
-import com.example.product.dto.ProductOrderResponse;
-import com.example.product.dto.ProductRestockRequest;
+import com.example.product.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +30,10 @@ public class ProductInternalController {
     @GetMapping("/{productId}")
     public ProductDto findById(@PathVariable Long productId) {
         return productService.findById(productId);
+    }
+
+    @PostMapping("/decrease/stock")
+    public void decreaseStock(@RequestBody List<OrderCompletedProductDto> orderCompletedProducts) {
+        productService.decreaseStock(orderCompletedProducts);
     }
 }

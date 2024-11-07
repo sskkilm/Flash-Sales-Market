@@ -5,6 +5,7 @@ import com.example.product.domain.Product;
 import com.example.product.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -62,5 +63,15 @@ public class ProductService {
     public int getStockQuantity(Long productId) {
         Product product = productRepository.findById(productId);
         return product.getStockQuantity();
+    }
+
+    @Transactional
+    public void decreaseStock(List<OrderCompletedProductDto> orderCompletedProducts) {
+        orderCompletedProducts
+                .forEach(orderCompletedProduct -> {
+                    Product product = productRepository.findById(orderCompletedProduct.productId());
+                    product.decreaseStock(orderCompletedProduct.quantity());
+                    productRepository.save(product);
+                });
     }
 }

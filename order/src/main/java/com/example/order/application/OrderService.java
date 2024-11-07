@@ -166,4 +166,15 @@ public class OrderService {
     private static boolean totalAmountMisMatch(OrderValidationRequest request, BigDecimal totalAmount) {
         return request.amount().compareTo(totalAmount) != 0;
     }
+
+    public void paymentCompleted(Long orderId) {
+        Order order = orderRepository.findById(orderId);
+        order.completed();
+        orderRepository.save(order);
+
+        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        productFeignClient.decreaseStock(
+                orderProducts.stream().map(OrderCompletedProductDto::from).toList()
+        );
+    }
 }

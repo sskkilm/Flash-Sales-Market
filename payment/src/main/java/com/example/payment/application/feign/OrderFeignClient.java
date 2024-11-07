@@ -17,4 +17,6 @@ public interface OrderFeignClient {
     @PostMapping("/internal/{memberId}/validate")
     boolean validateOrderInfo(@PathVariable Long memberId, @RequestBody OrderValidationRequest orderValidationRequest);
 
+    @PostMapping("/internal/{orderId}/payment/completed")
+    void paymentCompleted(@PathVariable Long orderId);
 }

@@ -49,6 +49,10 @@ public class Order {
         return !Objects.equals(this.memberId, memberId);
     }
 
+    public void completed() {
+        this.status = COMPLETED;
+    }
+
     private void validateOrderBy(Long memberId) {
         if (isOrderedBy(memberId)) {
             return;

@@ -199,4 +199,18 @@ class OrderTest {
         //then
         assertFalse(result);
     }
+
+    @Test
+    void 주문_완료() {
+        //given
+        Order order = Order.builder()
+                .status(PENDING)
+                .build();
+
+        //when
+        order.completed();
+
+        //then
+        assertEquals(COMPLETED, order.getStatus());
+    }
 }

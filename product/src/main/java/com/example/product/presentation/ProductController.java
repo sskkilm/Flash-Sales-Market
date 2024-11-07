@@ -1,4 +1,4 @@
-package com.example.product.api;
+package com.example.product.presentation;
 
 import com.example.product.application.ProductService;
 import com.example.product.dto.ProductDetails;

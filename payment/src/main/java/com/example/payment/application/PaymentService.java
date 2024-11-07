@@ -76,8 +76,7 @@ public class PaymentService {
         payment.confirmed();
         paymentRepository.save(payment);
 
-        // TODO: 주문 상태 완료로 변경
-        // TODO: 상품 재고 차감
+        orderFeignClient.paymentCompleted(payment.getOrderId());
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
     }
