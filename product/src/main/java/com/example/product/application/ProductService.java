@@ -16,6 +16,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final LocalDateTimeHolder localDateTimeHolder;
+    private final HoldingStockService holdingStockService;
     private final AmountCalculator amountCalculator = new AmountCalculator();
 
     public List<ProductDto> getProductList() {
@@ -28,12 +29,16 @@ public class ProductService {
         return ProductDetails.of(product);
     }
 
-    public ProductOrderResponse getProductOrderInfo(ProductOrderRequest productOrderRequest) {
+    @Transactional
+    public ProductOrderResponse order(ProductOrderRequest productOrderRequest) {
         List<OrderedProductInfo> orderedProductInfos = productOrderRequest.productOrderInfos().stream()
                 .map(request -> {
                     Product product = productRepository.findById(request.productId());
 
-                    product.checkOutOfStock(request.quantity());
+                    int holdingStockQuantity = holdingStockService.getHoldingStockQuantity(product.getId());
+                    product.checkOutOfStock(request.quantity(), holdingStockQuantity);
+
+                    holdingStockService.create(productOrderRequest.orderId(), product.getId(), request.quantity());
 
                     BigDecimal amount = amountCalculator.calculate(product, request.quantity());
 

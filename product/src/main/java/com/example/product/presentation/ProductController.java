@@ -30,7 +30,7 @@ public class ProductController {
         return productService.getProductDetails(productId);
     }
 
-    @GetMapping("/{productId}/stock")
+    @GetMapping("/stock")
     public int getStockQuantity(
             @PathVariable Long productId
     ) {

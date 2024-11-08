@@ -5,8 +5,7 @@ import com.example.product.domain.NormalProduct;
 import com.example.product.domain.Product;
 import com.example.product.domain.ProductType;
 import com.example.product.dto.*;
-import com.example.product.exception.InsufficientStockException;
-import com.example.product.exception.ProductNotFoundException;
+import com.example.product.exception.ProductServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +25,9 @@ class ProductServiceTest {
 
     @Mock
     ProductRepository productRepository;
+
+    @Mock
+    HoldingStockService holdingStockService;
 
     @Mock
     LocalDateTimeHolder localDateTimeHolder;
@@ -78,10 +80,10 @@ class ProductServiceTest {
     void 존재하지_않는_상품의_상세_정보를_조회하면_예외가_발생한다() {
         //given
         given(productRepository.findById(1L))
-                .willThrow(new ProductNotFoundException(1L));
+                .willThrow(ProductServiceException.class);
 
         //then
-        assertThrows(ProductNotFoundException.class,
+        assertThrows(ProductServiceException.class,
                 // when
                 () -> productService.getProductDetails(1L));
     }
@@ -162,50 +164,46 @@ class ProductServiceTest {
     void 존재하지_않는_상품을_주문하면_예외가_발생한다() {
         //given
         ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                List.of(
-                        new ProductOrderInfo(1L, 1)
-                )
+                1L, List.of(new ProductOrderInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
-                .willThrow(new ProductNotFoundException(1L));
+                .willThrow(ProductServiceException.class);
 
         //then
-        assertThrows(ProductNotFoundException.class,
+        assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.getProductOrderInfo(productOrderRequest));
+                () -> productService.order(productOrderRequest));
     }
 
     @Test
     void 상품_주문_시_재고가_부족하면_예외가_발생한다() {
         //given
         ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                List.of(
-                        new ProductOrderInfo(1L, 1)
-                )
+                1L, List.of(new ProductOrderInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
                 .willReturn(
                         NormalProduct.builder()
-                                .stockQuantity(0)
+                                .id(1L)
+                                .stockQuantity(1)
                                 .build()
                 );
+        given(holdingStockService.getHoldingStockQuantity(1L))
+                .willReturn(1);
 
         //then
-        assertThrows(InsufficientStockException.class,
+        assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.getProductOrderInfo(productOrderRequest));
+                () -> productService.order(productOrderRequest));
     }
 
     @Test
     void 상품을_주문한다() {
         //given
         ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                List.of(
-                        new ProductOrderInfo(1L, 1),
-                        new ProductOrderInfo(2L, 2)
-                )
+                1L, List.of(new ProductOrderInfo(1L, 1))
         );
 
         Product product1 = NormalProduct.builder()
@@ -214,38 +212,22 @@ class ProductServiceTest {
                 .stockQuantity(10)
                 .name("name1")
                 .build();
-        Product product2 = LimitedProduct.builder()
-                .id(2L)
-                .price(new BigDecimal("20000"))
-                .stockQuantity(10)
-                .name("name2")
-                .build();
         given(productRepository.findById(1L))
                 .willReturn(product1);
-        given(productRepository.findById(2L))
-                .willReturn(product2);
+        given(holdingStockService.getHoldingStockQuantity(1L))
+                .willReturn(0);
 
         //when
-        ProductOrderResponse response = productService.getProductOrderInfo(productOrderRequest);
+        ProductOrderResponse response = productService.order(productOrderRequest);
 
         //then
-        assertEquals(10, product2.getStockQuantity());
         assertEquals(10, product1.getStockQuantity());
 
-        List<OrderedProductInfo> purchasedProductPurchaseFeignRespons = response.orderedProductInfos();
-        assertEquals(2, purchasedProductPurchaseFeignRespons.size());
-
-        OrderedProductInfo orderedProductInfo1 = purchasedProductPurchaseFeignRespons.get(0);
+        OrderedProductInfo orderedProductInfo1 = response.orderedProductInfos().get(0);
         assertEquals(1L, orderedProductInfo1.productId());
         assertEquals(1, orderedProductInfo1.quantity());
         assertEquals("name1", orderedProductInfo1.productName());
         assertEquals(new BigDecimal("10000"), orderedProductInfo1.amount());
-
-        OrderedProductInfo orderedProductInfo2 = purchasedProductPurchaseFeignRespons.get(1);
-        assertEquals(2L, orderedProductInfo2.productId());
-        assertEquals(2, orderedProductInfo2.quantity());
-        assertEquals("name2", orderedProductInfo2.productName());
-        assertEquals(new BigDecimal("40000"), orderedProductInfo2.amount());
     }
 
     @Test
@@ -259,10 +241,10 @@ class ProductServiceTest {
         );
 
         given(productRepository.findById(1L))
-                .willThrow(new ProductNotFoundException(1L));
+                .willThrow(ProductServiceException.class);
 
         //then
-        assertThrows(ProductNotFoundException.class,
+        assertThrows(ProductServiceException.class,
                 // when
                 () -> productService.restock(productRestockRequest));
     }
@@ -307,10 +289,10 @@ class ProductServiceTest {
     void 존재하지_않는_특정_상품을_조회하면_예외가_발생한다() {
         //given
         given(productRepository.findById(1L))
-                .willThrow(new ProductNotFoundException(1L));
+                .willThrow(ProductServiceException.class);
 
         //then
-        assertThrows(ProductNotFoundException.class,
+        assertThrows(ProductServiceException.class,
                 //when
                 () -> productService.findById(1L)
         );
@@ -342,10 +324,10 @@ class ProductServiceTest {
     void 존재하지_않는_상품의_재고_수량_조회_시_예외가_발생한다() {
         //given
         given(productRepository.findById(1L))
-                .willThrow(new ProductNotFoundException(1L));
+                .willThrow(ProductServiceException.class);
 
         //then
-        assertThrows(ProductNotFoundException.class,
+        assertThrows(ProductServiceException.class,
                 //when
                 () -> productService.findById(1L));
     }

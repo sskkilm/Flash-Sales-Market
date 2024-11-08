@@ -1,8 +1,11 @@
 package com.example.product.exception;
 
-public abstract class ProductServiceException extends RuntimeException {
+import com.example.product.exception.error.ErrorCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    public ProductServiceException(String message) {
-        super(message);
-    }
+@Getter
+@RequiredArgsConstructor
+public class ProductServiceException extends RuntimeException {
+    private final ErrorCode code;
 }

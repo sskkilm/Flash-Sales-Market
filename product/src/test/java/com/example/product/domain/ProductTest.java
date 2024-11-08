@@ -1,6 +1,6 @@
 package com.example.product.domain;
 
-import com.example.product.exception.InsufficientStockException;
+import com.example.product.exception.ProductServiceException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,11 +14,12 @@ class ProductTest {
         NormalProduct product = NormalProduct.builder()
                 .stockQuantity(10)
                 .build();
+        int holdingStockQuantity = 8;
 
         //then
-        assertThrows(InsufficientStockException.class,
+        assertThrows(ProductServiceException.class,
                 //when
-                () -> product.checkOutOfStock(15));
+                () -> product.checkOutOfStock(3, holdingStockQuantity));
     }
 
     @Test

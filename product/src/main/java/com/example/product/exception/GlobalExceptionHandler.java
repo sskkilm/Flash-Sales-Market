@@ -1,9 +1,8 @@
 package com.example.product.exception;
 
-import com.example.product.dto.ErrorResponse;
+import com.example.product.exception.error.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,14 +11,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.product.exception.error.ErrorCode.INTERNAL_SERVER_ERROR;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductServiceException.class)
     public ResponseEntity<?> handleProductServiceException(ProductServiceException e) {
-        return ResponseEntity.badRequest().body(
-                new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage())
-        );
+        return ResponseEntity
+                .status(e.getCode().getStatus())
+                .body(new ErrorResponse(e.getCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -41,12 +42,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<?> handleDataAccessException(DataAccessException e) {
         return ResponseEntity.internalServerError()
-                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                .body(new ErrorResponse(INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         return ResponseEntity.internalServerError()
-                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+                .body(new ErrorResponse(INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 }

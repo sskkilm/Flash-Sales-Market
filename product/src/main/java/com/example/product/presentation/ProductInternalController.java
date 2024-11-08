@@ -16,9 +16,9 @@ public class ProductInternalController {
     private final ProductService productService;
 
     @PostMapping("/order")
-    public ProductOrderResponse getProductOrderInfo(
+    public ProductOrderResponse order(
             @Valid @RequestBody ProductOrderRequest productOrderRequest) {
-        return productService.getProductOrderInfo(productOrderRequest);
+        return productService.order(productOrderRequest);
     }
 
     @PostMapping("/restock-stock")
