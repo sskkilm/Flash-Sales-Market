@@ -14,7 +14,7 @@ import java.util.List;
 public interface ProductFeignClient {
 
     @PostMapping("/internal/order")
-    ProductOrderResponse getProductOrderInfo(
+    ProductOrderResponse order(
             @RequestBody ProductOrderRequest productOrderRequest
     );
 

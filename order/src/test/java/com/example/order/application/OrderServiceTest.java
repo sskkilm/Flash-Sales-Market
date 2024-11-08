@@ -47,7 +47,7 @@ class OrderServiceTest {
                 List.of(new ProductInfo(1L, 1))
         );
 
-        given(productFeignClient.getProductOrderInfo(any(ProductOrderRequest.class)))
+        given(productFeignClient.order(any(ProductOrderRequest.class)))
                 .willReturn(new ProductOrderResponse(List.of(
                         new OrderedProductInfo(
                                 1L, "name", 1, new BigDecimal("10000")

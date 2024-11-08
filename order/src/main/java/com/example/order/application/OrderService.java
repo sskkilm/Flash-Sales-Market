@@ -34,13 +34,12 @@ public class OrderService {
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
 
-        ProductOrderResponse productOrderResponse = productFeignClient.getProductOrderInfo(
-                mapOrderCreateRequestToProductOrderRequest(orderCreateRequest)
-        );
-
         Order order = orderRepository.save(Order.create(memberId));
 
-        List<OrderProduct> orderProducts = mapProductOrderResponseToOrderProducts(productOrderResponse, order);
+        ProductOrderRequest productOrderRequest = mapToProductOrderRequest(orderCreateRequest, order);
+        ProductOrderResponse productOrderResponse = productFeignClient.order(productOrderRequest);
+
+        List<OrderProduct> orderProducts = mapToOrderProducts(productOrderResponse, order);
         orderProductRepository.saveAll(orderProducts);
 
         BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
@@ -126,27 +125,6 @@ public class OrderService {
         orderRepository.saveAll(orders);
     }
 
-    private ProductOrderRequest mapOrderCreateRequestToProductOrderRequest(OrderCreateRequest orderCreateRequest) {
-        return new ProductOrderRequest(
-                orderCreateRequest.productInfos().stream().map(
-                        productOrderInfo -> new ProductOrderInfo(
-                                productOrderInfo.productId(), productOrderInfo.quantity())
-                ).toList()
-        );
-    }
-
-    private static List<OrderProduct> mapProductOrderResponseToOrderProducts(ProductOrderResponse productOrderResponse, Order order) {
-        return productOrderResponse.orderedProductInfos().stream().map(
-                orderedProductInfo -> OrderProduct.create(
-                        order,
-                        orderedProductInfo.productId(),
-                        orderedProductInfo.productName(),
-                        orderedProductInfo.quantity(),
-                        orderedProductInfo.amount()
-                )
-        ).toList();
-    }
-
     public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) throws OrderServiceException {
         Long orderId = request.orderId();
         Order order = orderRepository.findById(orderId);
@@ -177,4 +155,28 @@ public class OrderService {
                 orderProducts.stream().map(OrderCompletedProductDto::from).toList()
         );
     }
+
+    private static ProductOrderRequest mapToProductOrderRequest(OrderCreateRequest orderCreateRequest, Order order) {
+        return new ProductOrderRequest(
+                order.getId(),
+                orderCreateRequest.productInfos().stream().map(
+                        productInfo -> new ProductOrderInfo(
+                                productInfo.productId(), productInfo.quantity()
+                        )
+                ).toList());
+    }
+
+    private static List<OrderProduct> mapToOrderProducts(ProductOrderResponse productOrderResponse, Order order) {
+        return productOrderResponse.orderedProductInfos()
+                .stream().map(
+                        orderedProductInfo -> OrderProduct.create(
+                                order,
+                                orderedProductInfo.productId(),
+                                orderedProductInfo.productName(),
+                                orderedProductInfo.quantity(),
+                                orderedProductInfo.amount()
+                        )
+                ).toList();
+    }
+
 }
