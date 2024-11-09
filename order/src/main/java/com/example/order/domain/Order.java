@@ -53,6 +53,10 @@ public class Order {
         this.status = COMPLETED;
     }
 
+    public void failed() {
+        this.status = OrderStatus.FAILED;
+    }
+
     private void validateOrderBy(Long memberId) {
         if (isOrderedBy(memberId)) {
             return;

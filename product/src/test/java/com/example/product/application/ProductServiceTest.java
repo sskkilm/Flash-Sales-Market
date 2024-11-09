@@ -190,7 +190,7 @@ class ProductServiceTest {
                                 .stockQuantity(1)
                                 .build()
                 );
-        given(holdingStockService.getHoldingStockQuantity(1L))
+        given(holdingStockService.getHoldingStockQuantityInProduct(1L))
                 .willReturn(1);
 
         //then
@@ -214,7 +214,7 @@ class ProductServiceTest {
                 .build();
         given(productRepository.findById(1L))
                 .willReturn(product1);
-        given(holdingStockService.getHoldingStockQuantity(1L))
+        given(holdingStockService.getHoldingStockQuantityInProduct(1L))
                 .willReturn(0);
 
         //when

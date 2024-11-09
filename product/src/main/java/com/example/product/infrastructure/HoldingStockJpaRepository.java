@@ -10,4 +10,8 @@ import java.util.List;
 public interface HoldingStockJpaRepository extends JpaRepository<HoldingStockEntity, Long> {
 
     List<HoldingStockEntity> findAllByProductId(Long productId);
+
+    void deleteAllByOrderId(Long orderId);
+
+    List<HoldingStockEntity> findAllByOrderId(Long orderId);
 }

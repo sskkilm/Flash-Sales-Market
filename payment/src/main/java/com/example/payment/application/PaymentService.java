@@ -1,6 +1,7 @@
 package com.example.payment.application;
 
 import com.example.payment.application.feign.OrderFeignClient;
+import com.example.payment.application.feign.error.decoder.ProductFeignClient;
 import com.example.payment.domain.Payment;
 import com.example.payment.dto.*;
 import com.example.payment.exception.PaymentServiceException;
@@ -19,6 +20,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderFeignClient orderFeignClient;
+    private final ProductFeignClient productFeignClient;
     private final PGService pgService;
 
     @Transactional
@@ -27,9 +29,7 @@ public class PaymentService {
         OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
                 request.orderId(), request.amount()
         );
-        if (invalidOrderInfo(memberId, orderValidationRequest)) {
-            throw new PaymentServiceException(INVALID_ORDER_INFO);
-        }
+        orderFeignClient.validateOrderInfo(memberId, orderValidationRequest);
 
         Payment payment = paymentRepository.findOptionalPaymentByOrderId(request.orderId())
                 .map(p -> {
@@ -51,6 +51,8 @@ public class PaymentService {
                     )
             );
         } catch (PGServiceException e) {
+            orderFeignClient.updateOrderFailed(request.orderId());
+            productFeignClient.releaseHoldingStock(request.orderId());
             throw new PaymentServiceException(PAYMENT_FAILED_INIT_FAILURE);
         }
 
@@ -69,6 +71,8 @@ public class PaymentService {
                     new PGConfirmRequest(paymentKey, orderId, amount, memberPaymentInfo)
             );
         } catch (PGServiceException e) {
+            orderFeignClient.updateOrderFailed(orderId);
+            productFeignClient.releaseHoldingStock(orderId);
             throw new PaymentServiceException(PAYMENT_FAILED_CONFIRM_FAILURE);
         }
 
@@ -76,13 +80,10 @@ public class PaymentService {
         payment.confirmed();
         paymentRepository.save(payment);
 
-        orderFeignClient.paymentCompleted(payment.getOrderId());
+        orderFeignClient.updateOrderCompleted(orderId);
+        productFeignClient.applyHoldingStock(orderId);
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
-    }
-
-    private boolean invalidOrderInfo(Long memberId, OrderValidationRequest orderValidationRequest) {
-        return !orderFeignClient.validateOrderInfo(memberId, orderValidationRequest);
     }
 
 }

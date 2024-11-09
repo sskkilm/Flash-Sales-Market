@@ -24,4 +24,15 @@ public class HoldingStockRepositoryImpl implements HoldingStockRepository {
     public void save(HoldingStock holdingStock) {
         holdingStockJpaRepository.save(HoldingStockEntity.from(holdingStock));
     }
+
+    @Override
+    public void deleteAllByOrderId(Long orderId) {
+        holdingStockJpaRepository.deleteAllByOrderId(orderId);
+    }
+
+    @Override
+    public List<HoldingStock> findAllByOrderId(Long orderId) {
+        return holdingStockJpaRepository.findAllByOrderId(orderId)
+                .stream().map(HoldingStockEntity::toModel).toList();
+    }
 }

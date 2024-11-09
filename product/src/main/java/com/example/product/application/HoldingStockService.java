@@ -12,7 +12,7 @@ public class HoldingStockService {
 
     private final HoldingStockRepository holdingStockRepository;
 
-    public int getHoldingStockQuantity(Long productId) {
+    public int getHoldingStockQuantityInProduct(Long productId) {
         List<HoldingStock> holdingStocks = holdingStockRepository.findAllByProductId(productId);
         return holdingStocks.stream().mapToInt(HoldingStock::getQuantity).sum();
     }
@@ -20,5 +20,13 @@ public class HoldingStockService {
     public void create(Long orderId, Long productId, int quantity) {
         HoldingStock holdingStock = HoldingStock.create(orderId, productId, quantity);
         holdingStockRepository.save(holdingStock);
+    }
+
+    public void release(Long orderId) {
+        holdingStockRepository.deleteAllByOrderId(orderId);
+    }
+
+    public List<HoldingStock> findAllByOrderId(Long orderId) {
+        return holdingStockRepository.findAllByOrderId(orderId);
     }
 }

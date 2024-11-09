@@ -141,19 +141,20 @@ public class OrderService {
         return true;
     }
 
-    private static boolean totalAmountMisMatch(OrderValidationRequest request, BigDecimal totalAmount) {
-        return request.amount().compareTo(totalAmount) != 0;
-    }
-
-    public void paymentCompleted(Long orderId) {
+    public void updateOrderCompleted(Long orderId) {
         Order order = orderRepository.findById(orderId);
         order.completed();
         orderRepository.save(order);
+    }
 
-        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        productFeignClient.decreaseStock(
-                orderProducts.stream().map(OrderCompletedProductDto::from).toList()
-        );
+    public void updateOrderFailed(Long orderId) {
+        Order order = orderRepository.findById(orderId);
+        order.failed();
+        orderRepository.save(order);
+    }
+
+    private static boolean totalAmountMisMatch(OrderValidationRequest request, BigDecimal totalAmount) {
+        return request.amount().compareTo(totalAmount) != 0;
     }
 
     private static ProductOrderRequest mapToProductOrderRequest(OrderCreateRequest orderCreateRequest, Order order) {
@@ -178,5 +179,4 @@ public class OrderService {
                         )
                 ).toList();
     }
-
 }

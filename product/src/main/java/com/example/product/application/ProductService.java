@@ -1,6 +1,7 @@
 package com.example.product.application;
 
 import com.example.product.domain.AmountCalculator;
+import com.example.product.domain.HoldingStock;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class ProductService {
                 .map(request -> {
                     Product product = productRepository.findById(request.productId());
 
-                    int holdingStockQuantity = holdingStockService.getHoldingStockQuantity(product.getId());
+                    int holdingStockQuantity = holdingStockService.getHoldingStockQuantityInProduct(product.getId());
                     product.checkOutOfStock(request.quantity(), holdingStockQuantity);
 
                     holdingStockService.create(productOrderRequest.orderId(), product.getId(), request.quantity());
@@ -78,5 +79,20 @@ public class ProductService {
                     product.decreaseStock(orderCompletedProduct.quantity());
                     productRepository.save(product);
                 });
+    }
+
+    public void releaseHoldingStock(Long orderId) {
+        holdingStockService.release(orderId);
+    }
+
+    @Transactional
+    public void applyHoldingStock(Long orderId) {
+        List<HoldingStock> holdingStocks = holdingStockService.findAllByOrderId(orderId);
+        holdingStocks.forEach(holdingStock -> {
+            Product product = productRepository.findById(holdingStock.getProductId());
+            product.decreaseStock(holdingStock.getQuantity());
+            productRepository.save(product);
+        });
+        holdingStockService.release(orderId);
     }
 }

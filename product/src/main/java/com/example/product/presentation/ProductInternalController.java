@@ -36,4 +36,14 @@ public class ProductInternalController {
     public void decreaseStock(@RequestBody List<OrderCompletedProductDto> orderCompletedProducts) {
         productService.decreaseStock(orderCompletedProducts);
     }
+
+    @PostMapping("/{orderId}/release/holding-stock")
+    public void releaseHoldingStock(@PathVariable Long orderId) {
+        productService.releaseHoldingStock(orderId);
+    }
+
+    @PostMapping("{orderId}/apply/holding-stock")
+    void extractHoldingStock(@PathVariable Long orderId) {
+        productService.applyHoldingStock(orderId);
+    }
 }

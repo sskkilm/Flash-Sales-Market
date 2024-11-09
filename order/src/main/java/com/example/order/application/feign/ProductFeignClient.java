@@ -25,4 +25,5 @@ public interface ProductFeignClient {
 
     @PostMapping("/internal/decrease/stock")
     void decreaseStock(@RequestBody List<OrderCompletedProductDto> list);
+
 }

@@ -8,4 +8,8 @@ public interface HoldingStockRepository {
     List<HoldingStock> findAllByProductId(Long productId);
 
     void save(HoldingStock holdingStock);
+
+    void deleteAllByOrderId(Long orderId);
+
+    List<HoldingStock> findAllByOrderId(Long orderId);
 }

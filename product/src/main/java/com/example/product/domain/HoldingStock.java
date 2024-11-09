@@ -12,7 +12,8 @@ public class HoldingStock {
     private Long orderId;
     private Long productId;
     private int quantity;
-    LocalDateTime createdAt;
+    private LocalDateTime expiredAt;
+    private LocalDateTime createdAt;
 
     public static HoldingStock create(Long orderId, Long productId, int quantity) {
         return HoldingStock.builder()
