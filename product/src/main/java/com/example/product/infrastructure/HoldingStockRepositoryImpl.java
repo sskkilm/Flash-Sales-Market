@@ -35,4 +35,10 @@ public class HoldingStockRepositoryImpl implements HoldingStockRepository {
         return holdingStockJpaRepository.findAllByOrderId(orderId)
                 .stream().map(HoldingStockEntity::toModel).toList();
     }
+
+    @Override
+    public List<HoldingStock> findAll() {
+        return holdingStockJpaRepository.findAll()
+                .stream().map(HoldingStockEntity::toModel).toList();
+    }
 }

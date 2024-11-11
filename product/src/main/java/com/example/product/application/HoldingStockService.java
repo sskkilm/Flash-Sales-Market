@@ -3,6 +3,7 @@ package com.example.product.application;
 import com.example.product.domain.HoldingStock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,5 +29,10 @@ public class HoldingStockService {
 
     public List<HoldingStock> findAllByOrderId(Long orderId) {
         return holdingStockRepository.findAllByOrderId(orderId);
+    }
+
+    @Transactional
+    public void releaseInvalidHoldingStock() {
+        // TODO
     }
 }

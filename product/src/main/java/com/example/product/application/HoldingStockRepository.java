@@ -12,4 +12,6 @@ public interface HoldingStockRepository {
     void deleteAllByOrderId(Long orderId);
 
     List<HoldingStock> findAllByOrderId(Long orderId);
+
+    List<HoldingStock> findAll();
 }
