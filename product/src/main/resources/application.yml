@@ -5,6 +5,11 @@ spring:
   application:
     name: product-service
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/drop-sale-platform
@@ -18,9 +23,9 @@ spring:
       hibernate:
         format_sql: true
 
-logging:
-  level:
-    org.hibernate.SQL: debug
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
 
 eureka:
   client:

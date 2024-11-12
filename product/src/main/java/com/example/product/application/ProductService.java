@@ -1,19 +1,24 @@
 package com.example.product.application;
 
+import com.example.product.aop.DistributedLock;
 import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.HoldingStock;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
+    private static final String LOCK_KEY_PREFIX = "order_";
 
     private final ProductRepository productRepository;
     private final LocalDateTimeHolder localDateTimeHolder;
@@ -31,12 +36,15 @@ public class ProductService {
     }
 
     @Transactional
+    @DistributedLock(key = LOCK_KEY_PREFIX + "#productOrderRequest.orderId()")
     public ProductOrderResponse order(ProductOrderRequest productOrderRequest) {
+
         List<OrderedProductInfo> orderedProductInfos = productOrderRequest.productOrderInfos().stream()
                 .map(request -> {
                     Product product = productRepository.findById(request.productId());
 
                     int holdingStockQuantity = holdingStockService.getHoldingStockQuantityInProduct(product.getId());
+                    log.debug("{}번 상품에 선점된 재고: {}", product.getId(), holdingStockQuantity);
                     product.checkOutOfStock(request.quantity(), holdingStockQuantity);
 
                     holdingStockService.create(productOrderRequest.orderId(), product.getId(), request.quantity());
@@ -47,6 +55,7 @@ public class ProductService {
                 }).toList();
 
         return new ProductOrderResponse(orderedProductInfos);
+
     }
 
     public void restock(ProductRestockRequest productRestockRequest) {
@@ -90,7 +99,7 @@ public class ProductService {
         List<HoldingStock> holdingStocks = holdingStockService.findAllByOrderId(orderId);
         holdingStocks.forEach(holdingStock -> {
             Product product = productRepository.findById(holdingStock.getProductId());
-            product.decreaseStock(holdingStock.getQuantity());
+            product.decreaseStockAfterPayment(holdingStock.getQuantity());
             productRepository.save(product);
         });
         holdingStockService.release(orderId);
