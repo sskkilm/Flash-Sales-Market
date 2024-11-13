@@ -7,9 +7,11 @@ import com.example.product.domain.LimitedProduct;
 import com.example.product.domain.Product;
 import com.example.product.dto.ProductOrderInfo;
 import com.example.product.dto.ProductOrderRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,6 +22,7 @@ import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("test")
 @SpringBootTest
 public class HoldingStockConcurrencyTest {
 
@@ -31,6 +34,11 @@ public class HoldingStockConcurrencyTest {
 
     @Autowired
     HoldingStockService holdingStockService;
+
+    @BeforeEach
+    public void clear() {
+
+    }
 
     @Test
     void 동시에_재고를_선점한다() throws InterruptedException {
