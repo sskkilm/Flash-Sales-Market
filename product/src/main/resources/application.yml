@@ -1,14 +1,14 @@
-server:
-  port: 8083
-
 spring:
+  profiles:
+    active: local
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
   application:
     name: product-service
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -18,14 +18,22 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 #logging:
 #  level:
 #    org.hibernate.SQL: debug
+
+server:
+  port: 8083
 
 eureka:
   client:

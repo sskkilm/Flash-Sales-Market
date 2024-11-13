@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+eureka:
+  client:
+    enabled: false  # Eureka 클라이언트 비활성화
+
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
