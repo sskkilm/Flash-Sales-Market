@@ -1,6 +1,6 @@
 package com.example.product.application;
 
-import com.example.product.aop.DistributedLock;
+import com.example.product.aop.LockProducts;
 import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.HoldingStock;
 import com.example.product.domain.Product;
@@ -18,11 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private static final String LOCK_KEY_PREFIX = "order_";
-
     private final ProductRepository productRepository;
-    private final LocalDateTimeHolder localDateTimeHolder;
     private final HoldingStockService holdingStockService;
+    private final LocalDateTimeHolder localDateTimeHolder;
+
     private final AmountCalculator amountCalculator = new AmountCalculator();
 
     public List<ProductDto> getProductList() {
@@ -36,7 +35,7 @@ public class ProductService {
     }
 
     @Transactional
-    @DistributedLock(key = LOCK_KEY_PREFIX + "#productOrderRequest.orderId()")
+    @LockProducts
     public ProductOrderResponse order(ProductOrderRequest productOrderRequest) {
 
         List<OrderedProductInfo> orderedProductInfos = productOrderRequest.productOrderInfos().stream()
@@ -44,9 +43,8 @@ public class ProductService {
                     Product product = productRepository.findById(request.productId());
 
                     int holdingStockQuantity = holdingStockService.getHoldingStockQuantityInProduct(product.getId());
-                    log.debug("{}번 상품에 선점된 재고: {}", product.getId(), holdingStockQuantity);
+                    log.info("{}번 상품에 선점된 재고: {}", product.getId(), holdingStockQuantity);
                     product.checkOutOfStock(request.quantity(), holdingStockQuantity);
-
                     holdingStockService.create(productOrderRequest.orderId(), product.getId(), request.quantity());
 
                     BigDecimal amount = amountCalculator.calculate(product, request.quantity());
@@ -99,7 +97,7 @@ public class ProductService {
         List<HoldingStock> holdingStocks = holdingStockService.findAllByOrderId(orderId);
         holdingStocks.forEach(holdingStock -> {
             Product product = productRepository.findById(holdingStock.getProductId());
-            product.decreaseStockAfterPayment(holdingStock.getQuantity());
+            product.decreaseStock(holdingStock.getQuantity());
             productRepository.save(product);
         });
         holdingStockService.release(orderId);
