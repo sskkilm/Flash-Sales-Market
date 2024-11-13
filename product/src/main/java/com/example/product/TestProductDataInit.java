@@ -5,11 +5,13 @@ import com.example.product.domain.LimitedProduct;
 import com.example.product.domain.NormalProduct;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class TestProductDataInit {
