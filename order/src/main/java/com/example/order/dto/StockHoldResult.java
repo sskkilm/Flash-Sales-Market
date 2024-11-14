@@ -2,7 +2,7 @@ package com.example.order.dto;
 
 import java.math.BigDecimal;
 
-public record OrderedProductInfo(
+public record StockHoldResult(
         Long productId,
         String productName,
         int quantity,

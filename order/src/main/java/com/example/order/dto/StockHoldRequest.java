@@ -2,8 +2,8 @@ package com.example.order.dto;
 
 import java.util.List;
 
-public record ProductOrderRequest(
+public record StockHoldRequest(
         Long orderId,
-        List<ProductOrderInfo> productOrderInfos
+        List<StockHoldInfo> stockHoldInfos
 ) {
 }

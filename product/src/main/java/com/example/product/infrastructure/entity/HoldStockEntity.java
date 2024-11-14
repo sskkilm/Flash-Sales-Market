@@ -1,6 +1,6 @@
 package com.example.product.infrastructure.entity;
 
-import com.example.product.domain.HoldingStock;
+import com.example.product.domain.HoldStock;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,12 +9,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Getter
-@Entity(name = "HoldingStock")
+@Entity(name = "HoldStock")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class HoldingStockEntity {
+public class HoldStockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +31,8 @@ public class HoldingStockEntity {
     @CreatedDate
     private LocalDateTime createAt;
 
-    public HoldingStock toModel() {
-        return HoldingStock.builder()
+    public HoldStock toModel() {
+        return HoldStock.builder()
                 .id(this.id)
                 .orderId(this.orderId)
                 .productId(this.productId)
@@ -41,13 +41,13 @@ public class HoldingStockEntity {
                 .build();
     }
 
-    public static HoldingStockEntity from(HoldingStock holdingStock) {
-        return HoldingStockEntity.builder()
-                .id(holdingStock.getId())
-                .orderId(holdingStock.getOrderId())
-                .productId(holdingStock.getProductId())
-                .quantity(holdingStock.getQuantity())
-                .createAt(holdingStock.getCreatedAt())
+    public static HoldStockEntity from(HoldStock holdStock) {
+        return HoldStockEntity.builder()
+                .id(holdStock.getId())
+                .orderId(holdStock.getOrderId())
+                .productId(holdStock.getProductId())
+                .quantity(holdStock.getQuantity())
+                .createAt(holdStock.getCreatedAt())
                 .build();
     }
 }

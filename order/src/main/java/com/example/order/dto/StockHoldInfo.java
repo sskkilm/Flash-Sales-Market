@@ -1,6 +1,6 @@
 package com.example.order.dto;
 
-public record ProductOrderInfo(
+public record StockHoldInfo(
         Long productId,
         int quantity
 ) {

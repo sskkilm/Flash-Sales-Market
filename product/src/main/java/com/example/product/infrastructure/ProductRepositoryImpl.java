@@ -38,4 +38,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .stream().map(ProductEntity::toModel).toList();
     }
 
+    @Override
+    public void deleteAll() {
+        productJpaRepository.deleteAll();
+    }
+
 }

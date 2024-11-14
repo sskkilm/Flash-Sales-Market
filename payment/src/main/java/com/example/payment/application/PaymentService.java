@@ -81,7 +81,7 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         orderFeignClient.updateOrderCompleted(orderId);
-        productFeignClient.applyHoldingStock(orderId);
+        productFeignClient.applyHoldStock(orderId);
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
     }

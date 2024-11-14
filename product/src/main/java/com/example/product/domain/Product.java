@@ -21,8 +21,8 @@ public abstract class Product {
 
     public abstract ProductType getType();
 
-    public void checkOutOfStock(int quantity, int holdingStockQuantity) {
-        if (this.stockQuantity - holdingStockQuantity < quantity) {
+    public void checkOutOfStock(int quantity, int holdStockQuantity) {
+        if (this.stockQuantity - holdStockQuantity < quantity) {
             throw new ProductServiceException(INSUFFICIENT_STOCK);
         }
     }

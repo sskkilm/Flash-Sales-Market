@@ -1,6 +1,6 @@
 package com.example.product.application.scheduler;
 
-import com.example.product.application.HoldingStockService;
+import com.example.product.application.HoldStockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class HoldingStockScheduler {
 
-    private final HoldingStockService holdingStockService;
+    private final HoldStockService holdStockService;
 
     @Scheduled(fixedDelay = 60000)
     public void releaseInvalidHoldingStock() {
-        holdingStockService.releaseInvalidHoldingStock();
+        holdStockService.releaseInvalidHoldingStock();
     }
 }

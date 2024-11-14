@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record ProductOrderRequest(
+public record StockHoldRequest(
         @NotNull Long orderId,
-        @NotEmpty List<ProductOrderInfo> productOrderInfos
+        @NotEmpty List<StockHoldInfo> stockHoldInfos
 ) {
 }

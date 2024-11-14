@@ -15,10 +15,10 @@ public class ProductInternalController {
 
     private final ProductService productService;
 
-    @PostMapping("/order")
-    public ProductOrderResponse order(
-            @Valid @RequestBody ProductOrderRequest productOrderRequest) {
-        return productService.order(productOrderRequest);
+    @PostMapping("/hold-stock")
+    public StockHoldResponse holdStock(
+            @Valid @RequestBody StockHoldRequest stockHoldRequest) {
+        return productService.holdStock(stockHoldRequest);
     }
 
     @PostMapping("/restock-stock")
@@ -42,8 +42,8 @@ public class ProductInternalController {
         productService.releaseHoldingStock(orderId);
     }
 
-    @PostMapping("{orderId}/apply/holding-stock")
-    void extractHoldingStock(@PathVariable Long orderId) {
-        productService.applyHoldingStock(orderId);
+    @PostMapping("{orderId}/apply/hold-stock")
+    void applyHoldStock(@PathVariable Long orderId) {
+        productService.applyHoldStock(orderId);
     }
 }

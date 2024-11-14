@@ -44,12 +44,12 @@ class OrderServiceTest {
     void 상품을_주문한다() {
         //given
         OrderCreateRequest orderCreateRequest = new OrderCreateRequest(
-                List.of(new ProductInfo(1L, 1))
+                List.of(new OrderInfo(1L, 1))
         );
 
-        given(productFeignClient.order(any(ProductOrderRequest.class)))
-                .willReturn(new ProductOrderResponse(List.of(
-                        new OrderedProductInfo(
+        given(productFeignClient.holdStock(any(StockHoldRequest.class)))
+                .willReturn(new StockHoldResponse(List.of(
+                        new StockHoldResult(
                                 1L, "name", 1, new BigDecimal("10000")
                         )
                 )));

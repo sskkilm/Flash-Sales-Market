@@ -27,7 +27,7 @@ class ProductServiceTest {
     ProductRepository productRepository;
 
     @Mock
-    HoldingStockService holdingStockService;
+    HoldStockService holdStockService;
 
     @Mock
     LocalDateTimeHolder localDateTimeHolder;
@@ -163,8 +163,8 @@ class ProductServiceTest {
     @Test
     void 존재하지_않는_상품을_주문하면_예외가_발생한다() {
         //given
-        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                1L, List.of(new ProductOrderInfo(1L, 1))
+        StockHoldRequest stockHoldRequest = new StockHoldRequest(
+                1L, List.of(new StockHoldInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
@@ -173,14 +173,14 @@ class ProductServiceTest {
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.order(productOrderRequest));
+                () -> productService.holdStock(stockHoldRequest));
     }
 
     @Test
     void 상품_주문_시_재고가_부족하면_예외가_발생한다() {
         //given
-        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                1L, List.of(new ProductOrderInfo(1L, 1))
+        StockHoldRequest stockHoldRequest = new StockHoldRequest(
+                1L, List.of(new StockHoldInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
@@ -190,20 +190,20 @@ class ProductServiceTest {
                                 .stockQuantity(1)
                                 .build()
                 );
-        given(holdingStockService.getHoldingStockQuantityInProduct(1L))
+        given(holdStockService.getHoldStockQuantityInProduct(1L))
                 .willReturn(1);
 
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.order(productOrderRequest));
+                () -> productService.holdStock(stockHoldRequest));
     }
 
     @Test
     void 상품을_주문한다() {
         //given
-        ProductOrderRequest productOrderRequest = new ProductOrderRequest(
-                1L, List.of(new ProductOrderInfo(1L, 1))
+        StockHoldRequest stockHoldRequest = new StockHoldRequest(
+                1L, List.of(new StockHoldInfo(1L, 1))
         );
 
         Product product1 = NormalProduct.builder()
@@ -214,20 +214,20 @@ class ProductServiceTest {
                 .build();
         given(productRepository.findById(1L))
                 .willReturn(product1);
-        given(holdingStockService.getHoldingStockQuantityInProduct(1L))
+        given(holdStockService.getHoldStockQuantityInProduct(1L))
                 .willReturn(0);
 
         //when
-        ProductOrderResponse response = productService.order(productOrderRequest);
+        StockHoldResponse response = productService.holdStock(stockHoldRequest);
 
         //then
         assertEquals(10, product1.getStockQuantity());
 
-        OrderedProductInfo orderedProductInfo1 = response.orderedProductInfos().get(0);
-        assertEquals(1L, orderedProductInfo1.productId());
-        assertEquals(1, orderedProductInfo1.quantity());
-        assertEquals("name1", orderedProductInfo1.productName());
-        assertEquals(new BigDecimal("10000"), orderedProductInfo1.amount());
+        StockHoldResult stockHoldResult1 = response.stockHoldResults().get(0);
+        assertEquals(1L, stockHoldResult1.productId());
+        assertEquals(1, stockHoldResult1.quantity());
+        assertEquals("name1", stockHoldResult1.productName());
+        assertEquals(new BigDecimal("10000"), stockHoldResult1.amount());
     }
 
     @Test

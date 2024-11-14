@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class HoldingStock {
+public class HoldStock {
     private Long id;
     private Long orderId;
     private Long productId;
@@ -15,8 +15,8 @@ public class HoldingStock {
     private LocalDateTime expiredAt;
     private LocalDateTime createdAt;
 
-    public static HoldingStock create(Long orderId, Long productId, int quantity) {
-        return HoldingStock.builder()
+    public static HoldStock create(Long orderId, Long productId, int quantity) {
+        return HoldStock.builder()
                 .orderId(orderId)
                 .productId(productId)
                 .quantity(quantity)

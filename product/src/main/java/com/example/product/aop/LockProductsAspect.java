@@ -1,7 +1,7 @@
 package com.example.product.aop;
 
-import com.example.product.dto.ProductOrderInfo;
-import com.example.product.dto.ProductOrderRequest;
+import com.example.product.dto.StockHoldInfo;
+import com.example.product.dto.StockHoldRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,16 +21,16 @@ import java.util.List;
 @Aspect
 @RequiredArgsConstructor
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class DistributedLockAspect {
+public class LockProductsAspect {
 
     private static final String LOCK_KEY_PREFIX = "Lock::Product_";
 
     private final RedissonClient redissonClient;
 
-    @Around("@annotation(lockProducts) && args(productOrderRequest)")
-    public Object lock(ProceedingJoinPoint joinPoint, LockProducts lockProducts, ProductOrderRequest productOrderRequest) throws Throwable {
-        List<Long> productIds = productOrderRequest.productOrderInfos().stream()
-                .map(ProductOrderInfo::productId)
+    @Around("@annotation(lockProducts) && args(stockHoldRequest)")
+    public Object lock(ProceedingJoinPoint joinPoint, LockProducts lockProducts, StockHoldRequest stockHoldRequest) throws Throwable {
+        List<Long> productIds = stockHoldRequest.stockHoldInfos().stream()
+                .map(StockHoldInfo::productId)
                 .sorted()
                 .toList();
 

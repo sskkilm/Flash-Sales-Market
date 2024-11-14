@@ -5,7 +5,7 @@ import com.example.order.application.repository.OrderProductRepository;
 import com.example.order.application.repository.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.domain.OrderProductManager;
+import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
 import com.example.order.exception.OrderServiceException;
@@ -29,20 +29,22 @@ public class OrderService {
     private final ProductFeignClient productFeignClient;
     private final LocalDateTimeHolder localDateTimeHolder;
 
-    private final OrderProductManager orderProductManager = new OrderProductManager();
+    private final AmountCalculator amountCalculator = new AmountCalculator();
 
     @Transactional
     public OrderCreateResponse create(Long memberId, OrderCreateRequest orderCreateRequest) {
 
         Order order = orderRepository.save(Order.create(memberId));
 
-        ProductOrderRequest productOrderRequest = mapToProductOrderRequest(orderCreateRequest, order);
-        ProductOrderResponse productOrderResponse = productFeignClient.order(productOrderRequest);
+        StockHoldResponse stockHoldResponse = productFeignClient.holdStock(
+                mapToStockHoldRequest(order, orderCreateRequest)
+        );
 
-        List<OrderProduct> orderProducts = mapToOrderProducts(productOrderResponse, order);
-        orderProductRepository.saveAll(orderProducts);
+        List<OrderProduct> orderProducts = orderProductRepository.saveAll(
+                mapToOrderProducts(order, stockHoldResponse)
+        );
 
-        BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
+        BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
 
         return new OrderCreateResponse(order.getId(), totalAmount);
     }
@@ -80,7 +82,7 @@ public class OrderService {
         return orders.stream().map(order -> {
             List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
 
-            BigDecimal totalPrice = orderProductManager.calculateTotalAmount(orderProducts);
+            BigDecimal totalPrice = amountCalculator.calculateTotalAmount(orderProducts);
 
             List<OrderProductDto> orderProductDtos = orderProducts.stream().map(OrderProductDto::from).toList();
 
@@ -133,7 +135,7 @@ public class OrderService {
         }
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        BigDecimal totalAmount = orderProductManager.calculateTotalAmount(orderProducts);
+        BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
         if (totalAmountMisMatch(request, totalAmount)) {
             throw new OrderServiceException(TOTAL_AMOUNT_MIS_MATCH);
         }
@@ -157,25 +159,25 @@ public class OrderService {
         return request.amount().compareTo(totalAmount) != 0;
     }
 
-    private static ProductOrderRequest mapToProductOrderRequest(OrderCreateRequest orderCreateRequest, Order order) {
-        return new ProductOrderRequest(
+    private static StockHoldRequest mapToStockHoldRequest(Order order, OrderCreateRequest orderCreateRequest) {
+        return new StockHoldRequest(
                 order.getId(),
-                orderCreateRequest.productInfos().stream().map(
-                        productInfo -> new ProductOrderInfo(
-                                productInfo.productId(), productInfo.quantity()
+                orderCreateRequest.orderInfos().stream().map(
+                        orderInfo -> new StockHoldInfo(
+                                orderInfo.productId(), orderInfo.quantity()
                         )
                 ).toList());
     }
 
-    private static List<OrderProduct> mapToOrderProducts(ProductOrderResponse productOrderResponse, Order order) {
-        return productOrderResponse.orderedProductInfos()
+    private static List<OrderProduct> mapToOrderProducts(Order order, StockHoldResponse stockHoldResponse) {
+        return stockHoldResponse.stockHoldResults()
                 .stream().map(
-                        orderedProductInfo -> OrderProduct.create(
+                        stockHoldResult -> OrderProduct.create(
                                 order,
-                                orderedProductInfo.productId(),
-                                orderedProductInfo.productName(),
-                                orderedProductInfo.quantity(),
-                                orderedProductInfo.amount()
+                                stockHoldResult.productId(),
+                                stockHoldResult.productName(),
+                                stockHoldResult.quantity(),
+                                stockHoldResult.amount()
                         )
                 ).toList();
     }

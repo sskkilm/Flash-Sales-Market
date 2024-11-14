@@ -10,6 +10,6 @@ public interface ProductFeignClient {
     @PostMapping("/{orderId}/release/holding-stock")
     void releaseHoldingStock(@PathVariable Long orderId);
 
-    @PostMapping("/{orderId}/apply/holding-stock")
-    void applyHoldingStock(@PathVariable Long orderId);
+    @PostMapping("/{orderId}/apply/hold-stock")
+    void applyHoldStock(@PathVariable Long orderId);
 }
