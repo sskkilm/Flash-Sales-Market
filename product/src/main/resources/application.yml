@@ -12,7 +12,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/drop-sale-platform
+    url: jdbc:mysql://localhost:3306/flash-sales-market
     username: root
     password: 1234
 
@@ -28,9 +28,9 @@ spring:
       host: localhost
       port: 6379
 
-#logging:
-#  level:
-#    org.hibernate.SQL: debug
+logging:
+  level:
+    org.hibernate.SQL: debug
 
 server:
   port: 8083
