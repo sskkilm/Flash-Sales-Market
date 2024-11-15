@@ -17,8 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.order.exception.error.ErrorCode.MEMBER_UN_MATCHED;
-import static com.example.order.exception.error.ErrorCode.TOTAL_AMOUNT_MIS_MATCH;
+import static com.example.order.exception.error.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -128,16 +127,18 @@ public class OrderService {
     }
 
     public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) throws OrderServiceException {
-        Long orderId = request.orderId();
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(request.orderId());
         if (order.isNotOrderBy(memberId)) {
             throw new OrderServiceException(MEMBER_UN_MATCHED);
+        }
+        if (order.isCompleted()) {
+            throw new OrderServiceException(ALREADY_COMPLETED);
         }
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
         BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
-        if (totalAmountMisMatch(request, totalAmount)) {
-            throw new OrderServiceException(TOTAL_AMOUNT_MIS_MATCH);
+        if (totalAmountUnMatched(request, totalAmount)) {
+            throw new OrderServiceException(TOTAL_AMOUNT_UN_MATCHED);
         }
 
         return true;
@@ -155,7 +156,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    private static boolean totalAmountMisMatch(OrderValidationRequest request, BigDecimal totalAmount) {
+    private static boolean totalAmountUnMatched(OrderValidationRequest request, BigDecimal totalAmount) {
         return request.amount().compareTo(totalAmount) != 0;
     }
 

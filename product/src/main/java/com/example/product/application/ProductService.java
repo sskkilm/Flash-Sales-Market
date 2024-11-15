@@ -98,8 +98,8 @@ public class ProductService {
         List<HoldStock> holdStocks = holdStockService.findAllHoldStockByOrderId(orderId);
         holdStocks.forEach(holdStock -> {
             Product product = productRepository.findById(holdStock.getProductId());
-            product.decreaseStock(holdStock.getQuantity());
             log.info("{}번 상품에 남은 재고: {}", product.getId(), product.getStockQuantity());
+            product.decreaseStock(holdStock.getQuantity());
             productRepository.save(product);
         });
         holdStockService.release(orderId);

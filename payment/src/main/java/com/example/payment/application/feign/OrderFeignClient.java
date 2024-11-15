@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "api-gateway",
-        path = "/orders",
+        path = "/orders/internal",
         contextId = "orderClient",
         configuration = FeignErrorDecoder.class)
 public interface OrderFeignClient {
 
-    @PostMapping("/internal/{memberId}/validate")
+    @PostMapping("/{memberId}/validate")
     boolean validateOrderInfo(@PathVariable Long memberId, @RequestBody OrderValidationRequest orderValidationRequest);
 
-    @PostMapping("/internal/{orderId}/completed")
+    @PostMapping("/{orderId}/completed")
     void updateOrderCompleted(@PathVariable Long orderId);
 
-    @PostMapping("/internal/{orderId}}/fail")
+    @PostMapping("/{orderId}}/failed")
     void updateOrderFailed(@PathVariable Long orderId);
 }

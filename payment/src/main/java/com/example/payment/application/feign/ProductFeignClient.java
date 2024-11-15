@@ -1,4 +1,4 @@
-package com.example.payment.application.feign.error.decoder;
+package com.example.payment.application.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;

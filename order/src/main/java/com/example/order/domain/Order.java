@@ -75,7 +75,7 @@ public class Order {
         throw new OrderServiceException(CAN_NOT_BE_CANCELED);
     }
 
-    private boolean isCompleted() {
+    public boolean isCompleted() {
         return this.status == COMPLETED;
     }
 

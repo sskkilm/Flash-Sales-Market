@@ -11,7 +11,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentServiceException.class)
     public ResponseEntity<?> handlePaymentServiceException(PaymentServiceException e) {
         return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(new ErrorResponse(e.getErrorCode()));
+                .status(e.getStatus())
+                .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
 }

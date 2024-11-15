@@ -99,7 +99,7 @@ public class StockConcurrencyTest {
                         .openTime(now.minusMinutes(10))
                         .build()
         );
-        for (int i = 0; i < threadCount; i++) {
+        for (int i = 0; i < 100; i++) {
             long orderId = i + 1;
             HoldStock holdStock = HoldStock.create(orderId, product.getId(), 1);
             holdStockRepository.save(holdStock);

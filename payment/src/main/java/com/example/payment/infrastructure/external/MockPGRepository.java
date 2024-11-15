@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PGRepository extends JpaRepository<PGEntity, Long> {
+public interface MockPGRepository extends JpaRepository<PGEntity, Long> {
     Optional<PGEntity> findByPaymentKey(String paymentKey);
 
     Optional<PGEntity> findByOrderId(Long orderId);

@@ -14,10 +14,10 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class PGServiceImpl implements PGService {
+public class MockPGService implements PGService {
 
     private final ThirdPartyPaymentService thirdPartyPaymentService;
-    private final PGRepository pgRepository;
+    private final MockPGRepository mockPgRepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -29,10 +29,10 @@ public class PGServiceImpl implements PGService {
         }
 
         String paymentKey = UUID.randomUUID().toString();
-        PGEntity pgEntity = pgRepository.findByOrderId(request.orderId())
+        PGEntity pgEntity = mockPgRepository.findByOrderId(request.orderId())
                 .map(entity -> entity.updatePaymentKey(paymentKey))
                 .orElseGet(() -> PGEntity.create(request.orderId(), request.amount(), paymentKey));
-        pgRepository.save(pgEntity);
+        mockPgRepository.save(pgEntity);
 
         return new PGInitResponse(paymentKey, request.orderId(), request.amount(), request.memberPaymentInfo());
     }
@@ -41,7 +41,7 @@ public class PGServiceImpl implements PGService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PGConfirmResponse pgConfirm(PGConfirmRequest request) {
 
-        PGEntity pgEntity = pgRepository.findByPaymentKey(request.paymentKey())
+        PGEntity pgEntity = mockPgRepository.findByPaymentKey(request.paymentKey())
                 .orElseThrow(() -> new PGServiceException("존재하지 않는 결제 정보입니다."));
         pgEntity.validate(request.orderId(), request.amount());
 

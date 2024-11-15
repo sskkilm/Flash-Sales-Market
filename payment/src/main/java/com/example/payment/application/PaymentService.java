@@ -1,12 +1,15 @@
 package com.example.payment.application;
 
 import com.example.payment.application.feign.OrderFeignClient;
-import com.example.payment.application.feign.error.decoder.ProductFeignClient;
+import com.example.payment.application.feign.ProductFeignClient;
 import com.example.payment.domain.Payment;
 import com.example.payment.dto.*;
+import com.example.payment.event.PaymentConfirmedEvent;
+import com.example.payment.event.PaymentFailedEvent;
 import com.example.payment.exception.PaymentServiceException;
 import com.example.payment.infrastructure.external.PGServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ public class PaymentService {
     private final OrderFeignClient orderFeignClient;
     private final ProductFeignClient productFeignClient;
     private final PGService pgService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PaymentInitResponse init(Long memberId, PaymentInitRequest request) {
@@ -51,8 +55,7 @@ public class PaymentService {
                     )
             );
         } catch (PGServiceException e) {
-            orderFeignClient.updateOrderFailed(request.orderId());
-            productFeignClient.releaseHoldingStock(request.orderId());
+            eventPublisher.publishEvent(new PaymentFailedEvent(request.orderId()));
             throw new PaymentServiceException(PAYMENT_FAILED_INIT_FAILURE);
         }
 
@@ -71,8 +74,7 @@ public class PaymentService {
                     new PGConfirmRequest(paymentKey, orderId, amount, memberPaymentInfo)
             );
         } catch (PGServiceException e) {
-            orderFeignClient.updateOrderFailed(orderId);
-            productFeignClient.releaseHoldingStock(orderId);
+            eventPublisher.publishEvent(new PaymentFailedEvent(orderId));
             throw new PaymentServiceException(PAYMENT_FAILED_CONFIRM_FAILURE);
         }
 
@@ -80,8 +82,9 @@ public class PaymentService {
         payment.confirmed();
         paymentRepository.save(payment);
 
-        orderFeignClient.updateOrderCompleted(orderId);
-        productFeignClient.applyHoldStock(orderId);
+        eventPublisher.publishEvent(new PaymentConfirmedEvent(orderId));
+//        orderFeignClient.updateOrderCompleted(orderId);
+//        productFeignClient.applyHoldStock(orderId);
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
     }
