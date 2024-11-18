@@ -1,8 +1,8 @@
 package com.example.order.application;
 
 import com.example.order.application.feign.ProductFeignClient;
-import com.example.order.application.repository.OrderProductRepository;
-import com.example.order.application.repository.OrderRepository;
+import com.example.order.application.port.OrderProductRepository;
+import com.example.order.application.port.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.dto.*;
@@ -47,9 +47,9 @@ class OrderServiceTest {
                 List.of(new OrderInfo(1L, 1))
         );
 
-        given(productFeignClient.holdStock(any(StockHoldRequest.class)))
-                .willReturn(new StockHoldResponse(List.of(
-                        new StockHoldResult(
+        given(productFeignClient.preoccupyStock(any(StockPreoccupationRequest.class)))
+                .willReturn(new StockPreoccupationResponse(List.of(
+                        new StockPreoccupationResult(
                                 1L, "name", 1, new BigDecimal("10000")
                         )
                 )));

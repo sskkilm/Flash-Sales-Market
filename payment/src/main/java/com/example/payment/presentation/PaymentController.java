@@ -35,7 +35,7 @@ public class PaymentController {
             @RequestBody PaymentInitRequest paymentInitRequest
     ) {
         return paymentService.confirm(
-                paymentKey, orderId, amount, paymentInitRequest.memberPaymentInfo()
+                paymentKey, orderId, amount, paymentInitRequest
         );
     }
 }

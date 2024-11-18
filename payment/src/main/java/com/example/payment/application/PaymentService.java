@@ -1,15 +1,16 @@
 package com.example.payment.application;
 
 import com.example.payment.application.feign.OrderFeignClient;
-import com.example.payment.application.feign.ProductFeignClient;
+import com.example.payment.application.port.PGClient;
+import com.example.payment.application.port.EventProducer;
+import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.domain.Payment;
+import com.example.payment.domain.event.PaymentConfirmedEvent;
+import com.example.payment.domain.event.PaymentFailedEvent;
 import com.example.payment.dto.*;
-import com.example.payment.event.PaymentConfirmedEvent;
-import com.example.payment.event.PaymentFailedEvent;
 import com.example.payment.exception.PaymentServiceException;
-import com.example.payment.infrastructure.external.PGServiceException;
+import com.example.payment.infrastructure.pg.PGServiceException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +24,14 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderFeignClient orderFeignClient;
-    private final ProductFeignClient productFeignClient;
-    private final PGService pgService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final PGClient pgClient;
+    private final EventProducer eventProducer;
 
     @Transactional
     public PaymentInitResponse init(Long memberId, PaymentInitRequest request) {
 
         OrderValidationRequest orderValidationRequest = new OrderValidationRequest(
-                request.orderId(), request.amount()
+                request.orderId(), request.orderProductIds(), request.amount()
         );
         orderFeignClient.validateOrderInfo(memberId, orderValidationRequest);
 
@@ -49,13 +49,13 @@ public class PaymentService {
 
         PGInitResponse pgInitResponse = null;
         try {
-            pgInitResponse = pgService.pgInit(
+            pgInitResponse = pgClient.pgInit(
                     new PGInitRequest(
                             request.orderId(), request.amount(), request.memberPaymentInfo()
                     )
             );
         } catch (PGServiceException e) {
-            eventPublisher.publishEvent(new PaymentFailedEvent(request.orderId()));
+            eventProducer.publish(new PaymentFailedEvent(request.orderId()));
             throw new PaymentServiceException(PAYMENT_FAILED_INIT_FAILURE);
         }
 
@@ -63,18 +63,18 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentConfirmResponse confirm(String paymentKey, Long orderId, BigDecimal amount, MemberPaymentInfo memberPaymentInfo) {
+    public PaymentConfirmResponse confirm(String paymentKey, Long orderId, BigDecimal amount, PaymentInitRequest paymentInitRequest) {
 
         Payment payment = paymentRepository.findByOrderId(orderId);
         payment.validate(orderId, amount);
 
         PGConfirmResponse response = null;
         try {
-            response = pgService.pgConfirm(
-                    new PGConfirmRequest(paymentKey, orderId, amount, memberPaymentInfo)
+            response = pgClient.pgConfirm(
+                    new PGConfirmRequest(paymentKey, orderId, amount, paymentInitRequest.memberPaymentInfo())
             );
         } catch (PGServiceException e) {
-            eventPublisher.publishEvent(new PaymentFailedEvent(orderId));
+            eventProducer.publish(new PaymentFailedEvent(orderId));
             throw new PaymentServiceException(PAYMENT_FAILED_CONFIRM_FAILURE);
         }
 
@@ -82,7 +82,7 @@ public class PaymentService {
         payment.confirmed();
         paymentRepository.save(payment);
 
-        eventPublisher.publishEvent(new PaymentConfirmedEvent(orderId));
+        eventProducer.publish(new PaymentConfirmedEvent(orderId));
 //        orderFeignClient.updateOrderCompleted(orderId);
 //        productFeignClient.applyHoldStock(orderId);
 

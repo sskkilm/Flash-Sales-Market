@@ -15,12 +15,6 @@ public class ProductInternalController {
 
     private final ProductService productService;
 
-    @PostMapping("/hold-stock")
-    public StockHoldResponse holdStock(
-            @Valid @RequestBody StockHoldRequest stockHoldRequest) {
-        return productService.holdStock(stockHoldRequest);
-    }
-
     @PostMapping("/restock-stock")
     public void restock(
             @Valid @RequestBody ProductRestockRequest productRestockRequest) {
@@ -37,13 +31,20 @@ public class ProductInternalController {
         productService.decreaseStock(orderCompletedProducts);
     }
 
-    @PostMapping("/{orderId}/release/holding-stock")
-    public void releaseHoldingStock(@PathVariable Long orderId) {
-        productService.releaseHoldingStock(orderId);
+    @PostMapping("/preoccupation")
+    public StockPreoccupationResponse preoccupyStock(
+            @Valid @RequestBody StockPreoccupationRequest stockPreoccupationRequest) {
+        return productService.preoccupyStock(stockPreoccupationRequest);
     }
 
-    @PostMapping("{orderId}/apply/hold-stock")
-    void applyHoldStock(@PathVariable Long orderId) {
-        productService.applyHoldStock(orderId);
+//    @PostMapping("{orderId}/preoccupation/apply")
+//    void applyPreoccupiedStock(@PathVariable Long orderId) {
+//        productService.applyPreoccupiedStock(orderId);
+//    }
+
+    @PostMapping("/{orderId}/preoccupation/release")
+    public void releasePreoccupiedStock(@PathVariable Long orderId) {
+        productService.releasePreoccupiedStock(orderId);
     }
+
 }

@@ -1,6 +1,6 @@
 package com.example.product;
 
-import com.example.product.application.ProductRepository;
+import com.example.product.application.port.ProductRepository;
 import com.example.product.domain.LimitedProduct;
 import com.example.product.domain.NormalProduct;
 import jakarta.annotation.PostConstruct;

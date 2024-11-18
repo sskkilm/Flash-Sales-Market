@@ -57,6 +57,10 @@ public class Order {
         this.status = OrderStatus.FAILED;
     }
 
+    public boolean isNotPending() {
+        return this.status != PENDING;
+    }
+
     private void validateOrderBy(Long memberId) {
         if (isOrderedBy(memberId)) {
             return;
@@ -75,7 +79,7 @@ public class Order {
         throw new OrderServiceException(CAN_NOT_BE_CANCELED);
     }
 
-    public boolean isCompleted() {
+    private boolean isCompleted() {
         return this.status == COMPLETED;
     }
 
@@ -97,4 +101,5 @@ public class Order {
     private boolean isBeforeReturnablePeriod(LocalDateTime returnedDateTime) {
         return this.updatedAt.plusDays(RETURNABLE_PERIOD_AFTER_DELIVERY).isAfter(returnedDateTime);
     }
+
 }

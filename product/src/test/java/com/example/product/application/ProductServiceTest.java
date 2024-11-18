@@ -1,5 +1,7 @@
 package com.example.product.application;
 
+import com.example.product.application.port.LocalDateTimeHolder;
+import com.example.product.application.port.ProductRepository;
 import com.example.product.domain.LimitedProduct;
 import com.example.product.domain.NormalProduct;
 import com.example.product.domain.Product;
@@ -27,7 +29,7 @@ class ProductServiceTest {
     ProductRepository productRepository;
 
     @Mock
-    HoldStockService holdStockService;
+    StockPreoccupationService stockPreoccupationService;
 
     @Mock
     LocalDateTimeHolder localDateTimeHolder;
@@ -163,8 +165,8 @@ class ProductServiceTest {
     @Test
     void 존재하지_않는_상품을_주문하면_예외가_발생한다() {
         //given
-        StockHoldRequest stockHoldRequest = new StockHoldRequest(
-                1L, List.of(new StockHoldInfo(1L, 1))
+        StockPreoccupationRequest stockPreoccupationRequest = new StockPreoccupationRequest(
+                1L, List.of(new StockPreoccupationInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
@@ -173,14 +175,14 @@ class ProductServiceTest {
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.holdStock(stockHoldRequest));
+                () -> productService.preoccupyStock(stockPreoccupationRequest));
     }
 
     @Test
     void 상품_주문_시_재고가_부족하면_예외가_발생한다() {
         //given
-        StockHoldRequest stockHoldRequest = new StockHoldRequest(
-                1L, List.of(new StockHoldInfo(1L, 1))
+        StockPreoccupationRequest stockPreoccupationRequest = new StockPreoccupationRequest(
+                1L, List.of(new StockPreoccupationInfo(1L, 1))
         );
 
         given(productRepository.findById(1L))
@@ -190,20 +192,20 @@ class ProductServiceTest {
                                 .stockQuantity(1)
                                 .build()
                 );
-        given(holdStockService.getHoldStockQuantityInProduct(1L))
+        given(stockPreoccupationService.getPreoccupiedStockQuantityInProduct(1L))
                 .willReturn(1);
 
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.holdStock(stockHoldRequest));
+                () -> productService.preoccupyStock(stockPreoccupationRequest));
     }
 
     @Test
     void 상품을_주문한다() {
         //given
-        StockHoldRequest stockHoldRequest = new StockHoldRequest(
-                1L, List.of(new StockHoldInfo(1L, 1))
+        StockPreoccupationRequest stockPreoccupationRequest = new StockPreoccupationRequest(
+                1L, List.of(new StockPreoccupationInfo(1L, 1))
         );
 
         Product product1 = NormalProduct.builder()
@@ -214,20 +216,20 @@ class ProductServiceTest {
                 .build();
         given(productRepository.findById(1L))
                 .willReturn(product1);
-        given(holdStockService.getHoldStockQuantityInProduct(1L))
+        given(stockPreoccupationService.getPreoccupiedStockQuantityInProduct(1L))
                 .willReturn(0);
 
         //when
-        StockHoldResponse response = productService.holdStock(stockHoldRequest);
+        StockPreoccupationResponse response = productService.preoccupyStock(stockPreoccupationRequest);
 
         //then
         assertEquals(10, product1.getStockQuantity());
 
-        StockHoldResult stockHoldResult1 = response.stockHoldResults().get(0);
-        assertEquals(1L, stockHoldResult1.productId());
-        assertEquals(1, stockHoldResult1.quantity());
-        assertEquals("name1", stockHoldResult1.productName());
-        assertEquals(new BigDecimal("10000"), stockHoldResult1.amount());
+        StockPreoccupationResult stockPreoccupationResult1 = response.stockPreoccupationResults().get(0);
+        assertEquals(1L, stockPreoccupationResult1.productId());
+        assertEquals(1, stockPreoccupationResult1.quantity());
+        assertEquals("name1", stockPreoccupationResult1.productName());
+        assertEquals(new BigDecimal("10000"), stockPreoccupationResult1.amount());
     }
 
     @Test

@@ -1,24 +1,29 @@
 package com.example.order.application;
 
 import com.example.order.application.feign.ProductFeignClient;
-import com.example.order.application.repository.OrderProductRepository;
-import com.example.order.application.repository.OrderRepository;
+import com.example.order.application.port.OrderProductRepository;
+import com.example.order.application.port.OrderRepository;
+import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.OrderStatus;
 import com.example.order.dto.*;
 import com.example.order.exception.OrderServiceException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.example.order.exception.error.ErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -35,17 +40,18 @@ public class OrderService {
 
         Order order = orderRepository.save(Order.create(memberId));
 
-        StockHoldResponse stockHoldResponse = productFeignClient.holdStock(
-                mapToStockHoldRequest(order, orderCreateRequest)
+        StockPreoccupationResponse stockPreoccupationResponse = productFeignClient.preoccupyStock(
+                mapToStockPreoccupationRequest(order, orderCreateRequest)
         );
 
         List<OrderProduct> orderProducts = orderProductRepository.saveAll(
-                mapToOrderProducts(order, stockHoldResponse)
+                mapToOrderProducts(order, stockPreoccupationResponse)
         );
+        List<Long> orderProductIds = orderProducts.stream().map(OrderProduct::getId).toList();
 
         BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
 
-        return new OrderCreateResponse(order.getId(), totalAmount);
+        return new OrderCreateResponse(order.getId(), orderProductIds, totalAmount);
     }
 
     @Transactional
@@ -126,16 +132,18 @@ public class OrderService {
         orderRepository.saveAll(orders);
     }
 
-    public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) throws OrderServiceException {
+    public boolean validateOrderInfo(Long memberId, OrderValidationRequest request) {
         Order order = orderRepository.findById(request.orderId());
         if (order.isNotOrderBy(memberId)) {
             throw new OrderServiceException(MEMBER_UN_MATCHED);
         }
-        if (order.isCompleted()) {
-            throw new OrderServiceException(ALREADY_COMPLETED);
+        if (order.isNotPending()) {
+            throw new OrderServiceException(ALREADY_PROCESSED);
         }
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        validateOrderProducts(request, orderProducts);
+
         BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
         if (totalAmountUnMatched(request, totalAmount)) {
             throw new OrderServiceException(TOTAL_AMOUNT_UN_MATCHED);
@@ -148,30 +156,32 @@ public class OrderService {
         Order order = orderRepository.findById(orderId);
         order.completed();
         orderRepository.save(order);
+        log.info("Order ID:{} Completed", orderId);
     }
 
     public void updateOrderFailed(Long orderId) {
         Order order = orderRepository.findById(orderId);
         order.failed();
         orderRepository.save(order);
+        log.info("Order ID:{} Failed", orderId);
     }
 
     private static boolean totalAmountUnMatched(OrderValidationRequest request, BigDecimal totalAmount) {
         return request.amount().compareTo(totalAmount) != 0;
     }
 
-    private static StockHoldRequest mapToStockHoldRequest(Order order, OrderCreateRequest orderCreateRequest) {
-        return new StockHoldRequest(
+    private static StockPreoccupationRequest mapToStockPreoccupationRequest(Order order, OrderCreateRequest orderCreateRequest) {
+        return new StockPreoccupationRequest(
                 order.getId(),
                 orderCreateRequest.orderInfos().stream().map(
-                        orderInfo -> new StockHoldInfo(
+                        orderInfo -> new StockPreoccupationInfo(
                                 orderInfo.productId(), orderInfo.quantity()
                         )
                 ).toList());
     }
 
-    private static List<OrderProduct> mapToOrderProducts(Order order, StockHoldResponse stockHoldResponse) {
-        return stockHoldResponse.stockHoldResults()
+    private static List<OrderProduct> mapToOrderProducts(Order order, StockPreoccupationResponse stockPreoccupationResponse) {
+        return stockPreoccupationResponse.stockPreoccupationResults()
                 .stream().map(
                         stockHoldResult -> OrderProduct.create(
                                 order,
@@ -182,4 +192,13 @@ public class OrderService {
                         )
                 ).toList();
     }
+
+    private static void validateOrderProducts(OrderValidationRequest request, List<OrderProduct> orderProducts) {
+        Set<Long> orderProductIds = orderProducts.stream().map(OrderProduct::getId).collect(Collectors.toSet());
+        Set<Long> requestOrderProductIds = new HashSet<>(request.orderProductIds());
+        if (!orderProductIds.equals(requestOrderProductIds)) {
+            throw new OrderServiceException(ORDER_PRODUCT_INFO_UN_MATCHED);
+        }
+    }
+
 }

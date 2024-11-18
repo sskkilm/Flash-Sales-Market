@@ -1,6 +1,6 @@
 package com.example.product.infrastructure;
 
-import com.example.product.application.LocalDateTimeHolder;
+import com.example.product.application.port.LocalDateTimeHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

@@ -1,10 +1,12 @@
 package com.example.product.application;
 
-import com.example.product.domain.HoldStock;
+import com.example.product.application.port.ProductRepository;
+import com.example.product.application.port.StockPreoccupationRepository;
 import com.example.product.domain.LimitedProduct;
+import com.example.product.domain.PreoccupiedStock;
 import com.example.product.domain.Product;
-import com.example.product.dto.StockHoldInfo;
-import com.example.product.dto.StockHoldRequest;
+import com.example.product.dto.StockPreoccupationInfo;
+import com.example.product.dto.StockPreoccupationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +33,15 @@ public class StockConcurrencyTest {
     ProductRepository productRepository;
 
     @Autowired
-    HoldStockService holdStockService;
+    StockPreoccupationService stockPreoccupationService;
 
     @Autowired
-    HoldStockRepository holdStockRepository;
+    StockPreoccupationRepository stockPreoccupationRepository;
 
     @BeforeEach
     public void clear() {
         productRepository.deleteAll();
-        holdStockRepository.deleteAll();
+        stockPreoccupationRepository.deleteAll();
     }
 
     @Test
@@ -59,8 +61,8 @@ public class StockConcurrencyTest {
                         .build()
         );
 
-        List<StockHoldInfo> stockHoldInfos = List.of(
-                new StockHoldInfo(product.getId(), 1)
+        List<StockPreoccupationInfo> stockPreoccupationInfos = List.of(
+                new StockPreoccupationInfo(product.getId(), 1)
         );
 
         //when
@@ -68,10 +70,10 @@ public class StockConcurrencyTest {
             final int finalI = i + 1;
             executorService.submit(() -> {
                 try {
-                    StockHoldRequest stockHoldRequest = new StockHoldRequest(
-                            (long) finalI, stockHoldInfos
+                    StockPreoccupationRequest stockPreoccupationRequest = new StockPreoccupationRequest(
+                            (long) finalI, stockPreoccupationInfos
                     );
-                    productService.holdStock(stockHoldRequest);
+                    productService.preoccupyStock(stockPreoccupationRequest);
                 } finally {
                     latch.countDown();
                 }
@@ -80,7 +82,7 @@ public class StockConcurrencyTest {
         latch.await();
 
         //then
-        assertEquals(10, holdStockService.getHoldStockQuantityInProduct(product.getId()));
+        assertEquals(10, stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId()));
     }
 
     @Test
@@ -101,8 +103,8 @@ public class StockConcurrencyTest {
         );
         for (int i = 0; i < 100; i++) {
             long orderId = i + 1;
-            HoldStock holdStock = HoldStock.create(orderId, product.getId(), 1);
-            holdStockRepository.save(holdStock);
+            PreoccupiedStock preoccupiedStock = PreoccupiedStock.create(orderId, product.getId(), 1);
+            stockPreoccupationRepository.save(preoccupiedStock);
         }
 
         //when
@@ -110,7 +112,7 @@ public class StockConcurrencyTest {
             final long orderId = i + 1;
             executorService.submit(() -> {
                 try {
-                    productService.applyHoldStock(orderId);
+                    productService.applyPreoccupiedStock(orderId, List.of(product.getId()));
                 } finally {
                     latch.countDown();
                 }
@@ -121,7 +123,7 @@ public class StockConcurrencyTest {
         //then
         int stockQuantity = productRepository.findById(product.getId()).getStockQuantity();
         assertEquals(0, stockQuantity);
-        int holdStockQuantityInProduct = holdStockService.getHoldStockQuantityInProduct(product.getId());
+        int holdStockQuantityInProduct = stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId());
         assertEquals(0, holdStockQuantityInProduct);
     }
 }

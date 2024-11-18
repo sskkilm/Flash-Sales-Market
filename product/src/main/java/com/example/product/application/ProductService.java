@@ -1,9 +1,10 @@
 package com.example.product.application;
 
 import com.example.product.aop.LockProducts;
-import com.example.product.aop.LockProductsInOrder;
+import com.example.product.application.port.LocalDateTimeHolder;
+import com.example.product.application.port.ProductRepository;
 import com.example.product.domain.AmountCalculator;
-import com.example.product.domain.HoldStock;
+import com.example.product.domain.PreoccupiedStock;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final HoldStockService holdStockService;
+    private final StockPreoccupationService stockPreoccupationService;
     private final LocalDateTimeHolder localDateTimeHolder;
 
     private final AmountCalculator amountCalculator = new AmountCalculator();
@@ -33,27 +34,6 @@ public class ProductService {
     public ProductDetails<?> getProductDetails(Long id) {
         Product product = productRepository.findById(id);
         return ProductDetails.of(product);
-    }
-
-    @Transactional
-    @LockProducts
-    public StockHoldResponse holdStock(StockHoldRequest stockHoldRequest) {
-
-        List<StockHoldResult> stockHoldResults = stockHoldRequest.stockHoldInfos().stream()
-                .map(request -> {
-                    Product product = productRepository.findById(request.productId());
-
-                    int holdStockQuantity = holdStockService.getHoldStockQuantityInProduct(product.getId());
-                    log.info("{}번 상품에 선점된 재고: {}", product.getId(), holdStockQuantity);
-                    product.checkOutOfStock(request.quantity(), holdStockQuantity);
-                    holdStockService.hold(stockHoldRequest.orderId(), product.getId(), request.quantity());
-
-                    BigDecimal amount = amountCalculator.calculate(product, request.quantity());
-
-                    return new StockHoldResult(product.getId(), product.getName(), request.quantity(), amount);
-                }).toList();
-
-        return new StockHoldResponse(stockHoldResults);
     }
 
     public void restock(ProductRestockRequest productRestockRequest) {
@@ -88,20 +68,42 @@ public class ProductService {
                 });
     }
 
-    public void releaseHoldingStock(Long orderId) {
-        holdStockService.release(orderId);
+    @LockProducts
+    @Transactional
+    public StockPreoccupationResponse preoccupyStock(StockPreoccupationRequest stockPreoccupationRequest) {
+
+        List<StockPreoccupationResult> stockPreoccupationResults = stockPreoccupationRequest.stockPreoccupationInfos().stream()
+                .map(request -> {
+                    Product product = productRepository.findById(request.productId());
+
+                    int preoccupiedStockQuantity = stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId());
+                    log.info("{}번 상품에 선점된 재고: {}", product.getId(), preoccupiedStockQuantity);
+                    product.checkOutOfStock(request.quantity(), preoccupiedStockQuantity);
+                    stockPreoccupationService.preoccupy(stockPreoccupationRequest.orderId(), product.getId(), request.quantity());
+
+                    BigDecimal amount = amountCalculator.calculate(product, request.quantity());
+
+                    return new StockPreoccupationResult(product.getId(), product.getName(), request.quantity(), amount);
+                }).toList();
+
+        return new StockPreoccupationResponse(stockPreoccupationResults);
     }
 
+    @LockProducts
     @Transactional
-    @LockProductsInOrder
-    public void applyHoldStock(Long orderId) {
-        List<HoldStock> holdStocks = holdStockService.findAllHoldStockByOrderId(orderId);
-        holdStocks.forEach(holdStock -> {
+    public void applyPreoccupiedStock(Long orderId, List<Long> orderProductIds) {
+        List<PreoccupiedStock> preoccupiedStocks = stockPreoccupationService.findAllByOrderId(orderId);
+        preoccupiedStocks.forEach(holdStock -> {
             Product product = productRepository.findById(holdStock.getProductId());
             log.info("{}번 상품에 남은 재고: {}", product.getId(), product.getStockQuantity());
             product.decreaseStock(holdStock.getQuantity());
             productRepository.save(product);
         });
-        holdStockService.release(orderId);
+        stockPreoccupationService.release(orderId);
     }
+
+    public void releasePreoccupiedStock(Long orderId) {
+        stockPreoccupationService.release(orderId);
+    }
+
 }
