@@ -7,6 +7,7 @@ import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.PreoccupiedStock;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
+import com.example.product.exception.ProductServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static com.example.product.exception.error.ErrorCode.NOT_OPENED;
 
 @Slf4j
 @Service
@@ -75,6 +78,9 @@ public class ProductService {
         List<StockPreoccupationResult> stockPreoccupationResults = stockPreoccupationRequest.stockPreoccupationInfos().stream()
                 .map(request -> {
                     Product product = productRepository.findById(request.productId());
+                    if (product.isLimited() && product.isNotOpened()) {
+                        throw new ProductServiceException(NOT_OPENED);
+                    }
 
                     int preoccupiedStockQuantity = stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId());
                     log.info("{}번 상품에 선점된 재고: {}", product.getId(), preoccupiedStockQuantity);

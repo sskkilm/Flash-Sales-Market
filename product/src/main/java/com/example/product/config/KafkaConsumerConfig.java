@@ -1,10 +1,9 @@
-package com.example.order.config;
+package com.example.product.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -13,12 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableKafka
 public class KafkaConsumerConfig {
 
     public static final String KAFKA_BROKER_URL = "localhost:9094";
-    public static final String PAYMENT_CONFIRMED_EVENT_CONSUMER_GROUP_ID = "order-payment-confirmed-event-consumer";
-    public static final String PAYMENT_FAILED_EVENT_CONSUMER_GROUP_ID = "order-payment-failed-event-consumer";
+    public static final String PAYMENT_CONFIRMED_EVENT_CONSUMER_GROUP_ID = "product-payment-confirmed-event-consumer";
+    public static final String PAYMENT_FAILED_EVENT_CONSUMER_GROUP_ID = "product-payment-failed-event-consumer";
 
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {

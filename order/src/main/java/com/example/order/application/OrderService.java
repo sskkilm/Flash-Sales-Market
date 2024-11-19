@@ -152,6 +152,7 @@ public class OrderService {
         return true;
     }
 
+    @Transactional
     public void updateOrderCompleted(Long orderId) {
         Order order = orderRepository.findById(orderId);
         order.completed();
@@ -159,6 +160,7 @@ public class OrderService {
         log.info("Order ID:{} Completed", orderId);
     }
 
+    @Transactional
     public void updateOrderFailed(Long orderId) {
         Order order = orderRepository.findById(orderId);
         order.failed();

@@ -10,15 +10,13 @@ import java.net.URI;
 public record PaymentInitResponse(
         String paymentKey,
         Long orderId,
-        BigDecimal amount,
-        MemberPaymentInfo memberPaymentInfo
+        BigDecimal amount
 ) {
     public static PaymentInitResponse from(PGInitResponse pgInitResponse) {
         return new PaymentInitResponse(
                 pgInitResponse.paymentKey(),
                 pgInitResponse.orderId(),
-                pgInitResponse.amount(),
-                pgInitResponse.memberPaymentInfo()
+                pgInitResponse.amount()
         );
     }
 

@@ -3,10 +3,13 @@ package com.example.product.application;
 import com.example.product.application.port.StockPreoccupationRepository;
 import com.example.product.domain.PreoccupiedStock;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StockPreoccupationService {
@@ -23,8 +26,10 @@ public class StockPreoccupationService {
         stockPreoccupationRepository.save(preoccupiedStock);
     }
 
+    @Transactional
     public void release(Long orderId) {
         stockPreoccupationRepository.deleteAllByOrderId(orderId);
+        log.info("Order Id:{} 선점 재고 해제", orderId);
     }
 
     public List<PreoccupiedStock> findAllByOrderId(Long orderId) {

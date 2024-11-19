@@ -39,4 +39,11 @@ public abstract class Product {
         this.stockQuantity += quantity;
     }
 
+    public boolean isLimited() {
+        return this.getType().equals(ProductType.LIMITED);
+    }
+
+    public boolean isNotOpened() {
+        return ((LimitedProduct) this).getOpenTime().isAfter(LocalDateTime.now());
+    }
 }

@@ -20,11 +20,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderServiceException.class)
     public ResponseEntity<?> handleOrderServiceException(OrderServiceException e) {
-        log.info("Error Code: {}", e.getErrorCode());
-        log.info("Error Code Message: {}", e.getErrorCode().getMessage());
+        log.info("Error Http Status: {}", e.getStatus());
+        log.info("Error Code: {}", e.getCode());
+        log.info("Error Code Message: {}", e.getMessage());
         return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(new ErrorResponse(e.getErrorCode()));
+                .status(e.getStatus())
+                .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
 
 //    @ExceptionHandler(FeignException.FeignClientException.class)
@@ -72,14 +73,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<?> handleDataAccessException(DataAccessException e) {
         return ResponseEntity.internalServerError()
-                .body(new ErrorResponse(INTERNAL_SERVER_ERROR));
+                .body(new ErrorResponse(INTERNAL_SERVER_ERROR.name(), e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         log.error("Error Message: {}", e.getMessage());
         return ResponseEntity.internalServerError()
-                .body(new ErrorResponse(INTERNAL_SERVER_ERROR));
+                .body(new ErrorResponse(INTERNAL_SERVER_ERROR.name(), e.getMessage()));
     }
 
 }

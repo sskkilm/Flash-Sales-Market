@@ -20,14 +20,5 @@ public class OrderInternalController {
     ) {
         return orderService.validateOrderInfo(memberId, request);
     }
-
-    @PostMapping("/{orderId}/completed")
-    public void updateOrderCompleted(@PathVariable Long orderId) {
-        orderService.updateOrderCompleted(orderId);
-    }
-
-    @PostMapping("/{orderId}/fail")
-    public void updateOrderFailed(@PathVariable Long orderId) {
-        orderService.updateOrderFailed(orderId);
-    }
+    
 }

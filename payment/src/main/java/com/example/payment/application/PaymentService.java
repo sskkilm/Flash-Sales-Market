@@ -82,9 +82,7 @@ public class PaymentService {
         payment.confirmed();
         paymentRepository.save(payment);
 
-        eventProducer.publish(new PaymentConfirmedEvent(orderId));
-//        orderFeignClient.updateOrderCompleted(orderId);
-//        productFeignClient.applyHoldStock(orderId);
+        eventProducer.publish(new PaymentConfirmedEvent(orderId, paymentInitRequest.orderProductIds()));
 
         return new PaymentConfirmResponse(payment.getId(), response.orderId(), response.amount(), response.paymentKey());
     }
