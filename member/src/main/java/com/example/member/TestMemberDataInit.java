@@ -16,10 +16,12 @@ public class TestMemberDataInit {
 
     @PostConstruct
     public void init() {
-        Member member = Member.builder()
-                .email("email")
-                .name("name")
-                .build();
-        memberRepository.save(member);
+        for (int i = 0; i < 1000; i++) {
+            Member member = Member.builder()
+                    .email("email@" + i)
+                    .name("name@" + i)
+                    .build();
+            memberRepository.save(member);
+        }
     }
 }

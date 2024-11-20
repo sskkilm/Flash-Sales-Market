@@ -28,32 +28,6 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getCode(), e.getMessage()));
     }
 
-//    @ExceptionHandler(FeignException.FeignClientException.class)
-//    public ResponseEntity<?> handleFeignClientException(FeignException.FeignClientException e) {
-//        // FeignException에서 HTTP 상태 코드 추출
-//        HttpStatus status = HttpStatus.valueOf(e.status());
-//
-//        try {
-//            // B 서비스의 에러 응답을 파싱
-//            String responseBody = e.contentUTF8();
-//            ErrorResponse errorResponse = new ObjectMapper().readValue(responseBody, ErrorResponse.class);
-//
-//            return ResponseEntity
-//                    .status(status)
-//                    .body(errorResponse);
-//        } catch (JsonProcessingException ex) {
-//            // 파싱 실패시 FeignException의 메시지를 사용하여 새로운 ErrorResponse 생성
-//            ErrorResponse fallbackResponse = new ErrorResponse(
-//                    status,
-//                    e.getMessage()
-//            );
-//
-//            return ResponseEntity
-//                    .status(status)
-//                    .body(fallbackResponse);
-//        }
-//    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();

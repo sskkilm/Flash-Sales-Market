@@ -24,13 +24,13 @@ public class TestProductDataInit {
         LimitedProduct product = LimitedProduct.builder()
                 .name("limited product")
                 .price(new BigDecimal("20000"))
-                .stockQuantity(100)
+                .stockQuantity(10000)
                 .openTime(now.minusMinutes(10))
                 .build();
         LimitedProduct product2 = LimitedProduct.builder()
                 .name("limited product2")
                 .price(new BigDecimal("20000"))
-                .stockQuantity(100)
+                .stockQuantity(10000)
                 .openTime(now.minusMinutes(10))
                 .build();
 
