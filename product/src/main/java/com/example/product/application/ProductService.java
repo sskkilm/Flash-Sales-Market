@@ -1,9 +1,8 @@
 package com.example.product.application;
 
-import com.example.product.aop.LockProducts;
+import com.example.product.aop.DistributedLock;
 import com.example.product.application.port.LocalDateTimeHolder;
 import com.example.product.application.port.ProductRepository;
-import com.example.product.domain.AmountCalculator;
 import com.example.product.domain.PreoccupiedStock;
 import com.example.product.domain.Product;
 import com.example.product.dto.*;
@@ -13,10 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static com.example.product.exception.error.ErrorCode.NOT_OPENED;
+import static com.example.product.exception.error.ErrorCode.PRODUCT_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -26,8 +26,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final StockPreoccupationService stockPreoccupationService;
     private final LocalDateTimeHolder localDateTimeHolder;
-
-    private final AmountCalculator amountCalculator = new AmountCalculator();
 
     public List<ProductDto> getProductList() {
         return productRepository.findAllSellableProduct(localDateTimeHolder.now())
@@ -71,31 +69,28 @@ public class ProductService {
                 });
     }
 
-    @LockProducts
-    @Transactional
-    public StockPreoccupationResponse preoccupyStock(StockPreoccupationRequest stockPreoccupationRequest) {
+    public StockPreoccupationResponse preoccupyStock(StockPreoccupationRequest request) {
 
-        List<StockPreoccupationResult> stockPreoccupationResults = stockPreoccupationRequest.stockPreoccupationInfos().stream()
-                .map(request -> {
-                    Product product = productRepository.findById(request.productId());
-                    if (product.isLimited() && product.isNotOpened()) {
-                        throw new ProductServiceException(NOT_OPENED);
-                    }
+        List<Long> productIds = request.stockPreoccupationInfos().stream()
+                .map(StockPreoccupationInfo::productId)
+                .toList();
 
-                    int preoccupiedStockQuantity = stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId());
-                    log.info("{}번 상품에 선점된 재고: {}", product.getId(), preoccupiedStockQuantity);
-                    product.checkOutOfStock(request.quantity(), preoccupiedStockQuantity);
-                    stockPreoccupationService.preoccupy(stockPreoccupationRequest.orderId(), product.getId(), request.quantity());
+        Map<Long, Product> productMap = productRepository.findAllByIdIn(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
 
-                    BigDecimal amount = amountCalculator.calculate(product, request.quantity());
+        validateProductIdInfo(productIds, productMap);
 
-                    return new StockPreoccupationResult(product.getId(), product.getName(), request.quantity(), amount);
-                }).toList();
+        List<StockPreoccupationResult> results = stockPreoccupationService.preoccupy(
+                request.orderId(), productMap, request.stockPreoccupationInfos()
+        );
 
-        return new StockPreoccupationResponse(stockPreoccupationResults);
+        log.info("Preoccupied Stock In Product Ids:{}", productIds);
+
+        return new StockPreoccupationResponse(results);
     }
 
-    @LockProducts
+    @DistributedLock
     @Transactional
     public void applyPreoccupiedStock(Long orderId, List<Long> orderProductIds) {
         List<PreoccupiedStock> preoccupiedStocks = stockPreoccupationService.findAllByOrderId(orderId);
@@ -110,6 +105,14 @@ public class ProductService {
 
     public void releasePreoccupiedStock(Long orderId) {
         stockPreoccupationService.release(orderId);
+    }
+
+    private static void validateProductIdInfo(List<Long> productIds, Map<Long, Product> productMap) {
+        for (Long productId : productIds) {
+            if (!productMap.containsKey(productId)) {
+                throw new ProductServiceException(PRODUCT_NOT_FOUND);
+            }
+        }
     }
 
 }

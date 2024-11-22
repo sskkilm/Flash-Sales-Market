@@ -5,7 +5,7 @@ import com.example.product.domain.PreoccupiedStock;
 import java.util.List;
 
 public interface StockPreoccupationRepository {
-    List<PreoccupiedStock> findAllByProductId(Long productId);
+    List<Integer> findQuantitiesByProductId(Long productId);
 
     void save(PreoccupiedStock preoccupiedStock);
 
@@ -16,4 +16,6 @@ public interface StockPreoccupationRepository {
     List<PreoccupiedStock> findAll();
 
     void deleteAll();
+
+    void saveAll(List<PreoccupiedStock> preoccupiedStocks);
 }

@@ -41,15 +41,17 @@ public class OrderService {
         Order order = orderRepository.save(Order.create(memberId));
 
         StockPreoccupationResponse stockPreoccupationResponse = productFeignClient.preoccupyStock(
-                mapToStockPreoccupationRequest(order, orderCreateRequest)
+                StockPreoccupationRequest.from(order, orderCreateRequest.orderInfos())
         );
 
         List<OrderProduct> orderProducts = orderProductRepository.saveAll(
-                mapToOrderProducts(order, stockPreoccupationResponse)
+                mapToOrderProducts(order, stockPreoccupationResponse.stockPreoccupationResults(), amountCalculator)
         );
         List<Long> orderProductIds = orderProducts.stream().map(OrderProduct::getId).toList();
 
         BigDecimal totalAmount = amountCalculator.calculateTotalAmount(orderProducts);
+
+        log.info("Order Id:{} Created", order.getId());
 
         return new OrderCreateResponse(order.getId(), orderProductIds, totalAmount);
     }
@@ -172,25 +174,15 @@ public class OrderService {
         return request.amount().compareTo(totalAmount) != 0;
     }
 
-    private static StockPreoccupationRequest mapToStockPreoccupationRequest(Order order, OrderCreateRequest orderCreateRequest) {
-        return new StockPreoccupationRequest(
-                order.getId(),
-                orderCreateRequest.orderInfos().stream().map(
-                        orderInfo -> new StockPreoccupationInfo(
-                                orderInfo.productId(), orderInfo.quantity()
-                        )
-                ).toList());
-    }
-
-    private static List<OrderProduct> mapToOrderProducts(Order order, StockPreoccupationResponse stockPreoccupationResponse) {
-        return stockPreoccupationResponse.stockPreoccupationResults()
-                .stream().map(
-                        stockHoldResult -> OrderProduct.create(
+    private static List<OrderProduct> mapToOrderProducts(Order order, List<StockPreoccupationResult> results, AmountCalculator amountCalculator) {
+        return results.stream()
+                .map(
+                        result -> OrderProduct.create(
                                 order,
-                                stockHoldResult.productId(),
-                                stockHoldResult.productName(),
-                                stockHoldResult.quantity(),
-                                stockHoldResult.amount()
+                                result.productId(),
+                                result.productName(),
+                                result.quantity(),
+                                amountCalculator.calculateAmount(result.quantity(), result.price())
                         )
                 ).toList();
     }

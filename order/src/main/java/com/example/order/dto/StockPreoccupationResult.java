@@ -6,6 +6,6 @@ public record StockPreoccupationResult(
         Long productId,
         String productName,
         int quantity,
-        BigDecimal amount
+        BigDecimal price
 ) {
 }
