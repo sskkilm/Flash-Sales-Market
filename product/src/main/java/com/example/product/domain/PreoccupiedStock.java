@@ -12,7 +12,6 @@ public class PreoccupiedStock {
     private Long orderId;
     private Long productId;
     private int quantity;
-    private LocalDateTime expiredAt;
     private LocalDateTime createdAt;
 
     public static PreoccupiedStock create(Long orderId, Long productId, int quantity) {

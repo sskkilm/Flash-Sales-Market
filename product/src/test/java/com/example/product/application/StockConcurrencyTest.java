@@ -33,9 +33,6 @@ public class StockConcurrencyTest {
     ProductRepository productRepository;
 
     @Autowired
-    StockPreoccupationService stockPreoccupationService;
-
-    @Autowired
     StockPreoccupationRepository stockPreoccupationRepository;
 
     @BeforeEach
@@ -82,7 +79,9 @@ public class StockConcurrencyTest {
         latch.await();
 
         //then
-        assertEquals(10, stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId()));
+        int sum = stockPreoccupationRepository.findQuantitiesByProductId(product.getId())
+                .stream().mapToInt(e -> e).sum();
+        assertEquals(10, sum);
     }
 
     @Test
@@ -123,7 +122,8 @@ public class StockConcurrencyTest {
         //then
         int stockQuantity = productRepository.findById(product.getId()).getStockQuantity();
         assertEquals(0, stockQuantity);
-        int holdStockQuantityInProduct = stockPreoccupationService.getPreoccupiedStockQuantityInProduct(product.getId());
-        assertEquals(0, holdStockQuantityInProduct);
+        int sum = stockPreoccupationRepository.findQuantitiesByProductId(product.getId())
+                .stream().mapToInt(e -> e).sum();
+        assertEquals(0, sum);
     }
 }
