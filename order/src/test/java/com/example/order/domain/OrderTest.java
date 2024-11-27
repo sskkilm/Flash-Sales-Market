@@ -1,6 +1,6 @@
 package com.example.order.domain;
 
-import com.example.order.exception.OrderServiceException;
+import com.example.order.domain.exception.OrderServiceException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

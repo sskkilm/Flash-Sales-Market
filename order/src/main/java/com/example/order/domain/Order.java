@@ -1,6 +1,6 @@
 package com.example.order.domain;
 
-import com.example.order.exception.OrderServiceException;
+import com.example.order.domain.exception.OrderServiceException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.example.order.domain.OrderStatus.*;
-import static com.example.order.exception.error.ErrorCode.*;
+import static com.example.order.domain.exception.ErrorCode.*;
 
 @Getter
 @Builder

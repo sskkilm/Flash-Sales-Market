@@ -3,7 +3,7 @@ package com.example.order.infrastructure.repository;
 import com.example.order.application.port.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderStatus;
-import com.example.order.exception.OrderServiceException;
+import com.example.order.domain.exception.OrderServiceException;
 import com.example.order.infrastructure.entity.OrderEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.order.exception.error.ErrorCode.*;
+import static com.example.order.domain.exception.ErrorCode.*;
 
 @Repository
 @RequiredArgsConstructor

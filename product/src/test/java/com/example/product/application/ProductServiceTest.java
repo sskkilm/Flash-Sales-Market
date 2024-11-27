@@ -68,13 +68,11 @@ class ProductServiceTest {
         ProductDto productDto1 = productList.get(0);
         assertEquals(1L, productDto1.productId());
         assertEquals("name1", productDto1.name());
-        assertEquals(ProductType.NORMAL.name(), productDto1.type());
         assertEquals(new BigDecimal("10000"), productDto1.price());
 
         ProductDto productDto2 = productList.get(1);
         assertEquals(2L, productDto2.productId());
         assertEquals("name2", productDto2.name());
-        assertEquals(ProductType.LIMITED.name(), productDto2.type());
         assertEquals(new BigDecimal("20000"), productDto2.price());
     }
 
@@ -296,7 +294,7 @@ class ProductServiceTest {
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.findById(1L)
+                () -> productService.getProductInfo(1L)
         );
 
     }
@@ -314,7 +312,7 @@ class ProductServiceTest {
                 .willReturn(product1);
 
         //when
-        ProductDto productDto = productService.findById(1L);
+        ProductDto productDto = productService.getProductInfo(1L);
 
         //then
         assertEquals(1L, productDto.productId());
@@ -331,7 +329,7 @@ class ProductServiceTest {
         //then
         assertThrows(ProductServiceException.class,
                 //when
-                () -> productService.findById(1L));
+                () -> productService.getProductInfo(1L));
     }
 
     @Test

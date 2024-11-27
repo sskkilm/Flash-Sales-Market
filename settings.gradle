@@ -1,5 +1,6 @@
-rootProject.name = 'drop-sale-platform'
+rootProject.name = 'flash-sales-market'
 include 'member'
+include 'cart-item'
 include 'product'
 include 'order'
 include 'payment'

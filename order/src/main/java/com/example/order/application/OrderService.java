@@ -3,12 +3,20 @@ package com.example.order.application;
 import com.example.order.application.feign.ProductFeignClient;
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.application.port.OrderRepository;
+import com.example.order.common.dto.*;
+import com.example.order.common.dto.request.OrderCreateRequest;
+import com.example.order.common.dto.request.OrderValidationRequest;
+import com.example.order.common.dto.request.ProductRestockRequest;
+import com.example.order.common.dto.request.StockPreoccupationRequest;
+import com.example.order.common.dto.response.OrderCancelResponse;
+import com.example.order.common.dto.response.OrderCreateResponse;
+import com.example.order.common.dto.response.OrderReturnResponse;
+import com.example.order.common.dto.response.StockPreoccupationResponse;
 import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
 import com.example.order.domain.OrderStatus;
-import com.example.order.dto.*;
-import com.example.order.exception.OrderServiceException;
+import com.example.order.domain.exception.OrderServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.example.order.exception.error.ErrorCode.*;
+import static com.example.order.domain.exception.ErrorCode.*;
 
 @Slf4j
 @Service

@@ -1,21 +1,50 @@
 spring:
   application:
     name: api-gateway
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   cloud:
     gateway:
       routes:
-        - id: member-service
+        - id: member-service-external
+          uri: lb://member-service
+          predicates:
+            - Path=/members/logout
+          filters:
+            - name: AuthenticationFilter
+        - id: member-service-internal
           uri: lb://member-service
           predicates:
             - Path=/members/**
-        - id: product-service
+
+        - id: cart-item-service-external
+          uri: lb://cart-item-service
+          predicates:
+            - Path=/cart-items/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: product-service-internal
           uri: lb://product-service
           predicates:
             - Path=/products/**
-        - id: order-service
+
+        - id: order-service-internal
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/internal/**
+
+        - id: order-service-external
           uri: lb://order-service
           predicates:
             - Path=/orders/**
+          filters:
+            - name: AuthenticationFilter
+
         - id: payment-service
           uri: lb://payment-service
           predicates:
@@ -27,3 +56,7 @@ eureka:
     fetch-registry: true
     serviceUrl:
       defaultZone: http://localhost:8081/eureka
+
+jwt:
+  secret:
+    c3ByaW5nLWJvb3QtY2FzaGZsb3ctcHJvamVjdC1qd3Qtc2VjcmV0LWtleQo=

@@ -1,10 +1,10 @@
 package com.example.order.application.feign;
 
 import com.example.order.application.feign.error.decoder.FeignErrorDecoder;
-import com.example.order.dto.OrderCompletedProductDto;
-import com.example.order.dto.ProductRestockRequest;
-import com.example.order.dto.StockPreoccupationRequest;
-import com.example.order.dto.StockPreoccupationResponse;
+import com.example.order.common.dto.OrderCompletedProductDto;
+import com.example.order.common.dto.request.ProductRestockRequest;
+import com.example.order.common.dto.request.StockPreoccupationRequest;
+import com.example.order.common.dto.response.StockPreoccupationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

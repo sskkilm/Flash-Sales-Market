@@ -1,7 +1,11 @@
 package com.example.order.presentation;
 
 import com.example.order.application.OrderService;
-import com.example.order.dto.*;
+import com.example.order.common.dto.*;
+import com.example.order.common.dto.request.OrderCreateRequest;
+import com.example.order.common.dto.response.OrderCancelResponse;
+import com.example.order.common.dto.response.OrderCreateResponse;
+import com.example.order.common.dto.response.OrderReturnResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,35 +17,36 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
+    private static final String X_MEMBER_ID = "X-Member-Id";
     private final OrderService orderService;
 
-    @PostMapping("/{memberId}")
+    @PostMapping
     public OrderCreateResponse create(
-            @PathVariable Long memberId,
+            @RequestHeader(X_MEMBER_ID) Long memberId,
             @RequestBody @Valid OrderCreateRequest orderCreateRequest
     ) {
         return orderService.create(memberId, orderCreateRequest);
     }
 
-    @PostMapping("/{memberId}/{orderId}/cancel")
+    @PostMapping("/{orderId}/cancel")
     public OrderCancelResponse cancel(
-            @PathVariable Long memberId,
+            @RequestHeader(X_MEMBER_ID) Long memberId,
             @PathVariable Long orderId
     ) {
         return orderService.cancel(memberId, orderId);
     }
 
-    @PostMapping("/{memberId}/{orderId}/return")
+    @PostMapping("/{orderId}/return")
     public OrderReturnResponse returns(
-            @PathVariable Long memberId,
+            @RequestHeader(X_MEMBER_ID) Long memberId,
             @PathVariable Long orderId
     ) {
         return orderService.returns(memberId, orderId);
     }
 
-    @GetMapping("/{memberId}")
+    @GetMapping
     public List<OrderHistory> getOrderHistories(
-            @PathVariable Long memberId
+            @RequestHeader(X_MEMBER_ID) Long memberId
     ) {
         return orderService.getOrderHistories(memberId);
     }

@@ -1,7 +1,7 @@
 package com.example.order.application.feign.error.decoder;
 
-import com.example.order.exception.OrderServiceException;
-import com.example.order.exception.error.ErrorResponse;
+import com.example.order.domain.exception.OrderServiceException;
+import com.example.order.common.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 
-import static com.example.order.exception.error.ErrorCode.INTERNAL_SERVER_ERROR;
+import static com.example.order.domain.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor

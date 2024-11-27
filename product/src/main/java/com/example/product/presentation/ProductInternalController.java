@@ -22,8 +22,8 @@ public class ProductInternalController {
     }
 
     @GetMapping("/{productId}")
-    public ProductDto findById(@PathVariable Long productId) {
-        return productService.findById(productId);
+    public ProductDto getProductInfo(@PathVariable Long productId) {
+        return productService.getProductInfo(productId);
     }
 
     @PostMapping("/decrease/stock")
@@ -36,11 +36,6 @@ public class ProductInternalController {
             @Valid @RequestBody StockPreoccupationRequest stockPreoccupationRequest) {
         return productService.preoccupyStock(stockPreoccupationRequest);
     }
-
-//    @PostMapping("{orderId}/preoccupation/apply")
-//    void applyPreoccupiedStock(@PathVariable Long orderId) {
-//        productService.applyPreoccupiedStock(orderId);
-//    }
 
     @PostMapping("/{orderId}/preoccupation/release")
     public void releasePreoccupiedStock(@PathVariable Long orderId) {

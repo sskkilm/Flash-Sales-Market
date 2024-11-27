@@ -34,6 +34,12 @@ public class ProductService {
                 .stream().map(ProductDto::from).toList();
     }
 
+    public ProductDto getProductInfo(Long productId) {
+        Product product = productRepository.findById(productId);
+
+        return ProductDto.from(product);
+    }
+
     public ProductDetails<?> getProductDetails(Long id) {
         Product product = productRepository.findById(id);
         return ProductDetails.of(product);
@@ -48,12 +54,6 @@ public class ProductService {
 
             productRepository.save(product);
         });
-    }
-
-    public ProductDto findById(Long productId) {
-        Product product = productRepository.findById(productId);
-
-        return ProductDto.from(product);
     }
 
     public int getStockQuantity(Long productId) {
