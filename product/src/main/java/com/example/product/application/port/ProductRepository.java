@@ -14,4 +14,6 @@ public interface ProductRepository {
     List<Product> findAllSellableProduct(LocalDateTime now);
 
     void deleteAll();
+
+    List<Product> findAllByIdIn(List<Long> productIds);
 }

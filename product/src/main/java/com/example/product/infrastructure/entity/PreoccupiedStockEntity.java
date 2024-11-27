@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity(name = "PreoccupiedStock")
+@Table(
+        name = "preoccupied_stock",
+        indexes = {@Index(name = "idx_product_id", columnList = "productId")}
+)
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

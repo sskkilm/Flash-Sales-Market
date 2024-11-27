@@ -15,9 +15,8 @@ public class StockPreoccupationRepositoryImpl implements StockPreoccupationRepos
     private final StockPreoccupationJpaRepository stockPreoccupationJpaRepository;
 
     @Override
-    public List<PreoccupiedStock> findAllByProductId(Long productId) {
-        return stockPreoccupationJpaRepository.findAllByProductId(productId)
-                .stream().map(PreoccupiedStockEntity::toModel).toList();
+    public List<Integer> findQuantitiesByProductId(Long productId) {
+        return stockPreoccupationJpaRepository.findQuantitiesByProductId(productId);
     }
 
     @Override
@@ -45,5 +44,12 @@ public class StockPreoccupationRepositoryImpl implements StockPreoccupationRepos
     @Override
     public void deleteAll() {
         stockPreoccupationJpaRepository.deleteAll();
+    }
+
+    @Override
+    public void saveAll(List<PreoccupiedStock> preoccupiedStocks) {
+        stockPreoccupationJpaRepository.saveAll(preoccupiedStocks.stream()
+                .map(PreoccupiedStockEntity::from)
+                .toList());
     }
 }

@@ -11,4 +11,8 @@ public class AmountCalculator {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public BigDecimal calculateAmount(int quantity, BigDecimal price) {
+
+        return price.multiply(new BigDecimal(String.valueOf(quantity)));
+    }
 }

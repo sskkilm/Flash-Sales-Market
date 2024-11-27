@@ -1,8 +1,8 @@
 package com.example.product.aop;
 
 import com.example.product.application.port.LockService;
+import com.example.product.domain.Product;
 import com.example.product.dto.StockPreoccupationInfo;
-import com.example.product.dto.StockPreoccupationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,25 +13,27 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
 @Aspect
 @RequiredArgsConstructor
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-public class LockProductsAspect {
+public class DistributedLockAspect {
 
     private static final String LOCK_KEY_PREFIX = "Lock::Product_";
 
     private final LockService lockService;
 
-    @Around("@annotation(lockProducts) && args(stockPreoccupationRequest)")
-    public Object lock(ProceedingJoinPoint joinPoint, LockProducts lockProducts, StockPreoccupationRequest stockPreoccupationRequest) throws Throwable {
-        List<Long> productIds = stockPreoccupationRequest.stockPreoccupationInfos().stream()
+    @Around("@annotation(distributedLock) && args(orderId, productMap, stockPreoccupationInfos)")
+    public Object lockByStockPreoccupationInfos(ProceedingJoinPoint joinPoint, DistributedLock distributedLock,
+                                                Long orderId, Map<Long, Product> productMap, List<StockPreoccupationInfo> stockPreoccupationInfos) throws Throwable {
+        List<Long> productIds = stockPreoccupationInfos.stream()
                 .map(StockPreoccupationInfo::productId)
                 .sorted()
                 .toList();
-        lockService.acquireAllLocks(LOCK_KEY_PREFIX, productIds, lockProducts.waitTime(), lockProducts.leaseTime());
+        lockService.acquireAllLocks(LOCK_KEY_PREFIX, productIds, distributedLock.waitTime(), distributedLock.leaseTime());
 
         try {
             return joinPoint.proceed();
@@ -40,12 +42,13 @@ public class LockProductsAspect {
         }
     }
 
-    @Around("@annotation(lockProducts) && args(orderId, orderProductIds)")
-    public Object lock(ProceedingJoinPoint joinPoint, LockProducts lockProducts, Long orderId, List<Long> orderProductIds) throws Throwable {
+    @Around("@annotation(distributedLock) && args(orderId, orderProductIds)")
+    public Object lockByOrderProductIds(ProceedingJoinPoint joinPoint, DistributedLock distributedLock,
+                                        Long orderId, List<Long> orderProductIds) throws Throwable {
         List<Long> productIds = orderProductIds.stream()
                 .sorted()
                 .toList();
-        lockService.acquireAllLocks(LOCK_KEY_PREFIX, productIds, lockProducts.waitTime(), lockProducts.leaseTime());
+        lockService.acquireAllLocks(LOCK_KEY_PREFIX, productIds, distributedLock.waitTime(), distributedLock.leaseTime());
 
         try {
             return joinPoint.proceed();

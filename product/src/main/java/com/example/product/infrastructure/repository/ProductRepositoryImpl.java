@@ -43,4 +43,11 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.deleteAll();
     }
 
+    @Override
+    public List<Product> findAllByIdIn(List<Long> productIds) {
+        return productJpaRepository.findAllByIdIn(productIds)
+                .stream().map(ProductEntity::toModel)
+                .toList();
+    }
+
 }
