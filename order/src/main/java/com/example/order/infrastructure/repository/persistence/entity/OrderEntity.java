@@ -1,7 +1,5 @@
-package com.example.order.infrastructure.entity;
+package com.example.order.infrastructure.repository.persistence.entity;
 
-import com.example.order.domain.Order;
-import com.example.order.domain.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -35,24 +33,4 @@ public class OrderEntity {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
-    public static OrderEntity from(Order order) {
-        return OrderEntity.builder()
-                .id(order.getId())
-                .memberId(order.getMemberId())
-                .status(order.getStatus().toString())
-                .createdAt(order.getCreatedAt())
-                .updatedAt(order.getUpdatedAt())
-                .build();
-    }
-
-    public Order toModel() {
-        return Order.builder()
-                .id(this.id)
-                .memberId(this.memberId)
-                .status(OrderStatus.valueOf(this.status))
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt)
-                .build();
-    }
 }

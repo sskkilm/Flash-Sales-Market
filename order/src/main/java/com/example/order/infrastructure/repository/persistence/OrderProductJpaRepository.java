@@ -1,7 +1,7 @@
-package com.example.order.infrastructure.repository;
+package com.example.order.infrastructure.repository.persistence;
 
-import com.example.order.infrastructure.entity.OrderEntity;
-import com.example.order.infrastructure.entity.OrderProductEntity;
+import com.example.order.infrastructure.repository.persistence.entity.OrderEntity;
+import com.example.order.infrastructure.repository.persistence.entity.OrderProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

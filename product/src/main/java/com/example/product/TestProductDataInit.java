@@ -22,13 +22,13 @@ public class TestProductDataInit {
         LocalDateTime now = LocalDateTime.now();
 
         EventProduct product = EventProduct.builder()
-                .name("limited product")
+                .name("Event Product1")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10000)
                 .openTime(now.minusMinutes(10))
                 .build();
         EventProduct product2 = EventProduct.builder()
-                .name("limited product2")
+                .name("Event Product2")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10000)
                 .openTime(now.minusMinutes(10))

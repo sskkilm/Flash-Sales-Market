@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "api-gateway",
         path = "/products/internal",
         contextId = "productClient")
-public interface ProductFeignClient {
+public interface ProductClient {
 
     @GetMapping("/{productId}")
     ProductDto getProductInfo(@PathVariable Long productId);

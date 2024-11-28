@@ -3,8 +3,9 @@ package com.example.order.infrastructure.repository;
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.infrastructure.entity.OrderEntity;
-import com.example.order.infrastructure.entity.OrderProductEntity;
+import com.example.order.infrastructure.repository.persistence.OrderProductJpaRepository;
+import com.example.order.infrastructure.repository.persistence.mapper.OrderMapper;
+import com.example.order.infrastructure.repository.persistence.mapper.OrderProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,14 +20,14 @@ public class OrderProductRepositoryImpl implements OrderProductRepository {
     @Override
     public List<OrderProduct> saveAll(List<OrderProduct> orderProducts) {
         return orderProductJpaRepository.saveAll(
-                orderProducts.stream().map(OrderProductEntity::from).toList()
-        ).stream().map(OrderProductEntity::toModel).toList();
+                orderProducts.stream().map(OrderProductMapper::toEntity).toList()
+        ).stream().map(OrderProductMapper::toModel).toList();
     }
 
     @Override
     public List<OrderProduct> findAllByOrder(Order order) {
-        return orderProductJpaRepository.findAllByOrder(OrderEntity.from(order)).stream()
-                .map(OrderProductEntity::toModel).toList();
+        return orderProductJpaRepository.findAllByOrder(OrderMapper.toEntity(order)).stream()
+                .map(OrderProductMapper::toModel).toList();
     }
 
 }

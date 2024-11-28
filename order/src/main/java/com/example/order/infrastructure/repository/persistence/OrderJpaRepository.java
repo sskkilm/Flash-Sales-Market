@@ -1,6 +1,6 @@
-package com.example.order.infrastructure.repository;
+package com.example.order.infrastructure.repository.persistence;
 
-import com.example.order.infrastructure.entity.OrderEntity;
+import com.example.order.infrastructure.repository.persistence.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

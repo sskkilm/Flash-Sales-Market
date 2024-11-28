@@ -4,7 +4,7 @@ import com.example.member.application.port.MemberRepository;
 import com.example.member.domain.exception.MemberServiceException;
 import com.example.member.domain.model.Member;
 import com.example.member.infrastructure.repository.persistence.MemberJpaRepository;
-import com.example.member.infrastructure.repository.persistence.MemberMapper;
+import com.example.member.infrastructure.repository.persistence.mapper.MemberMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

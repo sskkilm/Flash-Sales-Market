@@ -1,4 +1,4 @@
-package com.port90.cartitem.infrastructure.repository.persistence;
+package com.port90.cartitem.infrastructure.repository.persistence.mapper;
 
 import com.port90.cartitem.domain.model.CartItem;
 import com.port90.cartitem.infrastructure.repository.persistence.entity.CartItemEntity;

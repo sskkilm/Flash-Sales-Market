@@ -1,4 +1,4 @@
-package com.example.member.infrastructure.repository.persistence;
+package com.example.member.infrastructure.repository.persistence.mapper;
 
 import com.example.member.domain.model.Member;
 import com.example.member.infrastructure.repository.persistence.entity.MemberEntity;

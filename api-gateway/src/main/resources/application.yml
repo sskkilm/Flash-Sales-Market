@@ -16,6 +16,7 @@ spring:
             - Path=/members/logout
           filters:
             - name: AuthenticationFilter
+
         - id: member-service-internal
           uri: lb://member-service
           predicates:
@@ -31,7 +32,14 @@ spring:
         - id: product-service-internal
           uri: lb://product-service
           predicates:
+            - Path=/products/internal/**
+
+        - id: product-service-external
+          uri: lb://product-service
+          predicates:
             - Path=/products/**
+          filters:
+            - name: AuthenticationFilter
 
         - id: order-service-internal
           uri: lb://order-service
@@ -45,10 +53,12 @@ spring:
           filters:
             - name: AuthenticationFilter
 
-        - id: payment-service
+        - id: payment-service-external
           uri: lb://payment-service
           predicates:
             - Path=/payments/**
+          filters:
+            - name: AuthenticationFilter
 
 eureka:
   client:

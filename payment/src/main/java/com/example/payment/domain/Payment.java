@@ -7,9 +7,10 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static com.example.payment.domain.PaymentStatus.*;
+import static com.example.payment.domain.PaymentStatus.CONFIRMED;
+import static com.example.payment.domain.PaymentStatus.PENDING;
 import static com.example.payment.domain.exception.ErrorCode.INVALID_ORDER_AMOUNT;
-import static com.example.payment.domain.exception.ErrorCode.PAYMENT_ALREADY_CONFIRMED;
+import static com.example.payment.domain.exception.ErrorCode.PAYMENT_ALREADY_PROCESSED;
 
 @Getter
 @Builder
@@ -30,21 +31,13 @@ public class Payment {
                 .build();
     }
 
-    public void failed() {
-        this.status = FAILED;
-    }
-
     public void validate(BigDecimal amount) {
-        if (this.status == CONFIRMED) {
-            throw new PaymentServiceException(PAYMENT_ALREADY_CONFIRMED);
+        if (this.status != PENDING) {
+            throw new PaymentServiceException(PAYMENT_ALREADY_PROCESSED);
         }
         if (this.amount.compareTo(amount) != 0) {
             throw new PaymentServiceException(INVALID_ORDER_AMOUNT);
         }
-    }
-
-    public boolean isPending() {
-        return this.status == PENDING;
     }
 
     public void updatePaymentKey(String paymentKey) {

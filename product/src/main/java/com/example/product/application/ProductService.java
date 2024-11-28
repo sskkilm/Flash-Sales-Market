@@ -5,8 +5,8 @@ import com.example.product.application.port.ProductRepository;
 import com.example.product.common.aop.DistributedLock;
 import com.example.product.common.dto.ProductDetails;
 import com.example.product.common.dto.ProductDto;
-import com.example.product.common.dto.request.StockIncreaseRequest;
 import com.example.product.common.dto.request.StockDecreaseRequest;
+import com.example.product.common.dto.request.StockIncreaseRequest;
 import com.example.product.domain.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,6 @@ public class ProductService {
                 .stream().map(ProductDto::from).toList();
     }
 
-    public ProductDto getProductInfo(Long productId) {
-        Product product = productRepository.findById(productId);
-
-        return ProductDto.from(product);
-    }
-
     public ProductDetails<?> getProductDetails(Long id) {
         Product product = productRepository.findById(id);
         return ProductDetails.of(product);
@@ -42,6 +36,12 @@ public class ProductService {
     public int getStockQuantity(Long productId) {
         Product product = productRepository.findById(productId);
         return product.getStockQuantity();
+    }
+
+    public ProductDto getProductInfo(Long productId) {
+        Product product = productRepository.findById(productId);
+
+        return ProductDto.from(product);
     }
 
     @DistributedLock
@@ -56,6 +56,7 @@ public class ProductService {
                 });
     }
 
+    @DistributedLock
     @Transactional
     public void increaseStock(List<StockIncreaseRequest> requests) {
         requests

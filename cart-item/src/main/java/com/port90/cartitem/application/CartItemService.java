@@ -1,7 +1,7 @@
 package com.port90.cartitem.application;
 
-import com.port90.cartitem.application.feign.OrderFeignClient;
-import com.port90.cartitem.application.feign.ProductFeignClient;
+import com.port90.cartitem.application.feign.OrderClient;
+import com.port90.cartitem.application.feign.ProductClient;
 import com.port90.cartitem.application.port.CartItemRepository;
 import com.port90.cartitem.common.dto.CartItemDto;
 import com.port90.cartitem.common.dto.ProductDto;
@@ -27,11 +27,11 @@ import static com.port90.cartitem.domain.exception.ErrorCode.MEMBER_INFO_UN_MATC
 public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
-    private final ProductFeignClient productFeignClient;
-    private final OrderFeignClient orderFeignClient;
+    private final ProductClient productClient;
+    private final OrderClient orderClient;
 
     public CartItemCreateResponse create(Long memberId, CartItemCreateRequest request) {
-        ProductDto productDto = productFeignClient.getProductInfo(request.productId());
+        ProductDto productDto = productClient.getProductInfo(request.productId());
         CartItem cartItem = cartItemRepository.save(
                 CartItem.create(memberId, productDto.productId(), request.quantity())
         );
@@ -64,7 +64,7 @@ public class CartItemService {
 
         return cartItems.stream().map(
                 cartItem -> {
-                    ProductDto productDto = productFeignClient.getProductInfo(cartItem.getProductId());
+                    ProductDto productDto = productClient.getProductInfo(cartItem.getProductId());
 
                     return new CartItemDto(cartItem.getId(), productDto.name(), cartItem.getQuantity());
                 }
@@ -84,7 +84,7 @@ public class CartItemService {
                                 cartItem.getProductId(), cartItem.getQuantity()
                         )).toList()
         );
-        OrderCreateResponse orderCreateResponse = orderFeignClient.create(memberId, request);
+        OrderCreateResponse orderCreateResponse = orderClient.create(memberId, request);
 
         cartItemRepository.deleteAll(cartItems);
 

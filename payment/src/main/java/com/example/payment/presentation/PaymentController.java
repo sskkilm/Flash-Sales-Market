@@ -1,12 +1,11 @@
 package com.example.payment.presentation;
 
 import com.example.payment.application.PaymentService;
+import com.example.payment.common.dto.request.PaymentConfirmRequest;
 import com.example.payment.common.dto.request.PaymentInitRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,10 +25,8 @@ public class PaymentController {
 
     @PostMapping("/confirm")
     public void confirm(
-            @RequestParam String paymentKey,
-            @RequestParam Long orderId,
-            @RequestParam BigDecimal amount
+            @RequestBody @Valid PaymentConfirmRequest request
     ) {
-        paymentService.confirm(paymentKey, orderId, amount);
+        paymentService.confirm(request);
     }
 }

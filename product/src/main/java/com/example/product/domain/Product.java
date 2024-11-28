@@ -21,12 +21,6 @@ public abstract class Product {
 
     public abstract ProductType getType();
 
-    public void checkOutOfStock(int quantity, int holdStockQuantity) {
-        if (this.stockQuantity - holdStockQuantity < quantity) {
-            throw new ProductServiceException(INSUFFICIENT_STOCK);
-        }
-    }
-
     public void decreaseStock(int quantity) {
         if (this.stockQuantity < quantity) {
             throw new ProductServiceException(INSUFFICIENT_STOCK);
@@ -37,13 +31,5 @@ public abstract class Product {
 
     public void increaseStock(int quantity) {
         this.stockQuantity += quantity;
-    }
-
-    public boolean isLimited() {
-        return this.getType().equals(ProductType.EVENT);
-    }
-
-    public boolean isNotOpened() {
-        return ((EventProduct) this).getOpenTime().isAfter(LocalDateTime.now());
     }
 }

@@ -1,6 +1,6 @@
 package com.example.order.application;
 
-import com.example.order.application.feign.ProductFeignClient;
+import com.example.order.application.feign.ProductClient;
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.application.port.OrderRepository;
 import com.example.order.common.dto.OrderDto;
@@ -9,7 +9,6 @@ import com.example.order.common.dto.ProductDto;
 import com.example.order.common.dto.request.OrderCreateRequest;
 import com.example.order.common.dto.request.StockDecreaseRequest;
 import com.example.order.common.dto.request.StockIncreaseRequest;
-import com.example.order.common.dto.response.OrderCancelResponse;
 import com.example.order.common.dto.response.OrderCreateResponse;
 import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.Order;
@@ -29,7 +28,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final ProductFeignClient productFeignClient;
+    private final ProductClient productClient;
 
     private final AmountCalculator amountCalculator = new AmountCalculator();
 
@@ -39,32 +38,13 @@ public class OrderService {
         Order order = orderRepository.save(Order.create(memberId));
 
         List<OrderProduct> orderProducts = getOrderProducts(request, order);
-
-        List<Long> orderProductIds = orderProductRepository.saveAll(orderProducts)
-                .stream()
-                .map(OrderProduct::getId)
-                .toList();
+        orderProductRepository.saveAll(orderProducts);
 
         decreaseStock(request);
 
         log.info("Order Id:{} Created", order.getId());
-        log.info("Order Product Ids:{} Created", orderProductIds);
 
-        return new OrderCreateResponse(order.getId(), orderProductIds);
-    }
-
-    @Transactional
-    public OrderCancelResponse cancel(Long memberId, Long orderId) {
-        Order order = orderRepository.findById(orderId);
-
-        order.cancel(memberId);
-        orderRepository.save(order);
-
-        increaseStock(order);
-
-        log.info("Order Id:{} Canceled", order.getId());
-
-        return new OrderCancelResponse(order.getId(), order.getMemberId(), order.getStatus().name());
+        return OrderCreateResponse.from(order);
     }
 
     public List<OrderDto> getOrderList(Long memberId) {
@@ -82,7 +62,7 @@ public class OrderService {
         }).toList();
     }
 
-    public OrderDto getOrder(Long orderId) {
+    public OrderDto findById(Long orderId) {
         Order order = orderRepository.findById(orderId);
 
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
@@ -93,11 +73,31 @@ public class OrderService {
         return new OrderDto(order.getId(), order.getMemberId(), order.getStatus().name(), totalPrice, orderProductDtos);
     }
 
+    @Transactional
+    public void paymentFailed(Long orderId) {
+        Order order = orderRepository.findById(orderId);
+        order.paymentFailed();
+        orderRepository.save(order);
+
+        increaseStock(order);
+
+        log.info("Order Id:{} Payment Failed", order.getId());
+    }
+
+    @Transactional
+    public void paymentConfirmed(Long orderId) {
+        Order order = orderRepository.findById(orderId);
+        order.paymentConfirmed();
+        orderRepository.save(order);
+
+        log.info("Order Id:{} Payment Confirmed", order.getId());
+    }
+
     private List<OrderProduct> getOrderProducts(OrderCreateRequest request, Order order) {
         return request.orderInfos()
                 .stream()
                 .map(orderInfo -> {
-                    ProductDto productDto = productFeignClient.getProductInfo(orderInfo.productId());
+                    ProductDto productDto = productClient.getProductInfo(orderInfo.productId());
                     BigDecimal amount = amountCalculator.calculateAmount(orderInfo.quantity(), productDto.price());
                     return OrderProduct.create(
                             order, orderInfo.productId(), productDto.name(), orderInfo.quantity(), amount
@@ -110,17 +110,17 @@ public class OrderService {
                 .stream()
                 .map(orderInfo -> new StockDecreaseRequest(orderInfo.productId(), orderInfo.quantity()))
                 .toList();
-        productFeignClient.decreaseStock(stockDecreaseRequests);
+        productClient.decreaseStock(stockDecreaseRequests);
     }
 
     private void increaseStock(Order order) {
-        List<StockIncreaseRequest> stockIncreaseRequests = orderProductRepository.findAllByOrder(order)
+        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        List<StockIncreaseRequest> stockIncreaseRequests = orderProducts
                 .stream().map(
                         orderProduct -> new StockIncreaseRequest(
                                 orderProduct.getProductId(), orderProduct.getQuantity()
                         )
                 ).toList();
-        productFeignClient.increaseStock(stockIncreaseRequests);
+        productClient.increaseStock(stockIncreaseRequests);
     }
-
 }

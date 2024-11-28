@@ -25,7 +25,17 @@ public class OrderInternalController {
     }
 
     @GetMapping("/{orderId}")
-    public OrderDto getOrder(@PathVariable Long orderId) {
-        return orderService.getOrder(orderId);
+    public OrderDto findById(@PathVariable Long orderId) {
+        return orderService.findById(orderId);
+    }
+
+    @PostMapping("/{orderId}/payment/fail")
+    void paymentFailed(@PathVariable Long orderId) {
+        orderService.paymentFailed(orderId);
+    }
+
+    @PostMapping("/{orderId}/payment/confirmed")
+    void paymentConfirmed(@PathVariable Long orderId) {
+        orderService.paymentConfirmed(orderId);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.member.application;
 
-import com.example.member.application.port.DateHolder;
+import com.example.member.application.port.DateProvider;
 import com.example.member.application.port.MemberRepository;
 import com.example.member.common.dto.request.LoginRequest;
 import com.example.member.common.dto.request.LogoutRequest;
@@ -27,7 +27,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-    private final DateHolder dateHolder;
+    private final DateProvider dateProvider;
 
     public MemberCreateResponse join(MemberCreateRequest request) {
         if (memberRepository.existsByUsername(request.username())) {
@@ -49,7 +49,7 @@ public class MemberService {
             throw new MemberServiceException(PASSWORD_UNMATCHED);
         }
 
-        Date now = dateHolder.now();
+        Date now = dateProvider.now();
 
         String accessToken = tokenService.generateAccessToken(member.getId(), now);
         String refreshToken = tokenService.generateRefreshToken(member.getId(), now);
@@ -61,7 +61,7 @@ public class MemberService {
 
     public ReissueTokenResponse reissueToken(ReissueTokenRequest request) {
 
-        return tokenService.reissueToken(request.refreshToken(), dateHolder.now());
+        return tokenService.reissueToken(request.refreshToken(), dateProvider.now());
     }
 
     public void logout(Long memberId, LogoutRequest request) {

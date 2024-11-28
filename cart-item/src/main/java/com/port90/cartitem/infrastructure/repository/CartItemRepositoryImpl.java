@@ -4,7 +4,7 @@ import com.port90.cartitem.application.port.CartItemRepository;
 import com.port90.cartitem.domain.exception.CartItemException;
 import com.port90.cartitem.domain.model.CartItem;
 import com.port90.cartitem.infrastructure.repository.persistence.CartItemJpaRepository;
-import com.port90.cartitem.infrastructure.repository.persistence.CartItemMapper;
+import com.port90.cartitem.infrastructure.repository.persistence.mapper.CartItemMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

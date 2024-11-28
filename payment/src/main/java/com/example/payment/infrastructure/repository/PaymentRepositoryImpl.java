@@ -3,14 +3,14 @@ package com.example.payment.infrastructure.repository;
 import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.domain.Payment;
 import com.example.payment.domain.exception.PaymentServiceException;
-import com.example.payment.infrastructure.repository.persistence.entity.PaymentEntity;
 import com.example.payment.infrastructure.repository.persistence.PaymentJpaRepository;
+import com.example.payment.infrastructure.repository.persistence.mapper.PaymentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
-import static com.example.payment.domain.exception.ErrorCode.PAYMENT_INFO_DOES_NOT_EXIST;
+import static com.example.payment.domain.exception.ErrorCode.PAYMENT_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,20 +20,24 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 
     @Override
     public Payment save(Payment payment) {
-        return paymentJpaRepository.save(PaymentEntity.from(payment)).toModel();
+        return PaymentMapper.toModel(
+                paymentJpaRepository.save(
+                        PaymentMapper.toEntity(payment)
+                )
+        );
     }
 
     @Override
     public Payment findByOrderId(Long orderId) {
-        return paymentJpaRepository.findByOrderId(orderId)
-                .orElseThrow(
-                        () -> new PaymentServiceException(PAYMENT_INFO_DOES_NOT_EXIST)
-                ).toModel();
+        return PaymentMapper.toModel(
+                paymentJpaRepository.findByOrderId(orderId)
+                        .orElseThrow(() -> new PaymentServiceException(PAYMENT_NOT_FOUND))
+        );
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public Optional<Payment> findOptionalPaymentByOrderId(Long orderId) {
-        return paymentJpaRepository.findByOrderId(orderId)
-                .map(PaymentEntity::toModel);
+    public void rollBack(Payment payment) {
+        paymentJpaRepository.delete(PaymentMapper.toEntity(payment));
     }
 }

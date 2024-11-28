@@ -6,13 +6,20 @@ import com.example.payment.common.dto.OrderDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "api-gateway",
         path = "/orders/internal",
         contextId = "orderClient",
         configuration = FeignErrorDecoder.class)
-public interface OrderFeignClient {
+public interface OrderClient {
 
     @GetMapping("/{orderId}")
-    OrderDto getOrder(@PathVariable Long orderId);
+    OrderDto findById(@PathVariable Long orderId);
+
+    @PostMapping("/{orderId}/payment/fail")
+    void paymentFailed(@PathVariable Long orderId);
+
+    @PostMapping("/{orderId}/payment/confirmed")
+    void paymentConfirmed(@PathVariable Long orderId);
 }

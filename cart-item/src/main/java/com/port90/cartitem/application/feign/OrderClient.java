@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 @FeignClient(name = "api-gateway", path = "/orders/internal", contextId = "orderClient")
-public interface OrderFeignClient {
+public interface OrderClient {
 
     @PostMapping("/cart-items")
     OrderCreateResponse create(
