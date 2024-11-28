@@ -2,16 +2,18 @@ package com.example.product.infrastructure.repository;
 
 import com.example.product.application.port.ProductRepository;
 import com.example.product.domain.Product;
-import com.example.product.exception.ProductServiceException;
-import com.example.product.infrastructure.entity.ProductEntity;
-import com.example.product.infrastructure.repository.mapper.ProductMapper;
+import com.example.product.domain.exception.ProductServiceException;
+import com.example.product.infrastructure.repository.persistence.entity.ProductEntity;
+import com.example.product.infrastructure.repository.persistence.mapper.ProductMapper;
+import com.example.product.infrastructure.repository.persistence.ProductJpaRepository;
+import com.example.product.infrastructure.repository.persistence.ProductQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.product.exception.error.ErrorCode.PRODUCT_NOT_FOUND;
+import static com.example.product.domain.exception.ErrorCode.PRODUCT_NOT_FOUND;
 
 @Repository
 @RequiredArgsConstructor

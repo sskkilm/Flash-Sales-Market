@@ -1,6 +1,6 @@
 package com.example.payment.infrastructure.pg;
 
-import com.example.payment.dto.MemberPaymentInfo;
+import com.example.payment.common.dto.MemberPaymentInfo;
 import org.springframework.stereotype.Component;
 
 @Component

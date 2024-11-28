@@ -6,7 +6,7 @@ import com.port90.cartitem.common.dto.request.CartItemCreateRequest;
 import com.port90.cartitem.common.dto.request.CartItemUpdateRequest;
 import com.port90.cartitem.common.dto.response.CartItemCreateResponse;
 import com.port90.cartitem.common.dto.response.CartItemUpdateResponse;
-import com.port90.cartitem.common.dto.response.CartOrderResponse;
+import com.port90.cartitem.common.dto.response.OrderCreateResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +54,7 @@ public class CartItemController {
     }
 
     @PostMapping("/orders")
-    public CartOrderResponse order(
+    public OrderCreateResponse order(
             @RequestHeader(X_MEMBER_ID) Long memberId
     ) {
         return cartItemService.order(memberId);

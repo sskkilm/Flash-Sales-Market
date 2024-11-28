@@ -1,45 +1,31 @@
 package com.example.order.presentation;
 
 import com.example.order.application.OrderService;
-import com.example.order.common.dto.OrderInfo;
-import com.example.order.common.dto.request.CartItemOrderRequest;
+import com.example.order.common.dto.OrderDto;
 import com.example.order.common.dto.request.OrderCreateRequest;
-import com.example.order.common.dto.request.OrderValidationRequest;
-import com.example.order.common.dto.response.CartOrderResponse;
+import com.example.order.common.dto.response.OrderCreateResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders/internal")
 public class OrderInternalController {
 
+    private static final String X_MEMBER_ID = "X-Member-Id";
     private final OrderService orderService;
 
     @PostMapping("/cart-items")
-    public CartOrderResponse cartOrder(
-            @RequestHeader("X-Member-Id") Long memberId,
-            @RequestBody List<CartItemOrderRequest> requests
+    public OrderCreateResponse create(
+            @RequestHeader(X_MEMBER_ID) Long memberId,
+            @RequestBody @Valid OrderCreateRequest orderCreateRequest
     ) {
-        List<OrderInfo> orderInfos = requests
-                .stream()
-                .map(request -> new OrderInfo(request.productId(), request.quantity()))
-                .toList();
-        return CartOrderResponse.from(
-                memberId,
-                orderService.create(memberId, new OrderCreateRequest(orderInfos))
-        );
+        return orderService.create(memberId, orderCreateRequest);
     }
 
-    @PostMapping("/validate")
-    public boolean validateOrderInfo(
-            @RequestHeader("X-User-Id") Long memberId,
-            @RequestBody @Valid OrderValidationRequest request
-    ) {
-        return orderService.validateOrderInfo(memberId, request);
+    @GetMapping("/{orderId}")
+    public OrderDto getOrder(@PathVariable Long orderId) {
+        return orderService.getOrder(orderId);
     }
-
 }

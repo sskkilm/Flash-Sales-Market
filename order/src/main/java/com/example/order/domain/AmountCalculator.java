@@ -7,7 +7,7 @@ public class AmountCalculator {
 
     public BigDecimal calculateTotalAmount(List<OrderProduct> orderProducts) {
         return orderProducts.stream()
-                .map(OrderProduct::getOrderAmount)
+                .map(OrderProduct::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

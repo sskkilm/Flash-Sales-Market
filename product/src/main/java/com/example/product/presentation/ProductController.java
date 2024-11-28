@@ -1,8 +1,8 @@
 package com.example.product.presentation;
 
 import com.example.product.application.ProductService;
-import com.example.product.dto.ProductDetails;
-import com.example.product.dto.ProductDto;
+import com.example.product.common.dto.ProductDetails;
+import com.example.product.common.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

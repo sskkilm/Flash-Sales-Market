@@ -1,11 +1,10 @@
 package com.example.order.presentation;
 
 import com.example.order.application.OrderService;
-import com.example.order.common.dto.*;
+import com.example.order.common.dto.OrderDto;
 import com.example.order.common.dto.request.OrderCreateRequest;
 import com.example.order.common.dto.response.OrderCancelResponse;
 import com.example.order.common.dto.response.OrderCreateResponse;
-import com.example.order.common.dto.response.OrderReturnResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -36,19 +35,11 @@ public class OrderController {
         return orderService.cancel(memberId, orderId);
     }
 
-    @PostMapping("/{orderId}/return")
-    public OrderReturnResponse returns(
-            @RequestHeader(X_MEMBER_ID) Long memberId,
-            @PathVariable Long orderId
-    ) {
-        return orderService.returns(memberId, orderId);
-    }
-
     @GetMapping
-    public List<OrderHistory> getOrderHistories(
+    public List<OrderDto> getOrderList(
             @RequestHeader(X_MEMBER_ID) Long memberId
     ) {
-        return orderService.getOrderHistories(memberId);
+        return orderService.getOrderList(memberId);
     }
 
 }

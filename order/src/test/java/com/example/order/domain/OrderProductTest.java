@@ -28,7 +28,7 @@ class OrderProductTest {
         assertEquals(1L, orderProduct.getProductId());
         assertEquals("name", orderProduct.getName());
         assertEquals(10, orderProduct.getQuantity());
-        assertEquals(new BigDecimal("10000"), orderProduct.getOrderAmount());
+        assertEquals(new BigDecimal("10000"), orderProduct.getAmount());
         assertNull(orderProduct.getCreatedAt());
     }
 }

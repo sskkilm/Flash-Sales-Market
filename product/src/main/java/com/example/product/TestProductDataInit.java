@@ -1,7 +1,7 @@
 package com.example.product;
 
 import com.example.product.application.port.ProductRepository;
-import com.example.product.domain.LimitedProduct;
+import com.example.product.domain.EventProduct;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -21,13 +21,13 @@ public class TestProductDataInit {
     public void init() {
         LocalDateTime now = LocalDateTime.now();
 
-        LimitedProduct product = LimitedProduct.builder()
+        EventProduct product = EventProduct.builder()
                 .name("limited product")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10000)
                 .openTime(now.minusMinutes(10))
                 .build();
-        LimitedProduct product2 = LimitedProduct.builder()
+        EventProduct product2 = EventProduct.builder()
                 .name("limited product2")
                 .price(new BigDecimal("20000"))
                 .stockQuantity(10000)

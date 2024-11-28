@@ -2,14 +2,15 @@ package com.example.payment.infrastructure.repository;
 
 import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.domain.Payment;
-import com.example.payment.exception.PaymentServiceException;
-import com.example.payment.infrastructure.entity.PaymentEntity;
+import com.example.payment.domain.exception.PaymentServiceException;
+import com.example.payment.infrastructure.repository.persistence.entity.PaymentEntity;
+import com.example.payment.infrastructure.repository.persistence.PaymentJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-import static com.example.payment.exception.error.ErrorCode.PAYMENT_INFO_DOES_NOT_EXIST;
+import static com.example.payment.domain.exception.ErrorCode.PAYMENT_INFO_DOES_NOT_EXIST;
 
 @Repository
 @RequiredArgsConstructor

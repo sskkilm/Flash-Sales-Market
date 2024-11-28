@@ -6,11 +6,12 @@ import com.port90.cartitem.application.port.CartItemRepository;
 import com.port90.cartitem.common.dto.CartItemDto;
 import com.port90.cartitem.common.dto.ProductDto;
 import com.port90.cartitem.common.dto.request.CartItemCreateRequest;
-import com.port90.cartitem.common.dto.request.CartItemOrderRequest;
+import com.port90.cartitem.common.dto.OrderInfo;
 import com.port90.cartitem.common.dto.request.CartItemUpdateRequest;
+import com.port90.cartitem.common.dto.request.OrderCreateRequest;
 import com.port90.cartitem.common.dto.response.CartItemCreateResponse;
 import com.port90.cartitem.common.dto.response.CartItemUpdateResponse;
-import com.port90.cartitem.common.dto.response.CartOrderResponse;
+import com.port90.cartitem.common.dto.response.OrderCreateResponse;
 import com.port90.cartitem.domain.exception.CartItemException;
 import com.port90.cartitem.domain.model.CartItem;
 import lombok.RequiredArgsConstructor;
@@ -70,25 +71,23 @@ public class CartItemService {
         ).toList();
     }
 
-    public CartOrderResponse order(Long memberId) {
+    public OrderCreateResponse order(Long memberId) {
         List<CartItem> cartItems = cartItemRepository.findAllByMemberId(memberId);
         if (cartItems.isEmpty()) {
             throw new CartItemException(CART_IS_EMPTY);
         }
 
-        List<CartItemOrderRequest> cartItemOrderRequests = cartItems
-                .stream()
-                .map(cartItem -> new CartItemOrderRequest(
+        OrderCreateRequest request = new OrderCreateRequest(
+                cartItems
+                        .stream()
+                        .map(cartItem -> new OrderInfo(
                                 cartItem.getProductId(), cartItem.getQuantity()
-                        )
-                ).toList();
-
-        CartOrderResponse cartOrderResponse = orderFeignClient.cartOrder(
-                memberId, cartItemOrderRequests
+                        )).toList()
         );
+        OrderCreateResponse orderCreateResponse = orderFeignClient.create(memberId, request);
 
         cartItemRepository.deleteAll(cartItems);
 
-        return cartOrderResponse;
+        return orderCreateResponse;
     }
 }

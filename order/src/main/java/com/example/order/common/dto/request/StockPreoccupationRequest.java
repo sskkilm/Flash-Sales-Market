@@ -1,5 +1,6 @@
 package com.example.order.common.dto.request;
 
+import com.example.order.common.dto.OrderInfo;
 import com.example.order.common.dto.StockPreoccupationInfo;
 
 import com.example.order.domain.Order;

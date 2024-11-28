@@ -50,7 +50,7 @@ public class OrderProductEntity {
                 .productId(orderProduct.getProductId())
                 .name(orderProduct.getName())
                 .quantity(orderProduct.getQuantity())
-                .orderAmount(orderProduct.getOrderAmount())
+                .orderAmount(orderProduct.getAmount())
                 .createdAt(orderProduct.getCreatedAt())
                 .build();
     }
@@ -62,7 +62,7 @@ public class OrderProductEntity {
                 .productId(this.productId)
                 .name(this.name)
                 .quantity(this.quantity)
-                .orderAmount(this.orderAmount)
+                .amount(this.orderAmount)
                 .createdAt(this.createdAt)
                 .build();
     }

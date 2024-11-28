@@ -1,13 +1,13 @@
 package com.example.product.domain;
 
-import com.example.product.exception.ProductServiceException;
+import com.example.product.domain.exception.ProductServiceException;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static com.example.product.exception.error.ErrorCode.INSUFFICIENT_STOCK;
+import static com.example.product.domain.exception.ErrorCode.INSUFFICIENT_STOCK;
 
 @Getter
 @SuperBuilder
@@ -40,10 +40,10 @@ public abstract class Product {
     }
 
     public boolean isLimited() {
-        return this.getType().equals(ProductType.LIMITED);
+        return this.getType().equals(ProductType.EVENT);
     }
 
     public boolean isNotOpened() {
-        return ((LimitedProduct) this).getOpenTime().isAfter(LocalDateTime.now());
+        return ((EventProduct) this).getOpenTime().isAfter(LocalDateTime.now());
     }
 }

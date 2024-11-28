@@ -1,12 +1,9 @@
 package com.example.payment.presentation;
 
 import com.example.payment.application.PaymentService;
-import com.example.payment.dto.PaymentConfirmResponse;
-import com.example.payment.dto.PaymentInitRequest;
-import com.example.payment.dto.PaymentInitResponse;
+import com.example.payment.common.dto.request.PaymentInitRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -16,26 +13,23 @@ import java.math.BigDecimal;
 @RequestMapping("/payments")
 public class PaymentController {
 
+    private static final String X_MEMBER_ID = "X-Member-Id";
     private final PaymentService paymentService;
 
-    @PostMapping("/init/{memberId}")
-    public ResponseEntity<?> init(
-            @PathVariable Long memberId,
+    @PostMapping("/init")
+    public void init(
+            @RequestHeader(X_MEMBER_ID) Long memberId,
             @RequestBody @Valid PaymentInitRequest paymentInitRequest
     ) {
-        PaymentInitResponse response = paymentService.init(memberId, paymentInitRequest);
-        return response.redirectToConfirm();
+        paymentService.init(memberId, paymentInitRequest);
     }
 
     @PostMapping("/confirm")
-    public PaymentConfirmResponse confirm(
+    public void confirm(
             @RequestParam String paymentKey,
             @RequestParam Long orderId,
-            @RequestParam BigDecimal amount,
-            @RequestBody PaymentInitRequest paymentInitRequest
+            @RequestParam BigDecimal amount
     ) {
-        return paymentService.confirm(
-                paymentKey, orderId, amount, paymentInitRequest
-        );
+        paymentService.confirm(paymentKey, orderId, amount);
     }
 }

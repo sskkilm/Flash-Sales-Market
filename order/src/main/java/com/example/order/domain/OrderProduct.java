@@ -14,7 +14,7 @@ public class OrderProduct {
     private Long productId;
     private String name;
     private int quantity;
-    private BigDecimal orderAmount;
+    private BigDecimal amount;
     private LocalDateTime createdAt;
 
     public static OrderProduct create(Order order, Long productId, String name, int quantity, BigDecimal orderAmount) {
@@ -23,7 +23,7 @@ public class OrderProduct {
                 .productId(productId)
                 .name(name)
                 .quantity(quantity)
-                .orderAmount(orderAmount)
+                .amount(orderAmount)
                 .build();
     }
 }

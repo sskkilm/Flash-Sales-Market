@@ -18,9 +18,10 @@ public class RedissonLockService implements LockService {
     private final RedissonClient redissonClient;
 
     @Override
-    public void acquireAllLocks(String lockKeyPrefix, List<Long> ids, long waitTime, long leaseTime) {
+    public void acquireAllLocks(String lockKey, List<Long> ids, long waitTime, long leaseTime) {
         for (Long id : ids) {
-            RLock lock = redissonClient.getLock(lockKeyPrefix + id);
+            String key = String.format(lockKey, id);
+            RLock lock = redissonClient.getLock(key);
             try {
                 boolean isLocked = lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS);
                 if (!isLocked) {
@@ -35,13 +36,13 @@ public class RedissonLockService implements LockService {
     }
 
     @Override
-    public void releaseAllLocks(String lockKeyPrefix, List<Long> ids) {
+    public void releaseAllLocks(String lockKey, List<Long> ids) {
         for (Long id : ids) {
-            RLock lock = redissonClient.getLock(lockKeyPrefix + id);
+            String key = String.format(lockKey, id);
+            RLock lock = redissonClient.getLock(key);
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
     }
-
 }

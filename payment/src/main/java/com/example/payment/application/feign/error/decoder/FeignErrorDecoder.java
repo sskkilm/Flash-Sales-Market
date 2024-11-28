@@ -1,7 +1,7 @@
 package com.example.payment.application.feign.error.decoder;
 
-import com.example.payment.exception.PaymentServiceException;
-import com.example.payment.exception.error.ErrorResponse;
+import com.example.payment.domain.exception.PaymentServiceException;
+import com.example.payment.common.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 
-import static com.example.payment.exception.error.ErrorCode.INTERNAL_SERVER_ERROR;
+import static com.example.payment.domain.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,15 +26,9 @@ public class FeignErrorDecoder implements ErrorDecoder {
             ErrorResponse errorResponse = objectMapper.readValue(
                     response.body().asInputStream(), ErrorResponse.class
             );
-            log.info("Error Http Status: {}", response.status());
-            log.info("Error Code: {}", errorResponse.code());
-            log.info("Error Code Message: {}", errorResponse.message());
-            return new PaymentServiceException(
-                    status, errorResponse.code(), errorResponse.message()
-            );
+            return new RuntimeException(errorResponse.message());
         } catch (IOException e) {
-            log.info("Error Message: {}", e.getMessage());
-            return new PaymentServiceException(INTERNAL_SERVER_ERROR);
+            return new PaymentServiceException(INTERNAL_SERVER_ERROR, e);
         }
     }
 }

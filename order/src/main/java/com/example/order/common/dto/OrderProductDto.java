@@ -18,7 +18,7 @@ public record OrderProductDto(
                 orderProduct.getProductId(),
                 orderProduct.getName(),
                 orderProduct.getQuantity(),
-                orderProduct.getOrderAmount()
+                orderProduct.getAmount()
         );
     }
 }

@@ -1,12 +1,9 @@
 package com.example.product.application;
 
 import com.example.product.application.port.ProductRepository;
-import com.example.product.application.port.StockPreoccupationRepository;
-import com.example.product.domain.LimitedProduct;
-import com.example.product.domain.PreoccupiedStock;
+import com.example.product.domain.EventProduct;
 import com.example.product.domain.Product;
-import com.example.product.dto.StockPreoccupationInfo;
-import com.example.product.dto.StockPreoccupationRequest;
+import com.example.product.common.dto.request.StockDecreaseRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,56 +29,9 @@ public class StockConcurrencyTest {
     @Autowired
     ProductRepository productRepository;
 
-    @Autowired
-    StockPreoccupationRepository stockPreoccupationRepository;
-
     @BeforeEach
     public void clear() {
         productRepository.deleteAll();
-        stockPreoccupationRepository.deleteAll();
-    }
-
-    @Test
-    void 동시에_재고를_선점한다() throws InterruptedException {
-        //given
-        int threadCount = 100;
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-
-        LocalDateTime now = LocalDateTime.now();
-        Product product = productRepository.save(
-                LimitedProduct.builder()
-                        .name("limited product")
-                        .price(new BigDecimal("20000"))
-                        .stockQuantity(10)
-                        .openTime(now.minusMinutes(10))
-                        .build()
-        );
-
-        List<StockPreoccupationInfo> stockPreoccupationInfos = List.of(
-                new StockPreoccupationInfo(product.getId(), 1)
-        );
-
-        //when
-        for (int i = 0; i < threadCount; i++) {
-            final int finalI = i + 1;
-            executorService.submit(() -> {
-                try {
-                    StockPreoccupationRequest stockPreoccupationRequest = new StockPreoccupationRequest(
-                            (long) finalI, stockPreoccupationInfos
-                    );
-                    productService.preoccupyStock(stockPreoccupationRequest);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-        latch.await();
-
-        //then
-        int sum = stockPreoccupationRepository.findQuantitiesByProductId(product.getId())
-                .stream().mapToInt(e -> e).sum();
-        assertEquals(10, sum);
     }
 
     @Test
@@ -93,25 +43,22 @@ public class StockConcurrencyTest {
 
         LocalDateTime now = LocalDateTime.now();
         Product product = productRepository.save(
-                LimitedProduct.builder()
-                        .name("limited product")
+                EventProduct.builder()
+                        .name("Event Product")
                         .price(new BigDecimal("20000"))
                         .stockQuantity(100)
                         .openTime(now.minusMinutes(10))
                         .build()
         );
-        for (int i = 0; i < 100; i++) {
-            long orderId = i + 1;
-            PreoccupiedStock preoccupiedStock = PreoccupiedStock.create(orderId, product.getId(), 1);
-            stockPreoccupationRepository.save(preoccupiedStock);
-        }
+        StockDecreaseRequest request = new StockDecreaseRequest(
+                product.getId(), 1
+        );
 
         //when
         for (int i = 0; i < threadCount; i++) {
-            final long orderId = i + 1;
             executorService.submit(() -> {
                 try {
-                    productService.applyPreoccupiedStock(orderId, List.of(product.getId()));
+                    productService.decreaseStock(List.of(request));
                 } finally {
                     latch.countDown();
                 }
@@ -122,8 +69,6 @@ public class StockConcurrencyTest {
         //then
         int stockQuantity = productRepository.findById(product.getId()).getStockQuantity();
         assertEquals(0, stockQuantity);
-        int sum = stockPreoccupationRepository.findQuantitiesByProductId(product.getId())
-                .stream().mapToInt(e -> e).sum();
-        assertEquals(0, sum);
     }
+
 }

@@ -18,13 +18,13 @@ class AmountCalculatorTest {
 
         List<OrderProduct> orderProducts = List.of(
                 OrderProduct.builder()
-                        .orderAmount(new BigDecimal("10000"))
+                        .amount(new BigDecimal("10000"))
                         .build(),
                 OrderProduct.builder()
-                        .orderAmount(new BigDecimal("20000"))
+                        .amount(new BigDecimal("20000"))
                         .build(),
                 OrderProduct.builder()
-                        .orderAmount(new BigDecimal("30000"))
+                        .amount(new BigDecimal("30000"))
                         .build()
         );
 

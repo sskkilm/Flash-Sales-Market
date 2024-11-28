@@ -1,8 +1,9 @@
 package com.example.product.presentation;
 
 import com.example.product.application.ProductService;
-import com.example.product.dto.*;
-import jakarta.validation.Valid;
+import com.example.product.common.dto.ProductDto;
+import com.example.product.common.dto.request.StockIncreaseRequest;
+import com.example.product.common.dto.request.StockDecreaseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,31 +16,21 @@ public class ProductInternalController {
 
     private final ProductService productService;
 
-    @PostMapping("/restock-stock")
-    public void restock(
-            @Valid @RequestBody ProductRestockRequest productRestockRequest) {
-        productService.restock(productRestockRequest);
-    }
-
     @GetMapping("/{productId}")
     public ProductDto getProductInfo(@PathVariable Long productId) {
         return productService.getProductInfo(productId);
     }
 
+    @PostMapping("/increase/stock")
+    public void increaseStock(
+            @RequestBody List<StockIncreaseRequest> stockIncreaseRequests
+    ) {
+        productService.increaseStock(stockIncreaseRequests);
+    }
+
     @PostMapping("/decrease/stock")
-    public void decreaseStock(@RequestBody List<OrderCompletedProductDto> orderCompletedProducts) {
-        productService.decreaseStock(orderCompletedProducts);
-    }
-
-    @PostMapping("/preoccupation")
-    public StockPreoccupationResponse preoccupyStock(
-            @Valid @RequestBody StockPreoccupationRequest stockPreoccupationRequest) {
-        return productService.preoccupyStock(stockPreoccupationRequest);
-    }
-
-    @PostMapping("/{orderId}/preoccupation/release")
-    public void releasePreoccupiedStock(@PathVariable Long orderId) {
-        productService.releasePreoccupiedStock(orderId);
+    public void decreaseStock(@RequestBody List<StockDecreaseRequest> stockDecreaseRequests) {
+        productService.decreaseStock(stockDecreaseRequests);
     }
 
 }
