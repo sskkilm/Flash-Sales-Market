@@ -17,7 +17,7 @@ public class OrderMapper {
     }
 
     public static Order toModel(OrderEntity orderEntity) {
-        Order.builder()
+        return Order.builder()
                 .id(orderEntity.getId())
                 .memberId(orderEntity.getMemberId())
                 .status(OrderStatus.valueOf(orderEntity.getStatus()))

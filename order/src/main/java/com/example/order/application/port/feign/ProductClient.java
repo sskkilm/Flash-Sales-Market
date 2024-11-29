@@ -1,6 +1,6 @@
-package com.example.order.application.feign;
+package com.example.order.application.port.feign;
 
-import com.example.order.application.feign.error.decoder.FeignErrorDecoder;
+import com.example.order.application.port.feign.error.decoder.FeignErrorDecoder;
 import com.example.order.common.dto.ProductDto;
 import com.example.order.common.dto.request.StockDecreaseRequest;
 import com.example.order.common.dto.request.StockIncreaseRequest;
@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "api-gateway",
+@FeignClient(
+        name = "api-gateway",
         path = "/products/internal",
         contextId = "productClient",
-        configuration = FeignErrorDecoder.class)
+        configuration = FeignErrorDecoder.class
+)
 public interface ProductClient {
 
     @GetMapping("/{productId}")

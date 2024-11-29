@@ -1,9 +1,11 @@
 package com.port90.cartitem.common.exception;
 
+import com.port90.cartitem.application.port.feign.error.decoder.CustomFeignException;
 import com.port90.cartitem.domain.exception.CartItemException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +28,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(new ErrorResponse(e.getErrorCode().name(), e.getMessage()));
+    }
+    @ExceptionHandler(CustomFeignException.class)
+    public ResponseEntity<?> handleCustomFeignException(CustomFeignException e) {
+        log.info("Error Http Status: {}", HttpStatus.BAD_REQUEST);
+        log.info("Error Code: {}", e.getErrorResponse().code());
+        log.info("Error Code Message: {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getErrorResponse().code(), e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,6 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
+        log.error("Error Message: {}", e.getMessage());
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR.name(), e.getMessage()));
     }

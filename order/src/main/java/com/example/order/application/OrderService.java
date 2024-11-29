@@ -1,6 +1,6 @@
 package com.example.order.application;
 
-import com.example.order.application.feign.ProductClient;
+import com.example.order.application.port.feign.ProductClient;
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.application.port.OrderRepository;
 import com.example.order.common.dto.OrderDto;

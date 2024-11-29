@@ -11,5 +11,9 @@ public class MemberServiceException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
-    
+
+    public MemberServiceException(ErrorCode errorCode, Throwable cause) {
+        super(errorCode.getMessage(), cause);
+        this.errorCode = errorCode;
+    }
 }

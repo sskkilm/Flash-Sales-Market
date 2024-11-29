@@ -1,19 +1,18 @@
 package com.example.order.domain.exception;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Getter
-@RequiredArgsConstructor
 public class OrderServiceException extends RuntimeException {
-    private final HttpStatus status;
-    private final String code;
-    private final String message;
+    private final ErrorCode errorCode;
 
     public OrderServiceException(ErrorCode errorCode) {
-        this.status = errorCode.getStatus();
-        this.code = errorCode.name();
-        this.message = errorCode.getMessage();
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
+    }
+
+    public OrderServiceException(ErrorCode errorCode, Throwable cause) {
+        super(errorCode.getMessage(), cause);
+        this.errorCode = errorCode;
     }
 }

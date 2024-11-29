@@ -1,7 +1,7 @@
 package com.example.payment.application;
 
-import com.example.payment.application.feign.OrderClient;
-import com.example.payment.application.feign.PGClient;
+import com.example.payment.application.port.feign.OrderClient;
+import com.example.payment.application.port.feign.PGClient;
 import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.common.dto.OrderDto;
 import com.example.payment.common.dto.request.PGConfirmRequest;

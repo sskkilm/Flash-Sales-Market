@@ -63,6 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
+        log.error("Error Message: {}", e.getMessage());
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR.name(), e.getMessage()));
     }

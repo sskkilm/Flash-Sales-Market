@@ -1,7 +1,7 @@
-package com.example.payment.application.feign;
+package com.example.payment.application.port.feign;
 
 
-import com.example.payment.application.feign.error.decoder.FeignErrorDecoder;
+import com.example.payment.application.port.feign.error.decoder.FeignErrorDecoder;
 import com.example.payment.common.dto.OrderDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

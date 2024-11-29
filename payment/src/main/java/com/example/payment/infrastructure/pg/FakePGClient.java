@@ -1,6 +1,6 @@
 package com.example.payment.infrastructure.pg;
 
-import com.example.payment.application.feign.PGClient;
+import com.example.payment.application.port.feign.PGClient;
 import com.example.payment.common.dto.request.PGConfirmRequest;
 import com.example.payment.common.dto.response.PGConfirmResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.port90.cartitem.application;
 
-import com.port90.cartitem.application.feign.OrderClient;
-import com.port90.cartitem.application.feign.ProductClient;
+import com.port90.cartitem.application.port.feign.OrderClient;
+import com.port90.cartitem.application.port.feign.ProductClient;
 import com.port90.cartitem.application.port.CartItemRepository;
 import com.port90.cartitem.common.dto.CartItemDto;
 import com.port90.cartitem.common.dto.ProductDto;
