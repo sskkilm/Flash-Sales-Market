@@ -1,0 +1,39 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  application:
+    name: member-service
+
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8082
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+eureka:
+  client:
+    enabled: false
+
+jwt:
+  secret:
+    c3ByaW5nLWJvb3QtY2FzaGZsb3ctcHJvamVjdC1qd3Qtc2VjcmV0LWtleQo=

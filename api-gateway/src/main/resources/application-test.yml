@@ -1,0 +1,73 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  application:
+    name: api-gateway
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cloud:
+    gateway:
+      routes:
+        - id: member-service-external
+          uri: lb://member-service
+          predicates:
+            - Path=/members/logout
+          filters:
+            - name: AuthenticationFilter
+
+        - id: member-service-internal
+          uri: lb://member-service
+          predicates:
+            - Path=/members/**
+
+        - id: cart-item-service-external
+          uri: lb://cart-item-service
+          predicates:
+            - Path=/cart-items/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: product-service-internal
+          uri: lb://product-service
+          predicates:
+            - Path=/products/internal/**
+
+        - id: product-service-external
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: order-service-internal
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/internal/**
+
+        - id: order-service-external
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: AuthenticationFilter
+
+        - id: payment-service-external
+          uri: lb://payment-service
+          predicates:
+            - Path=/payments/**
+          filters:
+            - name: AuthenticationFilter
+
+eureka:
+  client:
+    enabled: false
+
+jwt:
+  secret:
+    c3ByaW5nLWJvb3QtY2FzaGZsb3ctcHJvamVjdC1qd3Qtc2VjcmV0LWtleQo=

@@ -1,0 +1,31 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  application:
+    name: payment-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://payment-service-db:3306/flash-sales-market
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://service-registry:8081/eureka/
+
+server:
+  port: 8085
+
+kafka:
+  host: kafka
+  port: 9094

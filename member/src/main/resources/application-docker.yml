@@ -1,0 +1,36 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  application:
+    name: member-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://member-service-db:3306/flash-sales-market
+    username: root
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://service-registry:8081/eureka/
+
+jwt:
+  secret:
+    c3ByaW5nLWJvb3QtY2FzaGZsb3ctcHJvamVjdC1qd3Qtc2VjcmV0LWtleQo=
+
+server:
+  port: 8082

@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  application:
+    name: service-registry
+
+eureka:
+  client:
+    enabled: false
+
+server:
+  port: 8081
