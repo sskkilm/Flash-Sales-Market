@@ -1,9 +1,10 @@
 package com.example.payment.application;
 
+import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.application.port.feign.OrderClient;
 import com.example.payment.application.port.feign.PGClient;
-import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.common.dto.OrderDto;
+import com.example.payment.common.dto.PaymentDto;
 import com.example.payment.common.dto.request.PGConfirmRequest;
 import com.example.payment.common.dto.request.PaymentConfirmRequest;
 import com.example.payment.common.dto.request.PaymentInitRequest;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.example.payment.domain.exception.ErrorCode.*;
@@ -68,6 +70,14 @@ public class PaymentService {
         log.info("Payment Confirm Successes");
     }
 
+    public List<PaymentDto> getPaymentList(Long memberId) {
+        List<Long> orderIds = getOrderIdsByMemberId(memberId);
+        return paymentRepository.findByOrderIdInOrderIds(orderIds)
+                .stream()
+                .map(PaymentDto::from)
+                .toList();
+    }
+
     private static void validateOrder(Long memberId, PaymentInitRequest request, OrderDto order) {
         if (!Objects.equals(order.memberId(), memberId)) {
             throw new PaymentServiceException(ORDER_MEMBER_UNMATCHED);
@@ -78,5 +88,9 @@ public class PaymentService {
         if (request.amount().compareTo(order.amount()) != 0) {
             throw new PaymentServiceException(INVALID_ORDER_AMOUNT);
         }
+    }
+
+    private List<Long> getOrderIdsByMemberId(Long memberId) {
+        return orderClient.findIdsByMemberId(memberId);
     }
 }

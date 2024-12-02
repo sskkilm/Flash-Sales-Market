@@ -123,4 +123,8 @@ public class OrderService {
                 ).toList();
         productClient.increaseStock(stockIncreaseRequests);
     }
+
+    public List<Long> findIdsByMemberId(Long memberId) {
+        return orderRepository.findIdsByMemberId(memberId);
+    }
 }

@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders/internal")
@@ -37,5 +39,12 @@ public class OrderInternalController {
     @PostMapping("/{orderId}/payment/confirmed")
     void paymentConfirmed(@PathVariable Long orderId) {
         orderService.paymentConfirmed(orderId);
+    }
+
+    @GetMapping
+    public List<Long> findIdsByMemberId(
+            @RequestHeader(X_MEMBER_ID) Long memberId
+    ) {
+        return orderService.findIdsByMemberId(memberId);
     }
 }

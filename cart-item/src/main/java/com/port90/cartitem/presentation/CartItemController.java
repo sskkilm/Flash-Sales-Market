@@ -9,6 +9,7 @@ import com.port90.cartitem.common.dto.response.CartItemUpdateResponse;
 import com.port90.cartitem.common.dto.response.OrderCreateResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,11 +40,14 @@ public class CartItemController {
     }
 
     @DeleteMapping("/{cartItemId}")
-    public void delete(
+    public ResponseEntity<?> delete(
             @RequestHeader(X_MEMBER_ID) Long memberId,
             @PathVariable Long cartItemId
     ) {
         cartItemService.delete(memberId, cartItemId);
+        return ResponseEntity
+                .ok()
+                .body("Deleted");
     }
 
     @GetMapping

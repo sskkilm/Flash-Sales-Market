@@ -1,16 +1,208 @@
 services:
-  mysql:
+  # API Gateway
+  api-gateway:
+    container_name: api-gateway
+    image: api-gateway:latest
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Service Registry
+  service-registry:
+    container_name: service-registry
+    image: service-registry:latest
+    build:
+      context: .
+      dockerfile: service-registry/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Member Service
+  member-service:
+    container_name: member-service
+    image: member-service:latest
+    build:
+      context: .
+      dockerfile: member/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      member-service-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Member Service DB
+  member-service-db:
+    container_name: member-service-db
     image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: flash-sales-market
     ports:
       - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+  # Product Service
+  product-service:
+    container_name: product-service
+    image: product-service:latest
+    build:
+      context: .
+      dockerfile: product/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      product-service-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Product Service DB
+  product-service-db:
+    container_name: product-service-db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: flash-sales-market
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+  # Order Service
+  order-service:
+    container_name: order-service
+    image: order-service:latest
+    build:
+      context: .
+      dockerfile: order/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      order-service-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Order Service DB
+  order-service-db:
+    container_name: order-service-db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: flash-sales-market
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+  # Payment Service
+  payment-service:
+    container_name: payment-service
+    image: payment-service:latest
+    build:
+      context: .
+      dockerfile: payment/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      payment-service-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # Payment Service DB
+  payment-service-db:
+    container_name: payment-service-db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: flash-sales-market
+    ports:
+      - "3309:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
+  # CartItem Service
+  cart-item-service:
+    container_name: cart-item-service
+    image: cart-item-service:latest
+    build:
+      context: .
+      dockerfile: cart-item/Dockerfile
+    depends_on:
+      service-registry:
+        condition: service_started
+      cart-item-service-db:
+        condition: service_healthy
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  # CartItem Service DB
+  cart-item-service-db:
+    container_name: cart-item-service-db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: flash-sales-market
+    ports:
+      - "3310:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping" ]
+      interval: 5s
+      retries: 10
+
   redis:
+    container_name: redis
     image: redis:latest
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 10
+
   kafka:
+    container_name: kafka
     image: bitnami/kafka:latest
     ports:
       - "9094:9094"
@@ -22,3 +214,7 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    healthcheck:
+      test: [ "CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 5s
+      retries: 10

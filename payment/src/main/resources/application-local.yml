@@ -1,7 +1,8 @@
-server:
-  port: 8085
-
 spring:
+  config:
+    activate:
+      on-profile: local
+
   application:
     name: payment-service
 
@@ -28,3 +29,10 @@ eureka:
     fetch-registry: true
     serviceUrl:
       defaultZone: http://localhost:8081/eureka/
+
+server:
+  port: 8085
+
+kafka:
+  host: localhost
+  port: 9094

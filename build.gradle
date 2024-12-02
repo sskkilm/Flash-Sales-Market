@@ -4,6 +4,18 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
+}
+
+repositories {
+	mavenCentral()
+}
+
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'org.springframework.boot'
@@ -20,6 +32,14 @@ subprojects {
 
 	repositories {
 		mavenCentral()
+	}
+
+	bootJar {
+		enabled = true
+	}
+
+	jar {
+		enabled = false
 	}
 
 	ext {

@@ -1,4 +1,8 @@
 spring:
+  config:
+    activate:
+      on-profile: local
+
   application:
     name: api-gateway
 
@@ -10,50 +14,43 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: member-service-external
+        - id: member-service-authentication-required
           uri: lb://member-service
           predicates:
             - Path=/members/logout
           filters:
             - name: AuthenticationFilter
 
-        - id: member-service-internal
+        - id: member-service-authentication-non-required
           uri: lb://member-service
           predicates:
             - Path=/members/**
 
-        - id: cart-item-service-external
+        - id: cart-item-service-authentication-required
           uri: lb://cart-item-service
           predicates:
             - Path=/cart-items/**
           filters:
             - name: AuthenticationFilter
 
-        - id: product-service-internal
-          uri: lb://product-service
-          predicates:
-            - Path=/products/internal/**
-
-        - id: product-service-external
+        - id: product-service-authentication-non-required
           uri: lb://product-service
           predicates:
             - Path=/products/**
-          filters:
-            - name: AuthenticationFilter
 
-        - id: order-service-internal
+        - id: order-service-authentication-non-required
           uri: lb://order-service
           predicates:
             - Path=/orders/internal/**
 
-        - id: order-service-external
+        - id: order-service-authentication-required
           uri: lb://order-service
           predicates:
             - Path=/orders/**
           filters:
             - name: AuthenticationFilter
 
-        - id: payment-service-external
+        - id: payment-service-authentication-required
           uri: lb://payment-service
           predicates:
             - Path=/payments/**

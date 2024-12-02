@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.example.payment.domain.exception.ErrorCode.PAYMENT_NOT_FOUND;
 
 @Repository
@@ -39,5 +41,13 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public void rollBack(Payment payment) {
         paymentJpaRepository.delete(PaymentMapper.toEntity(payment));
+    }
+
+    @Override
+    public List<Payment> findByOrderIdInOrderIds(List<Long> orderIds) {
+        return paymentJpaRepository.findByOrderIdInOrderIds(orderIds)
+                .stream()
+                .map(PaymentMapper::toModel)
+                .toList();
     }
 }

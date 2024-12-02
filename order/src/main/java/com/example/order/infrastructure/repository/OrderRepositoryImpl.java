@@ -4,6 +4,7 @@ import com.example.order.application.port.OrderRepository;
 import com.example.order.domain.Order;
 import com.example.order.domain.exception.OrderServiceException;
 import com.example.order.infrastructure.repository.persistence.OrderJpaRepository;
+import com.example.order.infrastructure.repository.persistence.entity.OrderEntity;
 import com.example.order.infrastructure.repository.persistence.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -37,5 +38,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     public List<Order> findAllByMemberId(Long memberId) {
         return orderJpaRepository.findAllByMemberId(memberId)
                 .stream().map(OrderMapper::toModel).toList();
+    }
+
+    @Override
+    public List<Long> findIdsByMemberId(Long memberId) {
+        return orderJpaRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(OrderEntity::getId)
+                .toList();
     }
 }

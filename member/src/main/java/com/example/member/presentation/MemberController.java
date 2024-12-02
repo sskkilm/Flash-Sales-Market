@@ -10,6 +10,7 @@ import com.example.member.common.dto.response.MemberCreateResponse;
 import com.example.member.common.dto.response.ReissueTokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,10 +37,13 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public void logout(
+    public ResponseEntity<?> logout(
             @RequestHeader(X_MEMBER_ID) Long memberId,
             @RequestBody @Valid LogoutRequest request
     ) {
         memberService.logout(memberId, request);
+        return ResponseEntity
+                .ok()
+                .body("Logged out successfully");
     }
 }
