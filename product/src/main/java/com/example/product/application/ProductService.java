@@ -10,6 +10,7 @@ import com.example.product.common.dto.request.StockIncreaseRequest;
 import com.example.product.domain.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +34,9 @@ public class ProductService {
         return ProductDetails.of(product);
     }
 
+    @Cacheable(value = "products", key = "#productId + ':stock'")
     public int getStockQuantity(Long productId) {
-        Product product = productRepository.findById(productId);
-        return product.getStockQuantity();
+        return productRepository.findStockQuantityById(productId);
     }
 
     public ProductDto getProductInfo(Long productId) {

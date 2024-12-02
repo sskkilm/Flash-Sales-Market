@@ -52,4 +52,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 .toList();
     }
 
+    @Override
+    public int findStockQuantityById(Long productId) {
+        return productJpaRepository.findStockQuantityById(productId);
+    }
+
 }

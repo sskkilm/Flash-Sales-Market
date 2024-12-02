@@ -16,4 +16,6 @@ public interface ProductRepository {
     void deleteAll();
 
     List<Product> findAllByIdIn(List<Long> productIds);
+
+    int findStockQuantityById(Long productId);
 }
