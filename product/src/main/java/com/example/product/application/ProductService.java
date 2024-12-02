@@ -8,6 +8,7 @@ import com.example.product.common.dto.ProductDto;
 import com.example.product.common.dto.request.StockDecreaseRequest;
 import com.example.product.common.dto.request.StockIncreaseRequest;
 import com.example.product.domain.Product;
+import com.example.product.domain.exception.ProductServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,6 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.example.product.domain.exception.ErrorCode.CONTAINS_NOT_AVAILABLE_PRODUCT;
 
 @Slf4j
 @Service
@@ -48,9 +54,16 @@ public class ProductService {
     @DistributedLock
     @Transactional
     public void decreaseStock(List<StockDecreaseRequest> requests) {
+        List<Long> productIds = requests
+                .stream()
+                .map(StockDecreaseRequest::productId)
+                .toList();
+        Map<Long, Product> productMap = productRepository.findAllByIdIn(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
         requests
                 .forEach(request -> {
-                    Product product = productRepository.findById(request.productId());
+                    Product product = productMap.get(request.productId());
                     product.decreaseStock(request.quantity());
                     productRepository.save(product);
                     log.info("{}번 상품 재고 {}개 감소", request.productId(), request.quantity());
@@ -69,4 +82,26 @@ public class ProductService {
                 });
     }
 
+    public List<ProductDto> getProductInfos(List<Long> productIds) {
+        List<Product> products = productRepository.findAllByIdIn(productIds);
+
+        validateIdContains(productIds, products);
+
+        return products
+                .stream()
+                .map(ProductDto::from)
+                .toList();
+    }
+
+    private static void validateIdContains(List<Long> productIds, List<Product> products) {
+        Set<Long> productIdSet = products
+                .stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+        for (Long productId : productIds) {
+            if (!productIdSet.contains(productId)) {
+                throw new ProductServiceException(CONTAINS_NOT_AVAILABLE_PRODUCT);
+            }
+        }
+    }
 }

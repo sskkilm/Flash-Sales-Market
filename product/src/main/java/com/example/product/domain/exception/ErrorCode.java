@@ -14,6 +14,7 @@ public enum ErrorCode {
     CONTAINS_MISSING_PRODUCT_INFORMATION(BAD_REQUEST, "없는 상품 정보가 포함되어 있습니다."),
     PRODUCT_NOT_FOUND(BAD_REQUEST, "존재하지 않는 상품입니다."),
     NOT_OPENED(BAD_REQUEST, "오픈되지 않은 이벤트 상품입니다."),
+    CONTAINS_NOT_AVAILABLE_PRODUCT(BAD_REQUEST, "없는 상품이 포함되어 있습니다."),
 
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류입니다."),
     ;

@@ -5,10 +5,7 @@ import com.example.order.common.dto.ProductDto;
 import com.example.order.common.dto.request.StockDecreaseRequest;
 import com.example.order.common.dto.request.StockIncreaseRequest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,4 +25,7 @@ public interface ProductClient {
 
     @PostMapping("/increase/stock")
     void increaseStock(@RequestBody List<StockIncreaseRequest> stockIncreaseRequests);
+
+    @GetMapping
+    List<ProductDto> getProductInfos(@RequestParam List<Long> productIds);
 }

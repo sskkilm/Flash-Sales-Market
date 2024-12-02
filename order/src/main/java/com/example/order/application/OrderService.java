@@ -1,9 +1,10 @@
 package com.example.order.application;
 
-import com.example.order.application.port.feign.ProductClient;
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.application.port.OrderRepository;
+import com.example.order.application.port.feign.ProductClient;
 import com.example.order.common.dto.OrderDto;
+import com.example.order.common.dto.OrderInfo;
 import com.example.order.common.dto.OrderProductDto;
 import com.example.order.common.dto.ProductDto;
 import com.example.order.common.dto.request.OrderCreateRequest;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -94,13 +97,21 @@ public class OrderService {
     }
 
     private List<OrderProduct> getOrderProducts(OrderCreateRequest request, Order order) {
+        List<Long> productIds = request.orderInfos()
+                .stream()
+                .map(OrderInfo::productId)
+                .toList();
+        Map<Long, ProductDto> productMap = productClient.getProductInfos(productIds)
+                .stream()
+                .collect(Collectors.toMap(ProductDto::productId, productDto -> productDto));
+
         return request.orderInfos()
                 .stream()
                 .map(orderInfo -> {
-                    ProductDto productDto = productClient.getProductInfo(orderInfo.productId());
+                    ProductDto productDto = productMap.get(orderInfo.productId());
                     BigDecimal amount = amountCalculator.calculateAmount(orderInfo.quantity(), productDto.price());
                     return OrderProduct.create(
-                            order, orderInfo.productId(), productDto.name(), orderInfo.quantity(), amount
+                            order, productDto.productId(), productDto.name(), orderInfo.quantity(), amount
                     );
                 }).toList();
     }

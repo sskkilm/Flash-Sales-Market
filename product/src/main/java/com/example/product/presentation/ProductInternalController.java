@@ -33,4 +33,8 @@ public class ProductInternalController {
         productService.decreaseStock(stockDecreaseRequests);
     }
 
+    @GetMapping
+    public List<ProductDto> getProductInfos(@RequestParam List<Long> productIds) {
+        return productService.getProductInfos(productIds);
+    }
 }
