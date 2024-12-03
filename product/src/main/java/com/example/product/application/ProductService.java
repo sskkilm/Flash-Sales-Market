@@ -2,11 +2,13 @@ package com.example.product.application;
 
 import com.example.product.application.port.LocalDateTimeProvider;
 import com.example.product.application.port.ProductRepository;
+import com.example.product.application.port.StockCacheRepository;
 import com.example.product.common.aop.DistributedLock;
 import com.example.product.common.dto.ProductDetails;
 import com.example.product.common.dto.ProductDto;
 import com.example.product.common.dto.request.StockDecreaseRequest;
 import com.example.product.common.dto.request.StockIncreaseRequest;
+import com.example.product.domain.EventProduct;
 import com.example.product.domain.Product;
 import com.example.product.domain.exception.ProductServiceException;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.example.product.domain.exception.ErrorCode.CONTAINS_NOT_AVAILABLE_PRODUCT;
+import static com.example.product.domain.ProductType.EVENT;
+import static com.example.product.domain.exception.ErrorCode.CONTAINS_NOT_EXISTED_PRODUCT;
+import static com.example.product.domain.exception.ErrorCode.CONTAINS_NOT_OPENED_EVENT_PRODUCT;
 
 @Slf4j
 @Service
@@ -29,9 +33,10 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final LocalDateTimeProvider localDateTimeProvider;
+    private final StockCacheRepository stockCacheRepository;
 
-    public List<ProductDto> getProductList() {
-        return productRepository.findAllSellableProduct(localDateTimeProvider.now())
+    public List<ProductDto> getProductList(Long cursor, int size) {
+        return productRepository.findAllSellableProduct(cursor, size, localDateTimeProvider.now())
                 .stream().map(ProductDto::from).toList();
     }
 
@@ -86,6 +91,9 @@ public class ProductService {
         List<Product> products = productRepository.findAllByIdIn(productIds);
 
         validateIdContains(productIds, products);
+        validateNotOpenedEventProductContains(products);
+
+        cacheStock(products);
 
         return products
                 .stream()
@@ -100,8 +108,29 @@ public class ProductService {
                 .collect(Collectors.toSet());
         for (Long productId : productIds) {
             if (!productIdSet.contains(productId)) {
-                throw new ProductServiceException(CONTAINS_NOT_AVAILABLE_PRODUCT);
+                throw new ProductServiceException(CONTAINS_NOT_EXISTED_PRODUCT);
             }
         }
+    }
+
+    private void validateNotOpenedEventProductContains(List<Product> products) {
+        products
+                .forEach(
+                        product -> {
+                            if (product.getType() == EVENT
+                                    && ((EventProduct) product).getOpenTime().isAfter(localDateTimeProvider.now())) {
+                                throw new ProductServiceException(CONTAINS_NOT_OPENED_EVENT_PRODUCT);
+                            }
+                        }
+                );
+    }
+
+    private void cacheStock(List<Product> products) {
+        products
+                .forEach(
+                        product -> stockCacheRepository.cache(
+                                product.getId(), product.getStockQuantity()
+                        )
+                );
     }
 }

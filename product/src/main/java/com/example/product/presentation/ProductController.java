@@ -4,10 +4,7 @@ import com.example.product.application.ProductService;
 import com.example.product.common.dto.ProductDetails;
 import com.example.product.common.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,8 +16,11 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public List<ProductDto> getProductList() {
-        return productService.getProductList();
+    public List<ProductDto> getProductList(
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return productService.getProductList(cursor, size);
     }
 
     @GetMapping("/{productId}")

@@ -11,7 +11,7 @@ public interface ProductRepository {
 
     Product save(Product product);
 
-    List<Product> findAllSellableProduct(LocalDateTime now);
+    List<Product> findAllSellableProduct(Long cursor, int size, LocalDateTime now);
 
     void deleteAll();
 

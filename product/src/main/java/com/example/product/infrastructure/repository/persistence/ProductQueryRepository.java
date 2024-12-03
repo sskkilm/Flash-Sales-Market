@@ -21,12 +21,13 @@ public class ProductQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<ProductEntity> findAllSellableProduct(LocalDateTime now) {
+    public List<ProductEntity> findAllSellableProductByCursor(Long cursor, int size, LocalDateTime now) {
         return queryFactory
                 .selectFrom(productEntity)
                 .where(
-                        isNormalProduct().or(isOpenedLimitedProduct(now))
+                        (isNormalProduct().or(isOpenedLimitedProduct(now))), isIdGreaterThan(cursor)
                 )
+                .limit(size)
                 .fetch();
     }
 
@@ -39,4 +40,7 @@ public class ProductQueryRepository {
                 .and(treat(productEntity, QEventProductEntity.class).openTime.loe(now));
     }
 
+    private BooleanExpression isIdGreaterThan(Long cursor) {
+        return cursor != null ? productEntity.id.gt(cursor) : null;
+    }
 }

@@ -35,8 +35,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> findAllSellableProduct(LocalDateTime now) {
-        return productQueryRepository.findAllSellableProduct(now)
+    public List<Product> findAllSellableProduct(Long cursor, int size, LocalDateTime now) {
+        return productQueryRepository.findAllSellableProductByCursor(cursor, size, now)
                 .stream().map(ProductEntity::toModel).toList();
     }
 
