@@ -2,7 +2,6 @@ package com.example.product.application;
 
 import com.example.product.application.port.LocalDateTimeProvider;
 import com.example.product.application.port.ProductRepository;
-import com.example.product.application.port.StockCacheRepository;
 import com.example.product.common.aop.DistributedLock;
 import com.example.product.common.dto.ProductDetails;
 import com.example.product.common.dto.ProductDto;
@@ -33,7 +32,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final LocalDateTimeProvider localDateTimeProvider;
-    private final StockCacheRepository stockCacheRepository;
+    private final CacheService cacheService;
 
     public List<ProductDto> getProductList(Long cursor, int size) {
         return productRepository.findAllSellableProduct(cursor, size, localDateTimeProvider.now())
@@ -93,7 +92,7 @@ public class ProductService {
         validateIdContains(productIds, products);
         validateNotOpenedEventProductContains(products);
 
-        cacheStock(products);
+        cacheService.saveStock(products);
 
         return products
                 .stream()
@@ -122,15 +121,6 @@ public class ProductService {
                                 throw new ProductServiceException(CONTAINS_NOT_OPENED_EVENT_PRODUCT);
                             }
                         }
-                );
-    }
-
-    private void cacheStock(List<Product> products) {
-        products
-                .forEach(
-                        product -> stockCacheRepository.cache(
-                                product.getId(), product.getStockQuantity()
-                        )
                 );
     }
 }

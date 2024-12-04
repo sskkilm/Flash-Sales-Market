@@ -2,7 +2,6 @@ package com.example.order.application;
 
 import com.example.order.application.port.OrderProductRepository;
 import com.example.order.application.port.OrderRepository;
-import com.example.order.application.port.StockCacheRepository;
 import com.example.order.application.port.feign.ProductClient;
 import com.example.order.common.dto.OrderDto;
 import com.example.order.common.dto.OrderInfo;
@@ -15,14 +14,12 @@ import com.example.order.common.dto.response.OrderCreateResponse;
 import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.Order;
 import com.example.order.domain.OrderProduct;
-import com.example.order.domain.exception.OrderServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +32,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final ProductClient productClient;
-    private final StockCacheRepository stockCacheRepository;
+    private final CacheService cacheService;
 
     private final AmountCalculator amountCalculator = new AmountCalculator();
 
@@ -44,10 +41,9 @@ public class OrderService {
 
         Order order = orderRepository.save(Order.create(memberId));
 
-        List<OrderProduct> orderProducts = getOrderProducts(request, order);
-        orderProductRepository.saveAll(orderProducts);
+        List<OrderProduct> orderProducts = orderProductRepository.saveAll(getOrderProducts(request, order));
 
-        decreaseStockByCache(request);
+        cacheService.decreaseStock(orderProducts);
 
         log.info("Order Id:{} Created", order.getId());
 
@@ -126,36 +122,6 @@ public class OrderService {
                 .map(orderInfo -> new StockDecreaseRequest(orderInfo.productId(), orderInfo.quantity()))
                 .toList();
         productClient.decreaseStock(stockDecreaseRequests);
-    }
-
-    private void decreaseStockByCache(OrderCreateRequest request) {
-        Map<Long, Integer> successfullyDecreased = new HashMap<>();
-
-        try {
-            decreaseStockCache(request, successfullyDecreased);
-        } catch (OrderServiceException e) {
-            rollbackStockCache(successfullyDecreased);
-            throw e;
-        }
-    }
-
-    private void decreaseStockCache(OrderCreateRequest request, Map<Long, Integer> successfullyDecreased) {
-        request.orderInfos()
-                .forEach(orderInfo -> {
-                    Long result = stockCacheRepository.decreaseStock(
-                            orderInfo.productId(), orderInfo.quantity()
-                    );
-                    log.info("{}번 상품에 남은 재고:{}", orderInfo.productId(), result);
-                    successfullyDecreased.put(orderInfo.productId(), orderInfo.quantity());
-                });
-    }
-
-    private void rollbackStockCache(Map<Long, Integer> successfullyDecreased) {
-        successfullyDecreased
-                .forEach((productId, quantity) -> {
-                    Long result = stockCacheRepository.increaseStock(productId, quantity);
-                    log.info("{}번 상품에 복구된 재고:{}, 총 재고:{}", productId, quantity, result);
-                });
     }
 
     private void increaseStock(Order order) {

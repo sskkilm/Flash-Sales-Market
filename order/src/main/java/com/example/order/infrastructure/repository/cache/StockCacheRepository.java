@@ -1,6 +1,5 @@
 package com.example.order.infrastructure.repository.cache;
 
-import com.example.order.application.port.StockCacheRepository;
 import com.example.order.domain.exception.OrderServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,12 +12,11 @@ import static com.example.order.domain.exception.ErrorCode.INSUFFICIENT_STOCK;
 
 @Repository
 @RequiredArgsConstructor
-public class StockCacheRepositoryImpl implements StockCacheRepository {
+public class StockCacheRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final String STOCK_CACHE_KEY = "products::%d:stock";
 
-    @Override
     public Long decreaseStock(Long productId, int quantity) {
         String script =
                 "local current = tonumber(redis.call('GET', KEYS[1])) " +
@@ -38,7 +36,6 @@ public class StockCacheRepositoryImpl implements StockCacheRepository {
         return result;
     }
 
-    @Override
     public Long increaseStock(Long productId, Integer quantity) {
         String script = "return redis.call('INCRBY', KEYS[1], ARGV[1])";
 
