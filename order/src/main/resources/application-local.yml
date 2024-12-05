@@ -40,4 +40,4 @@ server:
 
 kafka:
   host: localhost
-  port: 9094
+  port: 9092

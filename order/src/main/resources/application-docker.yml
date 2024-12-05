@@ -33,4 +33,4 @@ server:
 
 kafka:
   host: kafka
-  port: 9094
+  port: 9092

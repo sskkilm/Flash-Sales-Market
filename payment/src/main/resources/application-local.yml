@@ -8,7 +8,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/flash-sales-market
+    url: jdbc:mysql://localhost:3309/flash-sales-market
     username: root
     password: 1234
 
@@ -18,6 +18,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   level:
@@ -35,4 +40,4 @@ server:
 
 kafka:
   host: localhost
-  port: 9094
+  port: 9092
