@@ -18,4 +18,6 @@ public interface ProductRepository {
     List<Product> findAllByIdIn(List<Long> productIds);
 
     int findStockQuantityById(Long productId);
+
+    void saveAll(List<Product> products);
 }

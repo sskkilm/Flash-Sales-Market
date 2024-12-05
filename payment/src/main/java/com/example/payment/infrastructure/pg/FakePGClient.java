@@ -16,7 +16,7 @@ public class FakePGClient implements PGClient {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PGConfirmResponse pgConfirm(PGConfirmRequest request, boolean flag) {
         if (!flag) {
-            throw new RuntimeException("결제 승인 실패");
+            throw new FakePGException("결제 승인 실패");
         }
 
         return new PGConfirmResponse(request.paymentKey(), request.orderId(), request.amount());

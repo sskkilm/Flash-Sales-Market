@@ -57,4 +57,14 @@ public class ProductRepositoryImpl implements ProductRepository {
         return productJpaRepository.findStockQuantityById(productId);
     }
 
+    @Override
+    public void saveAll(List<Product> products) {
+        productJpaRepository.saveAll(
+                products
+                        .stream()
+                        .map(productMapper::toEntity)
+                        .toList()
+        );
+    }
+
 }

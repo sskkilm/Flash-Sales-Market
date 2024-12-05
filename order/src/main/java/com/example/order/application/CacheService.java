@@ -29,6 +29,14 @@ public class CacheService {
         }
     }
 
+    public void increaseStock(List<OrderProduct> orderProducts) {
+        orderProducts
+                .forEach(orderProduct -> {
+                    Long result = cacheRepository.increaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
+                    log.info("{}번 상품에 복구된 재고:{}, 총 재고:{}", orderProduct.getProductId(), orderProduct.getQuantity(), result);
+                });
+    }
+
     private void decreaseStockCache(List<OrderProduct> orderProducts, Map<Long, Integer> successfullyDecreased) {
         orderProducts
                 .forEach(orderProduct -> {

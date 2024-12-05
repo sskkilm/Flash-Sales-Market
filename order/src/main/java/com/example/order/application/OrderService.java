@@ -9,7 +9,6 @@ import com.example.order.common.dto.OrderProductDto;
 import com.example.order.common.dto.ProductDto;
 import com.example.order.common.dto.request.OrderCreateRequest;
 import com.example.order.common.dto.request.StockDecreaseRequest;
-import com.example.order.common.dto.request.StockIncreaseRequest;
 import com.example.order.common.dto.response.OrderCreateResponse;
 import com.example.order.domain.AmountCalculator;
 import com.example.order.domain.Order;
@@ -42,12 +41,13 @@ public class OrderService {
         Order order = orderRepository.save(Order.create(memberId));
 
         List<OrderProduct> orderProducts = orderProductRepository.saveAll(getOrderProducts(request, order));
+        BigDecimal amount = amountCalculator.calculateTotalAmount(orderProducts);
 
         cacheService.decreaseStock(orderProducts);
 
         log.info("Order Id:{} Created", order.getId());
 
-        return OrderCreateResponse.from(order);
+        return OrderCreateResponse.from(order, amount);
     }
 
     public List<OrderDto> getOrderList(Long memberId) {
@@ -82,7 +82,7 @@ public class OrderService {
         order.paymentFailed();
         orderRepository.save(order);
 
-        increaseStock(order);
+        increaseStockInCache(order);
 
         log.info("Order Id:{} Payment Failed", order.getId());
     }
@@ -92,6 +92,8 @@ public class OrderService {
         Order order = orderRepository.findById(orderId);
         order.paymentConfirmed();
         orderRepository.save(order);
+
+        decreaseStockInDatabase(order);
 
         log.info("Order Id:{} Payment Confirmed", order.getId());
     }
@@ -116,23 +118,18 @@ public class OrderService {
                 }).toList();
     }
 
-    private void decreaseStock(OrderCreateRequest request) {
-        List<StockDecreaseRequest> stockDecreaseRequests = request.orderInfos()
+    private void decreaseStockInDatabase(Order order) {
+        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        List<StockDecreaseRequest> stockDecreaseRequests = orderProducts
                 .stream()
-                .map(orderInfo -> new StockDecreaseRequest(orderInfo.productId(), orderInfo.quantity()))
+                .map(orderProduct -> new StockDecreaseRequest(orderProduct.getProductId(), orderProduct.getQuantity()))
                 .toList();
         productClient.decreaseStock(stockDecreaseRequests);
     }
 
-    private void increaseStock(Order order) {
+    private void increaseStockInCache(Order order) {
         List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
-        List<StockIncreaseRequest> stockIncreaseRequests = orderProducts
-                .stream().map(
-                        orderProduct -> new StockIncreaseRequest(
-                                orderProduct.getProductId(), orderProduct.getQuantity()
-                        )
-                ).toList();
-        productClient.increaseStock(stockIncreaseRequests);
+        cacheService.increaseStock(orderProducts);
     }
 
     public List<Long> findIdsByMemberId(Long memberId) {

@@ -10,7 +10,7 @@ public interface PaymentRepository {
 
     Payment findByOrderId(Long orderId);
 
-    void rollBack(Payment payment);
+    void deleteById(Long paymentId);
 
     List<Payment> findByOrderIdInOrderIds(List<Long> orderIds);
 }

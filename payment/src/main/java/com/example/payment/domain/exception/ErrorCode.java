@@ -18,6 +18,8 @@ public enum ErrorCode {
     PAYMENT_CONFIRM_FAILED(BAD_REQUEST, "결제 승인에 실패했습니다."),
     PAYMENT_ALREADY_PROCESSED(BAD_REQUEST, "이미 처리된 결제입니다."),
 
+    TEMPORARY_PAYMENT_INFO_NOT_FOUND(BAD_REQUEST, "임시 결제 정보가 존재하지 않습니다."),
+
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류입니다."),
     ;
     private final HttpStatus status;

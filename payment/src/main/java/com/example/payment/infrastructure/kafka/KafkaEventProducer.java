@@ -1,4 +1,4 @@
-package com.example.payment.infrastructure.producer;
+package com.example.payment.infrastructure.kafka;
 
 import com.example.payment.application.port.EventProducer;
 import com.example.payment.domain.event.PaymentConfirmedEvent;
@@ -26,7 +26,7 @@ public class KafkaEventProducer implements EventProducer {
         try {
             String message = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(PAYMENT_CONFIRMED_TOPIC, message);
-            log.info("Publish Payment Confirmed Event: {}", event);
+            log.info("결제 승인 이벤트 발행: {}", event);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("직렬화 실패", e);
         }
@@ -37,7 +37,7 @@ public class KafkaEventProducer implements EventProducer {
         try {
             String message = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(PAYMENT_FAILED_TOPIC, message);
-            log.info("Publish Payment Failed Event: {}", event);
+            log.info("결제 실패 이벤트 발행: {}", event);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("직렬화 실패", e);
         }

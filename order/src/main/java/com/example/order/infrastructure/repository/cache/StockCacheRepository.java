@@ -37,11 +37,7 @@ public class StockCacheRepository {
     }
 
     public Long increaseStock(Long productId, Integer quantity) {
-        String script = "return redis.call('INCRBY', KEYS[1], ARGV[1])";
-
-        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
-
         String key = String.format(STOCK_CACHE_KEY, productId);
-        return redisTemplate.execute(redisScript, Collections.singletonList(key), String.valueOf(quantity));
+        return redisTemplate.opsForValue().increment(key, quantity);
     }
 }

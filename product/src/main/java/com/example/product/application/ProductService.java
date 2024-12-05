@@ -16,6 +16,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,8 @@ public class ProductService {
     @DistributedLock
     @Transactional
     public void decreaseStock(List<StockDecreaseRequest> requests) {
+        List<Product> products = new ArrayList<>();
+
         List<Long> productIds = requests
                 .stream()
                 .map(StockDecreaseRequest::productId)
@@ -69,21 +72,34 @@ public class ProductService {
                 .forEach(request -> {
                     Product product = productMap.get(request.productId());
                     product.decreaseStock(request.quantity());
-                    productRepository.save(product);
+                    products.add(product);
                     log.info("{}번 상품 재고 {}개 감소", request.productId(), request.quantity());
                 });
+
+        productRepository.saveAll(products);
     }
 
     @DistributedLock
     @Transactional
     public void increaseStock(List<StockIncreaseRequest> requests) {
+        List<Product> products = new ArrayList<>();
+
+        List<Long> productIds = requests
+                .stream()
+                .map(StockIncreaseRequest::productId)
+                .toList();
+        Map<Long, Product> productMap = productRepository.findAllByIdIn(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
         requests
                 .forEach(request -> {
-                    Product product = productRepository.findById(request.productId());
+                    Product product = productMap.get(request.productId());
                     product.increaseStock(request.quantity());
-                    productRepository.save(product);
+                    products.add(product);
                     log.info("{}번 상품 재고 {}개 증가", request.productId(), request.quantity());
                 });
+
+        productRepository.saveAll(products);
     }
 
     public List<ProductDto> getProductInfos(List<Long> productIds) {

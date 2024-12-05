@@ -11,11 +11,12 @@ import com.example.payment.common.dto.request.PaymentInitRequest;
 import com.example.payment.common.dto.response.PGConfirmResponse;
 import com.example.payment.domain.Payment;
 import com.example.payment.domain.exception.PaymentServiceException;
+import com.example.payment.infrastructure.pg.FakePGException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,45 +28,32 @@ import static com.example.payment.domain.exception.ErrorCode.*;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final CacheService cacheService;
     private final OrderClient orderClient;
     private final PGClient pgClient;
+    private final PaymentEventPublisher eventPublisher;
 
-    @Transactional
     public void init(Long memberId, PaymentInitRequest request) {
 
         OrderDto order = orderClient.findById(request.orderId());
         validateOrder(memberId, request, order);
 
-        paymentRepository.save(Payment.create(request.orderId(), request.amount()));
+        cacheService.saveTemporaryPaymentInfo(order);
 
         log.info("Payment Init Successes");
     }
 
-    @Transactional
     public void confirm(PaymentConfirmRequest request) {
 
-        Payment payment = paymentRepository.findByOrderId(request.orderId());
-        payment.validate(request.amount());
+        BigDecimal amount = cacheService.getTemporaryPaymentInfo(request.orderId());
+        validateOrderAmount(request, amount);
 
-        PGConfirmResponse response = null;
-        try {
-            response = pgClient.pgConfirm(
-                    new PGConfirmRequest(request.paymentKey(), request.orderId(), request.amount()), request.flag()
-            );
-        } catch (Exception e) {
-            paymentRepository.rollBack(payment);
+        PGConfirmResponse response = getPgConfirmResponse(request);
+        Payment payment = paymentRepository.save(
+                Payment.create(response.orderId(), response.amount(), response.paymentKey())
+        );
 
-            orderClient.paymentFailed(request.orderId());
-
-            log.info("Payment Confirm Fail");
-            throw new PaymentServiceException(PAYMENT_CONFIRM_FAILED, e);
-        }
-
-        payment.updatePaymentKey(response.paymentKey());
-        payment.confirmed();
-        paymentRepository.save(payment);
-
-        orderClient.paymentConfirmed(response.orderId());
+        eventPublisher.publishPaymentConfirmedEvent(payment);
 
         log.info("Payment Confirm Successes");
     }
@@ -92,5 +80,30 @@ public class PaymentService {
 
     private List<Long> getOrderIdsByMemberId(Long memberId) {
         return orderClient.findIdsByMemberId(memberId);
+    }
+
+    private static void validateOrderAmount(PaymentConfirmRequest request, BigDecimal amount) {
+        if (amount.compareTo(request.amount()) != 0) {
+            throw new PaymentServiceException(INVALID_ORDER_AMOUNT);
+        }
+    }
+
+    private PGConfirmResponse getPgConfirmResponse(PaymentConfirmRequest request) {
+        PGConfirmResponse response = null;
+        try {
+            response = pgClient.pgConfirm(
+                    new PGConfirmRequest(request.paymentKey(), request.orderId(), request.amount()), request.flag()
+            );
+        } catch (FakePGException e) {
+
+            eventPublisher.publishPaymentFailedEvent(request.orderId());
+
+            log.info("Payment Confirm Fail");
+
+            throw new PaymentServiceException(PAYMENT_CONFIRM_FAILED, e);
+        } finally {
+            cacheService.deleteTemporaryPaymentInfo(request.orderId());
+        }
+        return response;
     }
 }

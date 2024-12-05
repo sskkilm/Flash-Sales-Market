@@ -4,6 +4,7 @@ import com.example.payment.application.port.PaymentRepository;
 import com.example.payment.domain.Payment;
 import com.example.payment.domain.exception.PaymentServiceException;
 import com.example.payment.infrastructure.repository.persistence.PaymentJpaRepository;
+import com.example.payment.infrastructure.repository.persistence.entity.PaymentEntity;
 import com.example.payment.infrastructure.repository.persistence.mapper.PaymentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -39,8 +40,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
-    public void rollBack(Payment payment) {
-        paymentJpaRepository.delete(PaymentMapper.toEntity(payment));
+    public void deleteById(Long paymentId) {
+        PaymentEntity paymentEntity = paymentJpaRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentServiceException(PAYMENT_NOT_FOUND));
+        paymentJpaRepository.delete(paymentEntity);
     }
 
     @Override
