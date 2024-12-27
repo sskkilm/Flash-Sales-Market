@@ -21,8 +21,8 @@ public class TemporaryPaymentInfoCacheRepository {
 
     public void save(Long orderId, BigDecimal amount) {
         String key = generateKey(orderId);
-        redisTemplate.opsForValue().set(key, String.valueOf(amount), Duration.ofMinutes(15));
-        log.info("{}번 주문에 대한 임시 결제 정보 저장 성공, 금액: {}, TTL: 10분", orderId, amount);
+        redisTemplate.opsForValue().set(key, String.valueOf(amount), Duration.ofMinutes(10));
+        log.info("{}번 주문에 대한 임시 결제 정보 저장 성공, 금액: {}", orderId, amount);
     }
 
     public String get(Long orderId) {
