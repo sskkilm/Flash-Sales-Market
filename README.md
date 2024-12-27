@@ -39,10 +39,12 @@ docker compose up -d
 ```
 
 ## | 시스템 아키텍처
+![img.png](docs/images/architecture.png)
 
-## 서비스 별 기능 요약
+## | 서비스 별 기능 요약
 ### **1. Member Service**
 - JWT 기반 회원가입 / 로그인
+- RefreshToken을 통한 토큰 재발급
 - Redis를 이용한 토큰 블랙리스트 관리로 로그아웃 구현
 
 ### **2. CartItem Service**
@@ -69,9 +71,9 @@ docker compose up -d
 
 - 서비스 동적 위치 정보 관리
 
-## | ERD
+## [| ERD](docs/ERD.md)
 
-## | API 명세
+## [| API 명세](https://documenter.getpostman.com/view/33235954/2sAYJ6BfEp)
 
 ## | 핵심 기능
 
